@@ -2827,12 +2827,6 @@ module.exports = (io) => {
         */
 
         // RoomTotalJson 생성 및 return 
-        var userCompanyStatus = new UserCompanyStatus({
-            detectCnt : [0, 0, 0],
-            warnCnt    : 0,
-            IsBlocked   : false, //무력화 상태
-        });
-
         var blackUsers = {};
         var whiteUsers = {};
 
@@ -2841,11 +2835,6 @@ module.exports = (io) => {
                 userId   : user.UsersID,
                 profileColor : user.UsersProfileColor,
                 currentLocation : "",
-                companyA    : userCompanyStatus,
-                companyB    : userCompanyStatus,
-                companyC    : userCompanyStatus,
-                companyD    : userCompanyStatus,
-                companyE    : userCompanyStatus,
             });
         }
 
@@ -2867,46 +2856,52 @@ module.exports = (io) => {
         for (var i = 0; i < 5; i++){
             var initCompany = new Company({
                 abandonStatus : false,
-                penetrationTestingLV : [1,1,1,1,1,1,1,1,1,1,1,1,1],
-                attackLV : [0,0,0,0,0,0,0,0,0,0,0,0,0],
+                penetrationTestingLV : [1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 14개 
+                attackLV : [0,0,0,0,0,0,0,0,0,0,0,0,0,0],  // 유형레벨 14가지
                 sections : [
                     new Section({
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
                         level  : 1,
-                        vuln : Math.floor(Math.random() * 4),
-                        vulnActive : false,
+                        suspicionCount : 0,
+                        attackStep  : 0,  
                         attackStep : 0,
                         responseStep : 0,
                         attack : progress,
                         response : progress,
+                        responseLv : [], // 방어 레벨 
+                        resposnseCnt : [] // 방어 횟수 
                     }),
     
                     new Section({
-                        attackable : false,
+                        attackable : true,
                         responsible : true,
-                        destroyStatus  : false ,
+                        destroyStatus : false ,
                         level  : 1,
-                        vuln : Math.floor(Math.random() * 4),
-                        vulnActive : false,
+                        suspicionCount : 0,
+                        attackStep  : 0,  
                         attackStep : 0,
                         responseStep : 0,
                         attack : progress,
                         response : progress,
+                        responseLv : [], // 방어 레벨 
+                        resposnseCnt : [] // 방어 횟수 
                     }),
     
                     new Section({
-                        attackable : false,
+                        attackable : true,
                         responsible : true,
-                        destroyStatus  : false ,
+                        destroyStatus : false ,
                         level  : 1,
-                        vuln : Math.floor(Math.random() * 4),
-                        vulnActive : false,
+                        suspicionCount : 0,
+                        attackStep  : 0,  
                         attackStep : 0,
                         responseStep : 0,
                         attack : progress,
                         response : progress,
+                        responseLv : [], // 방어 레벨 
+                        resposnseCnt : [] // 방어 횟수 
                     }),
                 ]
             });
