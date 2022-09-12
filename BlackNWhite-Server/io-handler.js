@@ -1118,207 +1118,26 @@ module.exports = (io) => {
         });
         
 
-
-        // 무력화 test (나중에 삭제해야됨)
-        socket.on('TestNeutralization', async function() {
-            console.log("[On] TestNeutralization 스키마에 경고 추가 및 isBlocked True");
-            // console.log("[Emit] OnNeutralization");
-
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-
-            // 회사 A, C 에 경고 3번으로 무력화 true
-            roomTotalJson[0].blackTeam.users[socket.userID].companyA.warnCnt = 3;
-            roomTotalJson[0].blackTeam.users[socket.userID].companyA.IsBlocked = true;
-
-            roomTotalJson[0].blackTeam.users[socket.userID].companyC.warnCnt = 3;
-            roomTotalJson[0].blackTeam.users[socket.userID].companyC.IsBlocked = true;
-
-
-            // console.log("[CHECK] roomTotalJson[0].blackTeam.users[socket.userID] : ", roomTotalJson[0].blackTeam.users[socket.userID]);
-            await jsonStore.updatejson(roomTotalJson[0], socket.room);
-
-            socket.emit('OnNeutralization', true);            
-        });
-
-        // 특정 회사가 무력화인지 확인
-        socket.on('Check Neutralization',  async function(company) {
-            console.log("[On] Check Neutralization ", company);
+        // [블랙팀] 해당 섹션의 시나리오 가져옴 
+        socket.on('Get Scenario',  async function(data) {
+            console.log("[On] Get Scenario ", data.section, data.company);
 
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
             // 회사 isBlocked 정보 가져옴
-            var companyIsBlocked = roomTotalJson[0].blackTeam.users[socket.userID][company].IsBlocked;
-            console.log("!-- companyIsBlocked : ", companyIsBlocked);
+            var sectionInfo = roomTotalJson[0][data.company][data.section];
+            console.log("!-- sectionInfo : ", sectionInfo);
             
-            // null 처리
-            if (!companyIsBlocked){
-                companyIsBlocked = false;
-                console.log("!-- companyIsBlocked NULL처리 : ", companyIsBlocked);
-            }
+            var sectionScenario = { 
+                selectScenario : 2,
+                scenarioLevel : playerInfo, 
+                player2 : matePlayerInfo
+            };
             
-            socket.emit('OnNeutralization', companyIsBlocked);
+            socket.emit('SendSectionInfo', SendSectionInfo);
         });
+      
 
-
-        // 무력화 해결 시도 시
-        socket.on('Try Non-neutralization', async(company)=> {
-            console.log("[On] Solve Neutralization company :", company);
-          
-            //  json 불러와서 해당 영역 회사 경고 초기화 함 
-            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            console.log("JSN!!!",roomTotalJson[0]);
-            
-            var black_total_pita = roomTotalJson[0].blackTeam.total_pita;
-            console.log("blackTeam.total_pita!!!", black_total_pita );
-
-            
-            // 무력화 상태인지 확인
-            var companyIsBlocked = roomTotalJson[0].blackTeam.users[socket.userID][company].IsBlocked;
-            console.log("!-- companyIsBlocked : ", companyIsBlocked);
-
-            roomTotalJson[0].blackTeam.total_pita = parseInt(roomTotalJson[0].blackTeam.total_pita) - parseInt(config.UNBLOCK_INFO.pita);
-            console.log("roomTotalJson[0].blackTeam.total_pita!!", roomTotalJson[0].blackTeam.total_pita);
-            
-            if (!companyIsBlocked)
-            {
-                console.log("무력화 상태 아님!");
-                socket.emit('After non-Neutralization', false);
-                
-                gameLogger.info("game:neutralization_attempt", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userId,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : socket.roomID,
-                        team : socket.team,
-                        companyName : company,
-                        IsBlocked: roomTotalJson[0].blackTeam.users[socket.userID][company].IsBlocked,
-                        state : 0,
-                        cost :0,
-                        totalPita : black_total_pita
-                    },
-                });
-                return 
-            }
-        
-            // 가격화 
-            if (parseInt(black_total_pita) - parseInt(config.UNBLOCK_INFO.pita) < 0){
-                console.log("무력화 해제 실패!");
-                socket.emit('After non-Neutralization', false);
-                gameLogger.info("game:neutralization_attempt", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userId,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : socket.roomID,
-                        team : socket.team,
-                        companyName : company,
-                        IsBlocked: roomTotalJson[0].blackTeam.users[socket.userID][company].IsBlocked,
-                        state : -1,
-                        cost :0,
-                        totalPita : black_total_pita
-                    },
-                });
-                return 
-            }
-        
-  
-            // pita 가격 마이너스
-            roomTotalJson[0].blackTeam.total_pita = parseInt(roomTotalJson[0].blackTeam.total_pita) - parseInt(config.UNBLOCK_INFO.pita);
-            
-            await jsonStore.updatejson(roomTotalJson[0], socket.room);
-            io.sockets.in(socket.room+'false').emit('Update Pita', roomTotalJson[0].blackTeam.total_pita );
-            socket.emit('After non-Neutralization', true);
-
-            gameLogger.info("game:neutralization_attempt", {
-                server : 'server1',
-                userIP : '192.0.0.1',
-                sessionID : socket.sessionID,
-                userID : socket.userID,
-                nickname : socket.nickname,
-                data : 	{
-                    roomID : socket.roomID,
-                    team : socket.team,
-                    companyName : company,
-                    IsBlocked: roomTotalJson[0].blackTeam.users[socket.userID][company].IsBlocked,
-                    state : 1,
-                    cost : config.UNBLOCK_INFO.pita,
-                    totalPita :roomTotalJson[0].blackTeam.total_pita 
-                },
-            });
-            
-            
-            setTimeout(async function(){
-                //  json 불러와서 해당 영역 회사 경고 초기화 함 
-                roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-                // console.log("[setTimeout] JSON!!!",roomTotalJson);
-
-                // isBlocked 해제
-                roomTotalJson[0].blackTeam.users[socket.userID][company].IsBlocked = false;
-                await jsonStore.updatejson(roomTotalJson[0], socket.room);
-
-                console.log("무력화 해제 성공!");
-
-                // [GameLog] 로그 추가 - 무력화 해제 로그
-                const blackLogJson = JSON.parse(await jsonStore.getjson(socket.room+":blackLog"));
-
-                let today = new Date();   
-                let hours = today.getHours(); // 시
-                let minutes = today.getMinutes();  // 분
-                let seconds = today.getSeconds();  // 초
-                let now = hours+":"+minutes+":"+seconds;
-                var monitoringLog = {time: now, nickname: socket.nickname, targetCompany: company, targetSection: "", actionType: "Neutralization", detail: socket.nickname+"무력화 해제되었습니다."};
-
-                blackLogJson[0].push(monitoringLog);
-                await jsonStore.updatejson(blackLogJson[0], socket.room+":blackLog");
-
-                var logArr = [];
-                logArr.push(monitoringLog);
-                // socket.emit('BlackLog', logArr);
-                // socket.to(socket.room).emit('BlackLog', logArr);
-                io.sockets.in(socket.room+'false').emit('addLog', logArr);
-                console.log("무력화 해제 성공!");          
-
-                gameLogger.info("game:neutralization_success", {
-                server : 'server1',
-                userIP : '192.0.0.1',
-                sessionID : socket.sessionID,
-                userID : socket.userID,
-                nickname : socket.nickname,
-                data : 	{
-                    roomID : socket.roomID,
-                    team : socket.team,
-                    companyName : company,
-                    IsBlocked: roomTotalJson[0].blackTeam.users[socket.userID][company].IsBlocked,
-                    state : 1,
-                    cost : config.UNBLOCK_INFO.pita,
-                    totalPita :roomTotalJson[0].blackTeam.total_pita 
-                },
-            });          
-            }, 10000); // 10초
-
-            
-            roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            let company_blockedNum = 0;
-
-            for (var userId in roomTotalJson[0]["blackTeam"]["users"]){
-                console.log("[On Monitoring] user id : ", userId);
-                if (roomTotalJson[0]["blackTeam"]["users"][userId][company]["IsBlocked"] == true){
-                    company_blockedNum += 1;
-                }
-            }
-
-            console.log("[On Monitoring] company_blockedNum : ", company_blockedNum);
-        
-            socket.to(socket.room+'true').emit("Blocked Num", company_blockedNum);
-            socket.emit('Blocked Num', company_blockedNum);
-        
-        });
-        
     
         ////////////////////////////////////////////////////////////////////////////////////
         // 회사 선택 후 사용자들에게 위치 알리기
@@ -1570,7 +1389,19 @@ module.exports = (io) => {
 
 
 // ===================================================================================================================
-        // ## [Section] 영역 클릭 시 
+        // [Security Monitoring] 영역 클릭 시 레벨 보이기
+        socket.on('Section_Name_NonUP', async(data) => {
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+
+            data = JSON.parse(data);
+            var corpName = data.Corp;
+            var sectionIdx = data.areaIdx;
+
+            var area_level = sectionIdx.toString() + "-" + (roomTotalJson[0][corpName].sections[sectionIdx].level);
+            io.sockets.in(socket.room+'true').emit('Now_Level', corpName, area_level.toString());
+        });
+
+        // [Security Monitoring] 영역 클릭 시 -> 유지보수 버튼 클릭 시로 수정 필요
         socket.on('Section_Name', async(data) => {
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             var white_total_pita = roomTotalJson[0].whiteTeam.total_pita;
@@ -1578,72 +1409,17 @@ module.exports = (io) => {
             data = JSON.parse(data);
             var corpName = data.Corp;
             var sectionIdx = data.areaIdx;
-
-            // 개발자 로그 - 유지보수(영역 업그레이드) 시도
-            gameLogger.info("game:Maintenance attempt", {
-                server : 'server1',
-                userIP : '192.0.0.1',
-                sessionID : socket.sessionID,
-                userID : socket.userID,
-                nickname : socket.nickname,
-                data : 	{
-                    roomID : socket.room,
-                    team : true, 
-                    companyName : corpName, 
-                    section : sectionIdx,
-                    state : "attempt",
-                    sectionLevel : roomTotalJson[0][corpName].sections[sectionIdx].level,
-                    cost : 0,
-                    totalPita : white_total_pita
-                },
-            });
             
             if(white_total_pita - config.MAINTENANCE_SECTION_INFO.pita[roomTotalJson[0][corpName].sections[sectionIdx].level] < 0)
             {
                 socket.emit("Short of Money");
-                // 개발자 로그 - 유지보수(영역 업그레이드) 실패(피타 부족)
-                gameLogger.info("game:Maintenance fail", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userID,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : socket.room,
-                        team : true, 
-                        companyName : corpName, 
-                        section : sectionIdx,
-                        state : "fail",
-                        cause : "pita",
-                        sectionLevel : roomTotalJson[0][corpName].sections[sectionIdx].level,
-                        cost : 0,
-                        totalPita : white_total_pita
-                    },
-                });
             } else {
                 // 최대 레벨 확인
-                if(roomTotalJson[0][corpName].sections[sectionIdx].level >= config.MAX_LEVEL){
+                if(roomTotalJson[0][corpName].sections[sectionIdx].level >= config.MAX_LEVEL)
+                {
                     socket.emit("Out of Level");
-                    // 개발자 로그 - 유지보수(영역 업그레이드) 실패(최대 레벨)
-                    gameLogger.info("game:Maintenance fail", {
-                        server : 'server1',
-                        userIP : '192.0.0.1',
-                        sessionID : socket.sessionID,
-                        userID : socket.userID,
-                        nickname : socket.nickname,
-                        data : 	{
-                            roomID : socket.room,
-                            team : true, 
-                            companyName : corpName, 
-                            section : sectionIdx,
-                            state : "fail",
-                            cause : "max level",
-                            sectionLevel : roomTotalJson[0][corpName].sections[sectionIdx].level,
-                            cost : 0,
-                            totalPita : white_total_pita
-                        },
-                    });
-                } else {
+                } else 
+                {
                     // json 변경 - pita 감소
                     var newTotalPita = white_total_pita - config.MAINTENANCE_SECTION_INFO.pita[roomTotalJson[0][corpName].sections[sectionIdx].level]; //pita 감소
                     roomTotalJson[0].whiteTeam.total_pita = newTotalPita;
@@ -1652,182 +1428,13 @@ module.exports = (io) => {
 
                     var area_level = sectionIdx.toString() + "-" + (roomTotalJson[0][corpName].sections[sectionIdx].level);
                     io.sockets.in(socket.room+'true').emit('New_Level', corpName, area_level.toString());
-                    io.sockets.in(socket.room+'true').emit('Update Pita', newTotalPita); // 화이트팀
-
-                    // 개발자 로그 - 유지보수(영역 업그레이드) 성공
-                    gameLogger.info("game:Maintenance success", {
-                        server : 'server1',
-                        userIP : '192.0.0.1',
-                        sessionID : socket.sessionID,
-                        userID : socket.userID,
-                        nickname : socket.nickname,
-                        data : 	{
-                            roomID : socket.room,
-                            team : false, 
-                            companyName : corpName, 
-                            section : sectionIdx,
-                            state : "success",
-                            sectionLevel : roomTotalJson[0][corpName].sections[sectionIdx].level,
-                            cost :  config.MAINTENANCE_SECTION_INFO.pita[roomTotalJson[0][corpName].sections[sectionIdx].level],
-                            totalPita : newTotalPita
-                        },
-                    });
+                    io.sockets.in(socket.room+'true').emit('Update Pita', newTotalPita);
                 }
             }
         });
 
-        // ## [Section] 구조도 페이지 시작 시
-        socket.on('Section_Start', async (corp) => {
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var corpName = corp;
-            var sectionsArr = roomTotalJson[0][corpName].sections;
 
-            for(var i=0; i<sectionsArr.length; i++){
-                var sectionInfo = { Corp: corpName, areaIdx: i, level: roomTotalJson[0][corpName].sections[i].level, vuln: roomTotalJson[0][corpName].sections[i].vuln}
-                socket.emit('Area_Start_Emit', JSON.stringify(sectionInfo));
-            }
-        });
 
-        // ## [PreDiscovery] 사전탐색 페이지 시작 시
-        socket.on('PreDiscovery_Start', async (corp) => {
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var corpName = corp;
-            var sectionsArr = roomTotalJson[0][corpName].sections;
-
-            for(var i=0; i<sectionsArr.length; i++){
-                var sectionInfo = { Corp: corpName, areaIdx: i, vuln: roomTotalJson[0][corpName].sections[i].vuln, vulnActive: roomTotalJson[0][corpName].sections[i].vulnActive}
-                socket.emit('PreDiscovery_Start_Emit', JSON.stringify(sectionInfo));
-            }
-        });
-
-        // ## [Vuln] 영역 클릭 시 
-        socket.on('Get_VulnActive', async (data) => {
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var black_total_pita = roomTotalJson[0].blackTeam.total_pita;
-
-            data = JSON.parse(data);
-            var corpName = data.Corp;
-            var sectionIdx = data.areaIdx;
-
-            var vulnIdx =  roomTotalJson[0][corpName].sections[sectionIdx].vuln;
-
-            // 개발자 로그 - 취약점 탐색 시도
-            gameLogger.info("game:Explore attempt", {
-                server : 'server1',
-                userIP : '192.0.0.1',
-                sessionID : socket.sessionID,
-                userID : socket.userID,
-                nickname : socket.nickname,
-                data : 	{
-                    roomID : socket.room,
-                    team : false, 
-                    companyName : corpName, 
-                    section : sectionIdx,
-                    state : "attempt",
-                    cost : 0,
-                    totalPita : black_total_pita
-                },
-            });
-
-            
-            if( roomTotalJson[0][corpName].sections[sectionIdx].vulnActive == true){
-                socket.emit("already done");
-
-                // 개발자 로그 - 취약점 탐색 실패(이미 완료됨)
-                gameLogger.info("game:Explore fail", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userID,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : socket.room,
-                        team : false, 
-                        companyName : corpName, 
-                        section : sectionIdx,
-                        state : "fail",
-                        cause : "already done",
-                        cost : 0,
-                        totalPita : black_total_pita
-                    },
-                });
-            }
-            else if(black_total_pita - config.EXPLORE_INFO.pita < 0)
-            {
-                socket.emit("Short of Money");
-
-                // 개발자 로그 - 취약점 탐색 실패(피타 부족)
-                gameLogger.info("game:Explore fail", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userID,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : socket.room,
-                        team : false, 
-                        companyName : corpName, 
-                        section : sectionIdx,
-                        state : "fail",
-                        cause : "pita",
-                        cost : 0,
-                        totalPita : black_total_pita
-                    },
-                });
-            } else {
-                // json 변경
-                var newTotalPita = black_total_pita - config.EXPLORE_INFO.pita; // pita 감소
-                roomTotalJson[0].blackTeam.total_pita = newTotalPita; // pita 감소
-                roomTotalJson[0][corpName].sections[sectionIdx].vulnActive = true;  // vulnActive 변경
-                await jsonStore.updatejson(roomTotalJson[0], socket.room);
-
-                io.sockets.in(socket.room+'false').emit('Update Pita', newTotalPita); // 블랙팀
-                io.sockets.in(socket.room+'false').emit("Discovery Start", corpName, sectionIdx);
-
-                // 타이머 시작
-                setTimeout(async function(){
-                    io.sockets.in(socket.room+'false').emit('Area_VulnActive', corpName, sectionIdx, roomTotalJson[0][corpName].sections[sectionIdx].vulnActive);
-
-                    // [GameLog] 로그 추가 - 사전탐색 로그
-                    const blackLogJson = JSON.parse(await jsonStore.getjson(socket.room+":blackLog"));
-
-                    let today = new Date();   
-                    let hours = today.getHours(); // 시
-                    let minutes = today.getMinutes();  // 분
-                    let seconds = today.getSeconds();  // 초
-                    let now = hours+":"+minutes+":"+seconds;
-
-                    var companyIdx =  corpName.charCodeAt(7) - 65;
-                    var monitoringLog = {time: now, nickname: socket.nickname, targetCompany: corpName, targetSection: sectionNames[companyIdx][sectionIdx], actionType: "PreDiscovery", detail: "취약점 " +vulnArray[vulnIdx] +"이 발견되었습니다."};
-
-                    blackLogJson[0].push(monitoringLog);
-                    await jsonStore.updatejson(blackLogJson[0], socket.room+":blackLog");
-                    
-                    var logArr = [];
-                    logArr.push(monitoringLog);
-                    io.sockets.in(socket.room+'false').emit('addLog', logArr);
-
-                    // 개발자 로그 - 취약점 탐색 성공
-                    gameLogger.info("game:Explore success", {
-                        server : 'server1',
-                        userIP : '192.0.0.1',
-                        sessionID : socket.sessionID,
-                        userID : socket.userID,
-                        nickname : socket.nickname,
-                        data : 	{
-                            roomID : socket.room,
-                            team : false, 
-                            companyName : corpName, 
-                            section : sectionIdx,
-                            state : "success",
-                            vuln : vulnIdx,
-                            cost : config.EXPLORE_INFO.pita,
-                            totalPita : newTotalPita
-                        },
-                    });
-                }, config.EXPLORE_INFO.time * 1000);
-            }
-        });
 
         // [SectionState] Section Destroy
         socket.on('Get_Section_Destroy_State', async(corp) => {            
@@ -2422,12 +2029,13 @@ module.exports = (io) => {
                 attackLV : [0,0,0,0,0,0,0,0,0,0,0,0,0,0],  // 유형레벨 14가지
                 sections : [
                     new Section({
+                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
+                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep  : 0,  
                         attackStep : 0,
                         responseStep : 0,
                         attack : progress,
@@ -2451,12 +2059,13 @@ module.exports = (io) => {
                     }),
     
                     new Section({
+                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
+                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep  : 0,  
                         attackStep : 0,
                         responseStep : 0,
                         attack : progress,
@@ -2466,12 +2075,13 @@ module.exports = (io) => {
                     }),
     
                     new Section({
+                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
+                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep  : 0,  
                         attackStep : 0,
                         responseStep : 0,
                         attack : progress,
