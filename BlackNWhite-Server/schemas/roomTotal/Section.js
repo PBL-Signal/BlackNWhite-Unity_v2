@@ -3,6 +3,8 @@ const { Schema } = mongoose;
 const progress = require('./Progress').schema;
 
 const Section = new Schema({
+    selectScenario :  { type : Number, required : true }, // 블랙팀이 선택한 시나리오
+    scenarioLevel :  { type : Array, required : true }, // 힌트북 레벨
     attackable : { type : Boolean, required : true },
     responsible : { type : Boolean, required : true },
     destroyStatus  : { type : Boolean, required : true },

@@ -2860,6 +2860,8 @@ module.exports = (io) => {
                 attackLV : [0,0,0,0,0,0,0,0,0,0,0,0,0,0],  // 유형레벨 14가지
                 sections : [
                     new Section({
+                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
+                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2875,6 +2877,8 @@ module.exports = (io) => {
                     }),
     
                     new Section({
+                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
+                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2890,6 +2894,8 @@ module.exports = (io) => {
                     }),
     
                     new Section({
+                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
+                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
