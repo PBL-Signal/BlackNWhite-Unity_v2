@@ -1117,24 +1117,122 @@ module.exports = (io) => {
 
         });
         
+         // [블랙팀] 시나리오의 힌트북 레벨업 
+         socket.on('Try_Upgrade_Scenario',  async function(data) {
+            console.log("[On] Upgrade Scenario:");
+          
+            //  json 불러와서 블랙피타정보, 시나리오 레벨 정보 가져옴
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            var black_total_pita = roomTotalJson[0].blackTeam.total_pita;
+            console.log("blackTeam.total_pita!!!", black_total_pita );
 
-        // [블랙팀] 해당 섹션의 시나리오 가져옴 
+            var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
+            var scenarioNum = roomTotalJson[0][data.company]["sections"][data.section].selectScenario;
+            var scenarioLv = scenarioLvList[scenarioNum];
+
+            // 레벨업 가능한지 확인
+            if (scenarioLv >= 5){
+                socket.emit('Result_Upgrade_Scenario', false);
+                return;
+            }
+
+            // 가격 확인
+            if (parseInt(black_total_pita) - parseInt(config.UPGRADE_SCENARIO.pita[scenarioLv]) < 0){
+                console.log("업그레이드 실패 ! - pita 부족");
+                socket.emit('Result_Upgrade_Scenario', false);
+                return;
+            };
+
+            // lv 업그레이드 및 pita 가격 마이너스 
+            scenarioLvList[scenarioNum] += 1
+            roomTotalJson[0]["blackTeam"]["scenarioLevel"] = scenarioLvList;
+            roomTotalJson[0].blackTeam.total_pita = parseInt(roomTotalJson[0].blackTeam.total_pita) - parseInt(config.UPGRADE_SCENARIO.pita[scenarioLv]);
+            await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+            io.sockets.in(socket.room+'false').emit('Update Pita', roomTotalJson[0].blackTeam.total_pita );
+            socket.emit('Result_Upgrade_Scenario', true);
+        });
+
+
+        // [블랙팀] 해당 섹션의 선택된 시나리오의 힌트북 가져옴 
         socket.on('Get Scenario',  async function(data) {
             console.log("[On] Get Scenario ", data.section, data.company);
 
+            var hintTotal = {};
+            var scenarioLv = 0;
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
-            // 회사 isBlocked 정보 가져옴
-            var sectionInfo = roomTotalJson[0][data.company][data.section];
-            console.log("!-- sectionInfo : ", sectionInfo);
+            // 회사의 시나리오 레벨 &선택한 시나리오 가져옴
+            var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
+            var scenarioNum = roomTotalJson[0][data.company]["sections"][data.section].selectScenario;
             
+            // console.log('0', Object.values(config.SCENARIO1.attacks[0]).length);
+            // console.log('1', Object.values(config.SCENARIO1.attacks[1]).length);
+            // console.log('2', Object.values(config.SCENARIO1.attacks[2]).length);
+
+            if (scenarioNum != -1){
+                // 시나리오 레벨에 따라 선택한 시나리오 정보 가져옴
+                scenarioLv = scenarioLvList[scenarioNum];
+                console.log("!-- scenarioLv : ", scenarioLvList[scenarioNum]);
+                var attacks = []
+
+                if (scenarioLv == 1){
+                    // lv1: 각 단계 공격 여부
+                    for(let i = 0; i <= 13; i++){
+                        if(Object.values(config.SCENARIO1.attacks[i]).length == 0){
+                            attacks[i] =  false;
+                        }else{
+                            attacks[i] =  true;
+                        }
+                    }
+                    hintTotal['attacks'] = attacks;
+
+                }else if(scenarioLv == 2){
+                    // lv2: 각 단계 공격 개수
+                    for(let i = 0; i <= 13; i++){
+                        attacks[i] =  Object.values(config.SCENARIO1.attacks[i]).length;
+                    }
+                    hintTotal['attacks'] = attacks;
+
+                }else if(scenarioLv == 3){
+                    // lv3: 메인공격 여부
+                    // 각 단계 공격 개수
+                    for(let i = 0; i <= 13; i++){
+                        attacks[i] =  Object.values(config.SCENARIO1.attacks[i]).length;
+                    }
+                    hintTotal['attacks'] = attacks;
+
+                    // 메인 공격 개수 
+                    hintTotal['mainAttack']['totalCnt'] =  Object.values(config.SCENARIO1.mainAttack).length;
+                    // 메인 공격 여부
+                    // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
+                    //hintTotal['mainAttack']['ingCnt'] 
+
+                }else if(scenarioLv == 4){
+                    // lv4: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
+                    // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
+                }else if(scenarioLv == 5){
+                    // lv5: 모든 공격, 화살표 공개
+                    hintTotal = config.SCENARIO1;
+                }
+            }
+
+            // 전에 진행된 공격 중에 연결된 공격이 있다면 넣기
+            // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
+
+            // 내용 보내기 
             var sectionScenario = { 
-                selectScenario : 2,
-                scenarioLevel : playerInfo, 
-                player2 : matePlayerInfo
+                scenarioLvList : scenarioLvList,
+                selectScenario : scenarioNum,
+                // scenarioLevel : scenarioLv, 
+                // attackStep : sectionInfo.attackStep,
+                hintTotal : hintTotal
             };
             
-            socket.emit('SendSectionInfo', SendSectionInfo);
+            let sectionScenarioJson = JSON.stringify(sectionScenario);
+            console.log('sectionScenarioJson', sectionScenarioJson);
+
+            socket.emit('SendScenarioInfo', sectionScenarioJson);
         });
       
 
@@ -2680,7 +2778,6 @@ module.exports = (io) => {
                 sections : [
                     new Section({
                         selectScenario :  -1, // 블랙팀이 선택한 시나리오
-                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2691,12 +2788,11 @@ module.exports = (io) => {
                         attack : progress,
                         response : progress,
                         responseLv : [], // 방어 레벨 
-                        resposnseCnt : [] // 방어 횟수 
+                        responseCnt : [] // 방어 횟수 
                     }),
     
                     new Section({
-                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
-                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
+                        selectScenario :  0, // 블랙팀이 선택한 시나리오
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2707,12 +2803,11 @@ module.exports = (io) => {
                         attack : progress,
                         response : progress,
                         responseLv : [], // 방어 레벨 
-                        resposnseCnt : [] // 방어 횟수 
+                        responseCnt : [] // 방어 횟수 
                     }),
     
                     new Section({
-                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
-                        scenarioLevel :  [0,0,0,0,0], // 힌트북 레벨 (시나리오 별로 레벨 존재)
+                        selectScenario :  1, // 블랙팀이 선택한 시나리오
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2723,7 +2818,7 @@ module.exports = (io) => {
                         attack : progress,
                         response : progress,
                         responseLv : [], // 방어 레벨 
-                        resposnseCnt : [] // 방어 횟수 
+                        responseCnt : [] // 방어 횟수 
                     }),
                 ]
             });
@@ -2738,7 +2833,8 @@ module.exports = (io) => {
             server_end  :  new Date(),
             blackTeam  : new BlackTeam({ 
                 total_pita : 500,
-                users : blackUsers
+                users : blackUsers,
+                scenarioLevel : [0,0,0,0,0], // 힌트북 레벨
             }),
             whiteTeam  : new WhiteTeam({ 
                 total_pita : 500,
