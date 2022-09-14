@@ -1872,6 +1872,20 @@ module.exports = (io) => {
         });
 
 
+        // [Security Monitoring] 관제 issue Count
+        socket.on('Get_Issue_Count', async(corp) => {            
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            var corpName = corp;
+            var sectionsArr = roomTotalJson[0][corpName].sections;
+
+            var cntArr = [];
+            for(i=0; i<sectionsArr.length; i++)
+            {
+                var sectionData = roomTotalJson[0][corpName].sections[i].response.progress.length;
+                cntArr[i] = sectionData;
+            }
+            socket.emit('Issue_Count', cntArr);
+        });
 
 
         // [SectionState] Section Destroy
@@ -1890,20 +1904,7 @@ module.exports = (io) => {
             socket.emit('Section_Attacked_Name', JSON.stringify(sections));
         });
 
-        // [SectionState] 관제 issue Count
-        socket.on('Get_Issue_Count', async(corp) => {            
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var corpName = corp;
-            var sectionsArr = roomTotalJson[0][corpName].sections;
-
-            var cntArr = [];
-            for(i=0; i<sectionsArr.length; i++)
-            {
-                var sectionData = roomTotalJson[0][corpName].sections[i].response.progress.length;
-                cntArr[i] = sectionData;
-            }
-            socket.emit('Issue_Count', cntArr);
-        });
+        
 
         // [Abandon] 한 회사의 모든 영역이 파괴되었는지 확인 후 몰락 여부 결정
         socket.on('is_All_Sections_Destroyed', async(corpName) => {
