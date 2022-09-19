@@ -2128,7 +2128,6 @@ module.exports = (io) => {
                 attackLV : [0,0,0,0,0,0,0,0,0,0,0,0,0,0],  // 유형레벨 14가지
                 sections : [
                     new Section({
-                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2157,7 +2156,6 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        selectScenario :  0, // 블랙팀이 선택한 시나리오
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2172,7 +2170,6 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        selectScenario :  1, // 블랙팀이 선택한 시나리오
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
