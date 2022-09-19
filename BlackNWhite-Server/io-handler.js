@@ -1713,6 +1713,25 @@ module.exports = (io) => {
         });
 
 // ===================================================================================================================
+
+        // [Attack Matrix]
+        socket.on('check_scenario', async(data) => {
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+
+            data = JSON.parse(data);
+            var corpName = data.Corp;
+            var sectionIdx = data.areaIdx;
+
+            console.log(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario);
+
+            var selectFlag = false;
+            if(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario > -1)
+            {
+                selectFlag = true;
+            }
+            socket.emit('check_scenario_result', selectFlag);
+        });
+// ###################################################################################################################
         
         socket.on('disconnect', async function() {
             console.log('A Player disconnected!!! - socket.sessionID : ', socket.sessionID);
