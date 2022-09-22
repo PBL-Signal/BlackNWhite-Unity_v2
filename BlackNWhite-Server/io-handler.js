@@ -1813,6 +1813,25 @@ module.exports = (io) => {
         });
 
 // ===================================================================================================================
+
+        // [Attack Matrix]
+        socket.on('check_scenario', async(data) => {
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+
+            data = JSON.parse(data);
+            var corpName = data.Corp;
+            var sectionIdx = data.areaIdx;
+
+            console.log(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario);
+
+            var selectFlag = false;
+            if(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario > -1)
+            {
+                selectFlag = true;
+            }
+            socket.emit('check_scenario_result', selectFlag);
+        });
+// ###################################################################################################################
         
         socket.on('disconnect', async function() {
             console.log('A Player disconnected!!! - socket.sessionID : ', socket.sessionID);
@@ -2226,7 +2245,6 @@ module.exports = (io) => {
                 attackLV : [0,0,0,0,0,0,0,0,0,0,0,0,0,0],  // 유형레벨 14가지
                 sections : [
                     new Section({
-                        selectScenario :  -1, // 블랙팀이 선택한 시나리오
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2269,7 +2287,6 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        selectScenario :  0, // 블랙팀이 선택한 시나리오
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
@@ -2284,7 +2301,6 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        selectScenario :  1, // 블랙팀이 선택한 시나리오
                         attackable : true,
                         responsible : true,
                         destroyStatus : false ,
