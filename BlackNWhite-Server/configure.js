@@ -2,6 +2,9 @@
 module.exports = {
     TOTAL_PITA : 100,
 
+    // 상의 후 수정 필요 (테스트용)
+    ATTACK_UPGRADE_NUM : [1, 2, 3, 4, 5],
+
     // 공격
     ATTACK_1 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Reconnaissance"},
     ATTACK_2 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Resource Development"},
