@@ -1714,22 +1714,56 @@ module.exports = (io) => {
 
 // ===================================================================================================================
 
-        // [Attack Matrix]
-        socket.on('check_scenario', async(data) => {
+        // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행
+        socket.on('check_scenario_conn', async(data, attackName) => {
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
             data = JSON.parse(data);
             var corpName = data.Corp;
             var sectionIdx = data.areaIdx;
 
-            console.log(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario);
+            // console.log(roomTotalJson[0][corpName].sections[sectionIdx]);
+            // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress);
+            // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress.length);
 
-            var selectFlag = false;
-            if(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario > -1)
-            {
-                selectFlag = true;
+            var attackProgress = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+
+            // for(var i=0; i<attackProgress.length; i++){
+            for(var i=0; i<1; i++){
+                var scenarioName = "SCENARIO" + (i+1);
+                console.log(scenarioName);
+                if(attackProgress[i].length <= 0){
+                    //console.log(Object.values(config[scenarioName].startAttack));
+                    var newInfo = { attackName: attackName, state: 1 };  // 좌표 구하는 방법을 못 찾아서 일단 이름으로 해놓음
+                    attackProgress[i].push(newInfo);
+                    console.log(attackProgress[i]);
+                } else {
+                    console.log(attackProgress[i][attackProgress[i].length - 1]);
+                    console.log(Object.values(config[scenarioName].attackConn['[0,3]']));
+                    var checkArr = Object.values(config[scenarioName].attackConn['[0,3]']);
+
+                    if(checkArr.include("test")){ // 클릭한 공격의 좌표가 마지막 공격의 attackconn에 있다면 attackProgress에 push
+                        attackProgress[i].push(newInfo);
+                        continue;
+                    }
+
+                    var attackConn = config[scenarioName].attackConn;
+                    if(getKeyByValue(attackConn, value) != null ) {
+                        getKeyByValue(attackConn, getKeyByValue(attackConn, value));
+                    } else {
+                        // nothing
+                    }
+                    // Object.keys(attackConn).find(key => {
+                    //     if(attackConn[key].include("test")) {
+                    //         console.log(key);
+
+                    //     }
+                    // });
+
+                }
             }
-            socket.emit('check_scenario_result', selectFlag);
+
+            
         });
 // ###################################################################################################################
         
@@ -1756,6 +1790,20 @@ module.exports = (io) => {
             await sessionStore.deleteSession(socket.sessionID);
         });
     })
+
+    // value로 key 찾기
+    function getKeyByValue(object, value) {
+        Object.keys(object).find(key => {
+            if(object[key].include(value)) {
+                return key;
+            } else {
+                return null;
+            }
+        });
+
+
+        return Object.keys(object).find(key => object[key].include(value));
+    };
 
     // [room] 방 키 5자리 랜덤 
     function randomN(){
@@ -2133,11 +2181,6 @@ module.exports = (io) => {
             })
         }
     
-        var progress = new Progress({
-            progress  : [],
-            inProgress  : [],
-            last  : -1
-        })
 
         var initCompanyArray = []
         for (var i = 0; i < 5; i++){
@@ -2152,10 +2195,6 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
-                        responseStep : 0,
-                        attack : progress,
-                        response : progress,
                         responseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                         [0, 0, 0, 0, 0, 0, 0],
                                         [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2170,8 +2209,7 @@ module.exports = (io) => {
                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                         [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 활성화된 방어
-                        responseLv : [], // 방어 레벨 
-                        responseCnt : [] // 방어 횟수 
+                        attackProgress : [ [{ attackName: "test1", state: 1 }, { attackName: "test2", state: 1 }, { attackName: "test3", state: 1 }], [], [], [], [] ] 
                     }),
     
                     new Section({
@@ -2180,12 +2218,6 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
-                        responseStep : 0,
-                        attack : progress,
-                        response : progress,
-                        responseLv : [], // 방어 레벨 
-                        responseCnt : [] // 방어 횟수 
                     }),
     
                     new Section({
@@ -2194,12 +2226,6 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
-                        responseStep : 0,
-                        attack : progress,
-                        response : progress,
-                        responseLv : [], // 방어 레벨 
-                        responseCnt : [] // 방어 횟수 
                     }),
                 ]
             });
