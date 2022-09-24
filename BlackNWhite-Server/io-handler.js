@@ -1852,6 +1852,43 @@ module.exports = (io) => {
                         getKeyByValue(attackConn, getKeyByValue(attackConn, value));
                     } else {
                         // nothing
+                        const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            
+                        var isAbondon = true;
+                        var sectionsArr = roomTotalJson[0][corpName].sections;
+                        for(i=0; i<sectionsArr.length; i++)
+                        {
+                            var isDestroy = roomTotalJson[0][corpName].sections[i].destroyStatus;
+                            console.log("[Abandon]isDestroy " + i+isDestroy.toString());
+                            if(isDestroy == false){ // 한 영역이라도 false면 반복문 나감
+                                isAbondon = false;
+                                break;
+                            }
+                        }
+
+                        if (totla_test.includes(attackIndex)) {
+                            console.log("Already Select this Attack : ", attackIndex);
+                            for(var i = 0; i < totla_test.length; i++){ 
+                                if (totla_test[i] === attackIndex) { 
+                                    totla_test.splice(i, 1); 
+                                    break;
+                                }
+                            }
+                        } else {
+                            totla_test.push(attackIndex);
+                        }
+
+                        switch(attackIndex) {
+                            case 0:
+                                // 고민 필요
+                                break;
+                            case 1:
+                                // 고민 필요
+                                break;
+                            case 2:
+                                // 고민 필요
+                                break;
+                        }
                     }
                     // Object.keys(attackConn).find(key => {
                     //     if(attackConn[key].include("test")) {
