@@ -1398,9 +1398,26 @@ module.exports = (io) => {
             socket.emit("Get Tactic Level", companyName, returnValue);
         });
 
+        // Load Matrix Technique
+        socket.on('Load Technique', async(companyName, section) => {
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            console.log("load technique : ", companyName);
+            console.log("team : ", socket.team);
 
-        // Matrix -> Tactic Upgrade
-        socket.on('Upgrade Tactic', async(companyName, attackIndex) => {
+            if (socket.team == true) {
+                let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["responseActive"];
+                let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["responseLv"];
+
+                console.log("techniqueActivation : ", techniqueActivation);
+                console.log("techniqueLevel : ", techniqueLevel);
+
+                socket.emit("Get Technique", companyName, techniqueActivation, techniqueLevel);
+            }
+        });
+
+
+        // Matrix -> Emit Select Technique Num for Tactic Upgrade
+        socket.on('Upgrade Tactic', async(companyName, section, attackIndex) => {
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             console.log("companyName : ", companyName, ",  attackIndex : ", attackIndex)
             console.log("attackIndex : ", attackIndex);
@@ -1432,28 +1449,25 @@ module.exports = (io) => {
                 socket.to(socket.room + socket.team).emit('Update Pita', pitaNum);
                 socket.emit('Update Pita', pitaNum);
 
+                let techniqueBeActivationList = roomTotalJson[0][companyName]["sections"][section]["beActivated"];
+                techniqueBeActivationList.length = 0;
+
+                // white team -> 공격을 선택할 수 있도록 함
+                // balck team -> tactic 레벨 바로 업그레이드
                 if (socket.team == true) {
-                    console.log("white team upgrade attack card");
-                    roomTotalJson[0][companyName]["penetrationTestingLV"][attackIndex] += 1;
+                    console.log("Get Select Technique Num : ", config.ATTACK_UPGRADE_NUM[cardLv]);
+                    socket.emit("Get Select Technique Num", companyName, attackIndex, config.ATTACK_UPGRADE_NUM[cardLv], 0);
                 } else {
                     console.log("black team upgrade attack card");
                     roomTotalJson[0][companyName]["attackLV"][attackIndex] += 1;
+
+                    socket.to(socket.room + socket.team).emit("Get Tactic Level", companyName, roomTotalJson[0][companyName]["attackLV"][attackIndex]);
+                    socket.emit("Get Tactic Level", companyName, roomTotalJson[0][companyName]["attackLV"][attackIndex]);
                 }
 
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
                 roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
-                let returnValue;
-                if (socket.team == true) {
-                    returnValue = roomTotalJson[0][companyName]["penetrationTestingLV"];
-                } else {
-                    returnValue = roomTotalJson[0][companyName]["attackLV"];
-                }
-
-                // 나중에 white와 black 구분해서 보내기
-                console.log("Update Card List Return Value : ", returnValue);
-                socket.to(socket.room + socket.team).emit("Get Tactic Level", companyName, returnValue);
-                socket.emit("Get Tactic Level", companyName, returnValue);
             } else {
                 console.log("Something Problem!!!")
                 console.log("pitanum : ", pitaNum)
@@ -1468,6 +1482,92 @@ module.exports = (io) => {
             }
         });
 
+        // Select Technique
+        socket.on('Select Technique', async(companyName, section, categoryIndex, attackIndex) => {
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            console.log("Select Technique - companyName : ", companyName);
+            console.log("Select Technique - section : ", section);
+            console.log("Select Technique - categoryIndex : ", categoryIndex);
+            console.log("Select Technique - attackIndex : ", attackIndex);
+
+            let cardLv = roomTotalJson[0][companyName]["penetrationTestingLV"][categoryIndex];
+            console.log("cardLV : ", cardLv);
+            let techniqueBeActivationList = roomTotalJson[0][companyName]["sections"][section]["beActivated"];
+            
+            if (techniqueBeActivationList.includes(attackIndex)) {
+                console.log("Already Select this Attack : ", attackIndex);
+                for(var i = 0; i < techniqueBeActivationList.length; i++){ 
+                    if (techniqueBeActivationList[i] === attackIndex) { 
+                        techniqueBeActivationList.splice(i, 1); 
+                        break;
+                    }
+                }
+            } else {
+                techniqueBeActivationList.push(attackIndex);
+            }
+
+            
+            console.log("techniqueBeActivationList : ", techniqueBeActivationList);
+
+            if (techniqueBeActivationList.length == config.ATTACK_UPGRADE_NUM[cardLv]) {
+                // 선택 완료
+                // let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["responseActive"];
+                // let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["responseLv"];
+
+                // for(var i = 0; i < techniqueBeActivationList.length; i++){ 
+                //     techniqueActivation[categoryIndex][techniqueBeActivationList[i]] = 1;
+                // }
+
+                // console.log("techniqueActivation : ", techniqueActivation);
+                // console.log("techniqueLevel : ", techniqueLevel);
+
+                // socket.emit("Get Technique", companyName, techniqueActivation, techniqueLevel);
+
+                socket.emit("Complete Select Technique", companyName, categoryIndex);
+
+            } else {
+                console.log("cardLv : ", cardLv);
+                console.log("config.ATTACK_UPGRADE_NUM[cardLv] : ", config.ATTACK_UPGRADE_NUM[cardLv]);
+                console.log("techniqueBeActivationList.length : ", techniqueBeActivationList.length);
+                socket.emit("Get Select Technique Num", companyName, categoryIndex, config.ATTACK_UPGRADE_NUM[cardLv], techniqueBeActivationList.length);
+            }
+
+            await jsonStore.updatejson(roomTotalJson[0], socket.room);
+            roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+        });
+
+        // Select Technique Complete -> Add Active Technique & Upgrade Tactic Level
+        socket.on('Select Technique and Upgrade Tactic', async(companyName, section, categoryIndex) => {
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            console.log("Select Technique and Upgrade Tactic - companyName : ", companyName);
+            console.log("Select Technique and Upgrade Tactic - section : ", section);
+            console.log("Select Technique and Upgrade Tactic - categoryIndex : ", categoryIndex);
+
+            // 선택 완료
+            let tacticLevel = roomTotalJson[0][companyName]["penetrationTestingLV"];
+            let techniqueBeActivationList = roomTotalJson[0][companyName]["sections"][section]["beActivated"];
+            let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["responseActive"];
+            let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["responseLv"];
+
+            // 유니티에서 완료버튼 클릭 시 수정할 것!
+            if (socket.team == true) {
+                console.log("white team upgrade attack card");
+                roomTotalJson[0][companyName]["penetrationTestingLV"][categoryIndex] += 1;
+            }
+
+            for(var i = 0; i < techniqueBeActivationList.length; i++){ 
+                techniqueActivation[categoryIndex][techniqueBeActivationList[i]] = 1;
+            }
+
+            console.log("techniqueActivation : ", techniqueActivation);
+            console.log("techniqueLevel : ", techniqueLevel);
+
+            socket.emit("Get Technique", companyName, techniqueActivation, techniqueLevel);
+            socket.emit("Get Tactic Level", companyName, tacticLevel);
+
+            await jsonStore.updatejson(roomTotalJson[0], socket.room);
+            roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+        });
 
 
 
@@ -1763,22 +1863,56 @@ module.exports = (io) => {
 
 // ===================================================================================================================
 
-        // [Attack Matrix]
-        socket.on('check_scenario', async(data) => {
+        // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행
+        socket.on('check_scenario_conn', async(data, attackName) => {
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
             data = JSON.parse(data);
             var corpName = data.Corp;
             var sectionIdx = data.areaIdx;
 
-            console.log(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario);
+            // console.log(roomTotalJson[0][corpName].sections[sectionIdx]);
+            // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress);
+            // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress.length);
 
-            var selectFlag = false;
-            if(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario > -1)
-            {
-                selectFlag = true;
+            var attackProgress = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+
+            // for(var i=0; i<attackProgress.length; i++){
+            for(var i=0; i<1; i++){
+                var scenarioName = "SCENARIO" + (i+1);
+                console.log(scenarioName);
+                if(attackProgress[i].length <= 0){
+                    //console.log(Object.values(config[scenarioName].startAttack));
+                    var newInfo = { attackName: attackName, state: 1 };  // 좌표 구하는 방법을 못 찾아서 일단 이름으로 해놓음
+                    attackProgress[i].push(newInfo);
+                    console.log(attackProgress[i]);
+                } else {
+                    console.log(attackProgress[i][attackProgress[i].length - 1]);
+                    console.log(Object.values(config[scenarioName].attackConn['[0,3]']));
+                    var checkArr = Object.values(config[scenarioName].attackConn['[0,3]']);
+
+                    if(checkArr.include("test")){ // 클릭한 공격의 좌표가 마지막 공격의 attackconn에 있다면 attackProgress에 push
+                        attackProgress[i].push(newInfo);
+                        continue;
+                    }
+
+                    var attackConn = config[scenarioName].attackConn;
+                    if(getKeyByValue(attackConn, value) != null ) {
+                        getKeyByValue(attackConn, getKeyByValue(attackConn, value));
+                    } else {
+                        // nothing
+                    }
+                    // Object.keys(attackConn).find(key => {
+                    //     if(attackConn[key].include("test")) {
+                    //         console.log(key);
+
+                    //     }
+                    // });
+
+                }
             }
-            socket.emit('check_scenario_result', selectFlag);
+
+            
         });
 // ###################################################################################################################
         
@@ -1805,6 +1939,20 @@ module.exports = (io) => {
             await sessionStore.deleteSession(socket.sessionID);
         });
     })
+
+    // value로 key 찾기
+    function getKeyByValue(object, value) {
+        Object.keys(object).find(key => {
+            if(object[key].include(value)) {
+                return key;
+            } else {
+                return null;
+            }
+        });
+
+
+        return Object.keys(object).find(key => object[key].include(value));
+    };
 
     // [room] 방 키 5자리 랜덤 
     function randomN(){
@@ -1952,8 +2100,6 @@ module.exports = (io) => {
         // 3. redis - roomManage/publicRoom 또는 roomManage/privateRoom 에 저장
         var redisroomKey =  roomType +'Room';
         listStore.rpushList(redisroomKey, roomPin, false, 'roomManage');
-
-        
 
         return room_info
     };
@@ -2182,17 +2328,12 @@ module.exports = (io) => {
             })
         }
     
-        var progress = new Progress({
-            progress  : [],
-            inProgress  : [],
-            last  : -1
-        })
 
         var initCompanyArray = []
         for (var i = 0; i < 5; i++){
             var initCompany = new Company({
                 abandonStatus : false,
-                penetrationTestingLV : [1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 14개 
+                penetrationTestingLV : [0,0,0,0,0,0,0,0,0,0,0,0,0,0], // 14개 
                 attackLV : [0,0,0,0,0,0,0,0,0,0,0,0,0,0],  // 유형레벨 14가지
                 sections : [
                     new Section({
@@ -2201,25 +2342,38 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
+                        attackProgress : [ [{ attackName: "test1", state: 1 }, { attackName: "test2", state: 1 }, { attackName: "test3", state: 1 }], [], [], [], [] ],
                         responseStep : 0,
-                        attack : progress,
                         response : progress,
+                        beActivated : [],
                         responseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 활성화된 방어
-                        responseLv : [], // 방어 레벨 
+                                    [0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 활성화된 방어
+                        responseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
                         responseCnt : [] // 방어 횟수 
                     }),
     
@@ -2229,12 +2383,6 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
-                        responseStep : 0,
-                        attack : progress,
-                        response : progress,
-                        responseLv : [], // 방어 레벨 
-                        responseCnt : [] // 방어 횟수 
                     }),
     
                     new Section({
@@ -2243,12 +2391,6 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
-                        responseStep : 0,
-                        attack : progress,
-                        response : progress,
-                        responseLv : [], // 방어 레벨 
-                        responseCnt : [] // 방어 횟수 
                     }),
                 ]
             });
