@@ -1865,86 +1865,73 @@ module.exports = (io) => {
 
         // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행
         socket.on('check_scenario_conn', async(data, attackName) => {
+            attackName = "Phishing";
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
             data = JSON.parse(data);
             var corpName = data.Corp;
             var sectionIdx = data.areaIdx;
 
-            // console.log(roomTotalJson[0][corpName].sections[sectionIdx]);
             // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress);
-            // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress.length);
+            var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
 
-            var attackProgress = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
-
-            // for(var i=0; i<attackProgress.length; i++){
+            // for(var i=0; i<sectionAttackProgressArr.length; i++){
             for(var i=0; i<1; i++){
                 var scenarioName = "SCENARIO" + (i+1);
-                console.log(scenarioName);
-                if(attackProgress[i].length <= 0){
-                    //console.log(Object.values(config[scenarioName].startAttack));
-                    var newInfo = { attackName: attackName, state: 1 };  // 좌표 구하는 방법을 못 찾아서 일단 이름으로 해놓음
-                    attackProgress[i].push(newInfo);
-                    console.log(attackProgress[i]);
-                } else {
-                    console.log(attackProgress[i][attackProgress[i].length - 1]);
-                    console.log(Object.values(config[scenarioName].attackConn['[0,3]']));
-                    var checkArr = Object.values(config[scenarioName].attackConn['[0,3]']);
 
-                    if(checkArr.include("test")){ // 클릭한 공격의 좌표가 마지막 공격의 attackconn에 있다면 attackProgress에 push
-                        attackProgress[i].push(newInfo);
-                        continue;
-                    }
+                // 진행된 공격이 없는 경우 -> startkAttack인지 확인 -> 공격 리스트에 바로 추가
+                if(sectionAttackProgressArr[i].length <= 0){ 
+                    console.log("if1");
+                    var startAttackArr = (Object.values(config[scenarioName].startAttack)); // startkAttack인지 확인
+                    
+                    if(startAttackArr.includes(attackName)) { // 공격 리스트에 추가
+                        var newInfo = { attackName: attackName, state: 1 }; 
+                        sectionAttackProgressArr[i].push(newInfo);
+                        console.log(sectionAttackProgressArr[i]);
+                    }                    
 
-                    var attackConn = config[scenarioName].attackConn;
-                    if(getKeyByValue(attackConn, value) != null ) {
-                        getKeyByValue(attackConn, getKeyByValue(attackConn, value));
-                    } else {
-                        // nothing
-                        const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            
-                        var isAbondon = true;
-                        var sectionsArr = roomTotalJson[0][corpName].sections;
-                        for(i=0; i<sectionsArr.length; i++)
-                        {
-                            var isDestroy = roomTotalJson[0][corpName].sections[i].destroyStatus;
-                            console.log("[Abandon]isDestroy " + i+isDestroy.toString());
-                            if(isDestroy == false){ // 한 영역이라도 false면 반복문 나감
-                                isAbondon = false;
-                                break;
-                            }
-                        }
 
-                        if (totla_test.includes(attackIndex)) {
-                            console.log("Already Select this Attack : ", attackIndex);
-                            for(var i = 0; i < totla_test.length; i++){ 
-                                if (totla_test[i] === attackIndex) { 
-                                    totla_test.splice(i, 1); 
-                                    break;
-                                }
-                            }
+                // 진행된 공격이 있는 경우 -> 마지막 공격부터 conn을 확인 -> 해당되는 경우 공격 리스트에 추가    
+                } else { 
+                    console.log("if2");
+                    for(var k=sectionAttackProgressArr[i].length - 1; k>=0; k--){
+                        var checkLastAttack = sectionAttackProgressArr[i][k].attackName;
+
+                        var attacksArr;
+                        if(config[scenarioName].attackConn[checkLastAttack] == null) { // attackConn 확인
+                            console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
                         } else {
-                            totla_test.push(attackIndex);
+                            console.log("if2-1");
+                            attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
+                            console.log(attacksArr);
+                            if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가
+                                console.log("if2-2");
+                                var newInfo = { attackName: attackName, state: 1 }; 
+                                sectionAttackProgressArr[i].push(newInfo);
+                                console.log(sectionAttackProgressArr[i]);
+                            }
                         }
 
-                        switch(attackIndex) {
-                            case 0:
-                                // 고민 필요
-                                break;
-                            case 1:
-                                // 고민 필요
-                                break;
-                            case 2:
-                                // 고민 필요
-                                break;
-                        }
                     }
-                    // Object.keys(attackConn).find(key => {
-                    //     if(attackConn[key].include("test")) {
-                    //         console.log(key);
 
+
+                    // var checkLastAttack = sectionAttackProgress[i][sectionAttackProgress[i].length - 1].attackName; // 마지막 공격
+
+                    // var attacksArr;
+                    // if(config[scenarioName].attackConn[checkLastAttack] == null) {
+                    //     console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
+                    // } else {
+                    //     console.log("if2-1");
+                    //     attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
+                    //     console.log(attacksArr);
+                    //     if(attacksArr.includes(attackName)){
+                    //         console.log("if2-2");
+                    //         var newInfo = { attackName: "test", state: 1 }; 
+                    //         sectionAttackProgress[i].push(newInfo);
+                    //         console.log(sectionAttackProgress[i]);
                     //     }
-                    // });
+                    // }
+
 
                 }
             }
@@ -1977,19 +1964,6 @@ module.exports = (io) => {
         });
     })
 
-    // value로 key 찾기
-    function getKeyByValue(object, value) {
-        Object.keys(object).find(key => {
-            if(object[key].include(value)) {
-                return key;
-            } else {
-                return null;
-            }
-        });
-
-
-        return Object.keys(object).find(key => object[key].include(value));
-    };
 
     // [room] 방 키 5자리 랜덤 
     function randomN(){
@@ -2379,9 +2353,9 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackProgress : [ [{ attackName: "test1", state: 1 }, { attackName: "test2", state: 1 }, { attackName: "test3", state: 1 }], [], [], [], [] ],
+                        attackProgress : [ [{ attackName: "Gather Victim Network Information", state: 1 }, { attackName: "Exploit Public-Facing Application", state: 1 }, { attackName: "Active Scanning", state: 1 }], [], [], [], [] ],
                         responseStep : 0,
-                        response : progress,
+                        //response : progress,
                         beActivated : [],
                         responseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],

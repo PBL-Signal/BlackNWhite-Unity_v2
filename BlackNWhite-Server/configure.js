@@ -118,49 +118,92 @@ module.exports = {
     */
     BUY_SCENARIO: { pita : [1000, 1100, 1200, 1300, 1400] },
     UPGRADE_SCENARIO : { pita : [50, 100, 200, 300, 400] }, // 블랙팀 - 사전 탐색 (어택 시나리오) 0->1 : 50 pita
-                                                    
+            
     SCENARIO1 :{
         'attacks': {
-            '0': [[0,3]],
+            '0': ["Gather Victim Network Information"],
             '1' : [],
-            '2' : [[2,1], [2,4], [2,8]],
-            '3' : [[3,0], [3,8]],
-            '4' : [[4,0]],
-            '5' : [[5,11]],
-            '6' : [[6,0], [6,4], [6,16]],
-            '7' : [[7,1]],
-            '8' : [[8,0]],
+            '2' : ["Exploit Public-Facing Application", "Phishing", "Valid Accounts"],
+            '3' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
+            '4' : ["Account Manipulation"],
+            '5' : ["Scheduled Task/Job"],
+            '6' : ["Abuse Elevation Control Mechanism", "Indirect Command Execution"],
+            '7' : ["Brute Force"],
+            '8' : ["Account Discovery"],
             '9' : [],
-            '10' : [[10,15]],
-            '11' : [[11,1]],
-            '12' : [[12,2],[12,6]],
-            '13' : [[13,2]],
+            '10' : ["Screen Capture"],
+            '11' : ["Communication Through Removable Media"],
+            '12' : ["Exfiltration Over Alternative Protocol", "Exfiltration Over Web Service"],
+            '13' : ["Data Encrypted for Impact"],
         },
 
         'startAttack' : [
-            [0,3]
+            "Gather Victim Network Information"
         ],
         
         'mainAttack' : [
-            [7,1], [8,0], [11,1], [13,2]
+            "Brute Force", "Account Discovery", "Communication Through Removable Media", "Data Encrypted for Impact"
         ],
 
         'attackConn' : {
-           '[0,3]': [[2,1], [2,4], [2,8]],
-           '[2,1]' :  [[3,0], [3,8]],
-            '[2,4]' : [[3,0], [3,8]],
-            '[2,8]' : [[3,0], [3,8]],
-            '[3,0]' : [[4,0], [5,11]],
-            '[3,8]' : [[4,0], [5,11]],
-            '[4,0]' : [[6,0], [6,16]],
-            '[5,11]' : [[10,15],[12,2],[12,6]],
-            '[6,0]' : [[7,1], [8,0]],
-            '[6,16]' : [[7,1]],
-            '[10,15]' : [[11,1]],
-            '[12,2]' : [[13,2]],
-            '[12,6]' : [[13,2]]
+           'Gather Victim Network Information': ["Exploit Public-Facing Application", "Phishing", "Valid Accounts"],
+           'Exploit Public-Facing Application' :  ["Command and Scripting Interpreter", "Software Deployment Tools"],
+            'Phishing' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
+            'Valid Accounts' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
+            'Command and Scripting Interpreter' : ["Account Manipulation", "Scheduled Task/Job"],
+            'Software Deployment Tools' : ["Account Manipulation", "Scheduled Task/Job"],
+            'Account Manipulation' : ["Abuse Elevation Control Mechanism", "Indirect Command Execution"],
+            'Scheduled Task/Job' : ["Screen Capture","Exfiltration Over Alternative Protocol","Exfiltration Over Web Service"],
+            'Abuse Elevation Control Mechanism' : ["Brute Force", "Account Discovery"],
+            'Indirect Command Execution' : ["Brute Force"],
+            'Screen Capture' : ["Communication Through Removable Media"],
+            'Exfiltration Over Alternative Protocol' : ["Data Encrypted for Impact"],
+            'Exfiltration Over Web Service' : ["Data Encrypted for Impact"]
         }
 
     }
+    // SCENARIO1 :{
+    //     'attacks': {
+    //         '0': [[0,3]],
+    //         '1' : [],
+    //         '2' : [[2,1], [2,4], [2,8]],
+    //         '3' : [[3,0], [3,8]],
+    //         '4' : [[4,0]],
+    //         '5' : [[5,11]],
+    //         '6' : [[6,0], [6,4], [6,16]],
+    //         '7' : [[7,1]],
+    //         '8' : [[8,0]],
+    //         '9' : [],
+    //         '10' : [[10,15]],
+    //         '11' : [[11,1]],
+    //         '12' : [[12,2],[12,6]],
+    //         '13' : [[13,2]],
+    //     },
+
+    //     'startAttack' : [
+    //         [0,3]
+    //     ],
+        
+    //     'mainAttack' : [
+    //         [7,1], [8,0], [11,1], [13,2]
+    //     ],
+
+    //     'attackConn' : {
+    //        '[0,3]': [[2,1], [2,4], [2,8]],
+    //        '[2,1]' :  [[3,0], [3,8]],
+    //         '[2,4]' : [[3,0], [3,8]],
+    //         '[2,8]' : [[3,0], [3,8]],
+    //         '[3,0]' : [[4,0], [5,11]],
+    //         '[3,8]' : [[4,0], [5,11]],
+    //         '[4,0]' : [[6,0], [6,16]],
+    //         '[5,11]' : [[10,15],[12,2],[12,6]],
+    //         '[6,0]' : [[7,1], [8,0]],
+    //         '[6,16]' : [[7,1]],
+    //         '[10,15]' : [[11,1]],
+    //         '[12,2]' : [[13,2]],
+    //         '[12,6]' : [[13,2]]
+    //     }
+
+    // }
   
 }
