@@ -1864,7 +1864,7 @@ module.exports = (io) => {
 // ===================================================================================================================
 
         // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행
-        socket.on('check_scenario_conn', async(data, attackName) => {
+        socket.on('check_scenario_conn', async(data, attackName, tacticName) => {
             attackName = "Phishing";
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
@@ -1885,7 +1885,7 @@ module.exports = (io) => {
                     var startAttackArr = (Object.values(config[scenarioName].startAttack)); // startkAttack인지 확인
                     
                     if(startAttackArr.includes(attackName)) { // 공격 리스트에 추가
-                        var newInfo = { attackName: attackName, state: 1 }; 
+                        var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
                         sectionAttackProgressArr[i].push(newInfo);
                         console.log(sectionAttackProgressArr[i]);
                     }                    
@@ -1895,7 +1895,10 @@ module.exports = (io) => {
                 } else { 
                     console.log("if2");
                     for(var k=sectionAttackProgressArr[i].length - 1; k>=0; k--){
-                        var checkLastAttack = sectionAttackProgressArr[i][k].attackName;
+                        var checkLastAttack;
+                        if(sectionAttackProgressArr[i][k].state == 2) {
+                            checkLastAttack = sectionAttackProgressArr[i][k].attackName;
+                        }
 
                         var attacksArr;
                         if(config[scenarioName].attackConn[checkLastAttack] == null) { // attackConn 확인
@@ -1906,7 +1909,7 @@ module.exports = (io) => {
                             console.log(attacksArr);
                             if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가
                                 console.log("if2-2");
-                                var newInfo = { attackName: attackName, state: 1 }; 
+                                var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
                                 sectionAttackProgressArr[i].push(newInfo);
                                 console.log(sectionAttackProgressArr[i]);
                             }
@@ -2353,7 +2356,7 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackProgress : [ [{ attackName: "Gather Victim Network Information", state: 1 }, { attackName: "Exploit Public-Facing Application", state: 1 }, { attackName: "Active Scanning", state: 1 }], [], [], [], [] ],
+                        attackProgress : [ [{ tactic: "Reconnaissance", attackName: "Gather Victim Network Information", state: 2 }, { tactic: "Reconnaissance", attackName: "Exploit Public-Facing Application", state: 2 }, { tactic: "Reconnaissance", attackName: "Active Scanning", state: 1 } ], [], [], [], [] ],
                         responseStep : 0,
                         //response : progress,
                         beActivated : [],
