@@ -1117,9 +1117,19 @@ module.exports = (io) => {
 
         });
         
+        // [블랙팀] 시나리오의 힌트북 레벨 정보 emit
+        socket.on('GetScenarioLv',  async function() {
+            console.log("[On] GetScenarioLv");
+
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
+            socket.emit('BroadScenarioLv', scenarioLvList);
+        });
+
+
          // [블랙팀] 시나리오의 힌트북 레벨업 
-         socket.on('Try_Upgrade_Scenario',  async function(data) {
-            console.log("[On] Upgrade Scenario:");
+         socket.on('TryUpgradeScenario',  async function(selectedScenario) {
+            console.log("[On] Upgrade Scenario: " + selectedScenario);
           
             //  json 불러와서 블랙피타정보, 시나리오 레벨 정보 가져옴
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
@@ -1127,36 +1137,75 @@ module.exports = (io) => {
             console.log("blackTeam.total_pita!!!", black_total_pita );
 
             var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
-            var scenarioNum = roomTotalJson[0][data.company]["sections"][data.section].selectScenario;
-            var scenarioLv = scenarioLvList[scenarioNum];
+            // var scenarioNum = roomTotalJson[0][data.company]["sections"][data.section].selectScenario;
+            var scenarioLv = scenarioLvList[selectedScenario];
 
             // 레벨업 가능한지 확인
             if (scenarioLv >= 5){
-                socket.emit('Result_Upgrade_Scenario', false);
+                socket.emit('ResultUpgradeScenario', false);
                 return;
             }
 
             // 가격 확인
             if (parseInt(black_total_pita) - parseInt(config.UPGRADE_SCENARIO.pita[scenarioLv]) < 0){
                 console.log("업그레이드 실패 ! - pita 부족");
-                socket.emit('Result_Upgrade_Scenario', false);
+                socket.emit('ResultUpgradeScenario', false);
                 return;
             };
 
             // lv 업그레이드 및 pita 가격 마이너스 
-            scenarioLvList[scenarioNum] += 1
+            scenarioLvList[selectedScenario] += 1
             roomTotalJson[0]["blackTeam"]["scenarioLevel"] = scenarioLvList;
             roomTotalJson[0].blackTeam.total_pita = parseInt(roomTotalJson[0].blackTeam.total_pita) - parseInt(config.UPGRADE_SCENARIO.pita[scenarioLv]);
             await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
             io.sockets.in(socket.room+'false').emit('Update Pita', roomTotalJson[0].blackTeam.total_pita );
-            socket.emit('Result_Upgrade_Scenario', true);
+            socket.emit('ResultUpgradeScenario', true);
+            io.sockets.in(socket.room).emit('BroadScenarioLv', scenarioLvList);
+            console.log("업그레이드 성공 ! " + scenarioLvList);
+        });
+
+         // [블랙팀] 시나리오의 힌트북 구입
+         socket.on('TryBuyScenario',  async function(selectedScenario) {
+            console.log("[On] Buy Scenario: " + selectedScenario);
+          
+            //  json 불러와서 블랙피타정보, 시나리오 레벨 정보 가져옴
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            var black_total_pita = roomTotalJson[0].blackTeam.total_pita;
+            console.log("blackTeam.total_pita!!!", black_total_pita );
+
+            var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
+            var scenarioLv = scenarioLvList[selectedScenario];
+
+            // 레벨업 가능한지 확인
+            if (scenarioLv != -1){
+                socket.emit('ResultBuyScenario', false);
+                return;
+            }
+
+            // 가격 확인
+            if (parseInt(black_total_pita) - parseInt(config.BUY_SCENARIO.pita[selectedScenario]) < 0){
+                console.log("구입 ! - pita 부족");
+                socket.emit('ResultBuyScenario', false);
+                return;
+            };
+
+            // lv 업그레이드 및 pita 가격 마이너스 
+            scenarioLvList[selectedScenario] += 1
+            roomTotalJson[0]["blackTeam"]["scenarioLevel"] = scenarioLvList;
+            roomTotalJson[0].blackTeam.total_pita = parseInt(roomTotalJson[0].blackTeam.total_pita) - parseInt(config.UPGRADE_SCENARIO.pita[scenarioLv]);
+            await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+            io.sockets.in(socket.room+'false').emit('Update Pita', roomTotalJson[0].blackTeam.total_pita );
+            socket.emit('ResultBuyScenario', true);
+            io.sockets.in(socket.room).emit('BroadScenarioLv', scenarioLvList);
+            console.log("구입 성공 ! " + scenarioLvList);
         });
 
 
         // [블랙팀] 해당 섹션의 선택된 시나리오의 힌트북 가져옴 
-        socket.on('Get Scenario',  async function(data) {
-            console.log("[On] Get Scenario ", data.section, data.company);
+        socket.on('GetSectAttScenario',  async function(data) {
+            console.log("[On] GetSectAttScenario ", data.section, data.company, data.scenario);
 
             var hintTotal = {};
             var scenarioLv = 0;
@@ -1164,16 +1213,16 @@ module.exports = (io) => {
 
             // 회사의 시나리오 레벨 &선택한 시나리오 가져옴
             var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
-            var scenarioNum = roomTotalJson[0][data.company]["sections"][data.section].selectScenario;
+            // var scenarioNum = roomTotalJson[0][data.company]["sections"][data.section].selectScenario;
             
             // console.log('0', Object.values(config.SCENARIO1.attacks[0]).length);
             // console.log('1', Object.values(config.SCENARIO1.attacks[1]).length);
             // console.log('2', Object.values(config.SCENARIO1.attacks[2]).length);
 
-            if (scenarioNum != -1){
+            if (data.scenario != -1){
                 // 시나리오 레벨에 따라 선택한 시나리오 정보 가져옴
-                scenarioLv = scenarioLvList[scenarioNum];
-                console.log("!-- scenarioLv : ", scenarioLvList[scenarioNum]);
+                scenarioLv = scenarioLvList[data.scenario];
+                console.log("!-- scenarioLv : ", scenarioLvList[data.scenario]);
                 var attacks = []
 
                 if (scenarioLv == 1){
@@ -1223,7 +1272,7 @@ module.exports = (io) => {
             // 내용 보내기 
             var sectionScenario = { 
                 scenarioLvList : scenarioLvList,
-                selectScenario : scenarioNum,
+                selectScenario : data.scenario,
                 // scenarioLevel : scenarioLv, 
                 // attackStep : sectionInfo.attackStep,
                 hintTotal : hintTotal
@@ -1814,22 +1863,80 @@ module.exports = (io) => {
 
 // ===================================================================================================================
 
-        // [Attack Matrix]
-        socket.on('check_scenario', async(data) => {
+        // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행
+        socket.on('check_scenario_conn', async(data, attackName) => {
+            attackName = "Phishing";
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
             data = JSON.parse(data);
             var corpName = data.Corp;
             var sectionIdx = data.areaIdx;
 
-            console.log(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario);
+            // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress);
+            var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
 
-            var selectFlag = false;
-            if(roomTotalJson[0][corpName].sections[sectionIdx].selectScenario > -1)
-            {
-                selectFlag = true;
+            // for(var i=0; i<sectionAttackProgressArr.length; i++){
+            for(var i=0; i<1; i++){
+                var scenarioName = "SCENARIO" + (i+1);
+
+                // 진행된 공격이 없는 경우 -> startkAttack인지 확인 -> 공격 리스트에 바로 추가
+                if(sectionAttackProgressArr[i].length <= 0){ 
+                    console.log("if1");
+                    var startAttackArr = (Object.values(config[scenarioName].startAttack)); // startkAttack인지 확인
+                    
+                    if(startAttackArr.includes(attackName)) { // 공격 리스트에 추가
+                        var newInfo = { attackName: attackName, state: 1 }; 
+                        sectionAttackProgressArr[i].push(newInfo);
+                        console.log(sectionAttackProgressArr[i]);
+                    }                    
+
+
+                // 진행된 공격이 있는 경우 -> 마지막 공격부터 conn을 확인 -> 해당되는 경우 공격 리스트에 추가    
+                } else { 
+                    console.log("if2");
+                    for(var k=sectionAttackProgressArr[i].length - 1; k>=0; k--){
+                        var checkLastAttack = sectionAttackProgressArr[i][k].attackName;
+
+                        var attacksArr;
+                        if(config[scenarioName].attackConn[checkLastAttack] == null) { // attackConn 확인
+                            console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
+                        } else {
+                            console.log("if2-1");
+                            attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
+                            console.log(attacksArr);
+                            if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가
+                                console.log("if2-2");
+                                var newInfo = { attackName: attackName, state: 1 }; 
+                                sectionAttackProgressArr[i].push(newInfo);
+                                console.log(sectionAttackProgressArr[i]);
+                            }
+                        }
+
+                    }
+
+
+                    // var checkLastAttack = sectionAttackProgress[i][sectionAttackProgress[i].length - 1].attackName; // 마지막 공격
+
+                    // var attacksArr;
+                    // if(config[scenarioName].attackConn[checkLastAttack] == null) {
+                    //     console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
+                    // } else {
+                    //     console.log("if2-1");
+                    //     attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
+                    //     console.log(attacksArr);
+                    //     if(attacksArr.includes(attackName)){
+                    //         console.log("if2-2");
+                    //         var newInfo = { attackName: "test", state: 1 }; 
+                    //         sectionAttackProgress[i].push(newInfo);
+                    //         console.log(sectionAttackProgress[i]);
+                    //     }
+                    // }
+
+
+                }
             }
-            socket.emit('check_scenario_result', selectFlag);
+
+            
         });
 // ###################################################################################################################
         
@@ -1856,6 +1963,7 @@ module.exports = (io) => {
             await sessionStore.deleteSession(socket.sessionID);
         });
     })
+
 
     // [room] 방 키 5자리 랜덤 
     function randomN(){
@@ -2231,11 +2339,6 @@ module.exports = (io) => {
             })
         }
     
-        var progress = new Progress({
-            progress  : [],
-            inProgress  : [],
-            last  : -1
-        })
 
         var initCompanyArray = []
         for (var i = 0; i < 5; i++){
@@ -2250,10 +2353,9 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
+                        attackProgress : [ [{ attackName: "Gather Victim Network Information", state: 1 }, { attackName: "Exploit Public-Facing Application", state: 1 }, { attackName: "Active Scanning", state: 1 }], [], [], [], [] ],
                         responseStep : 0,
-                        attack : progress,
-                        response : progress,
+                        //response : progress,
                         beActivated : [],
                         responseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
@@ -2383,7 +2485,7 @@ module.exports = (io) => {
             blackTeam  : new BlackTeam({ 
                 total_pita : 500,
                 users : blackUsers,
-                scenarioLevel : [0,0,0,0,0], // 힌트북 레벨
+                scenarioLevel : [-1,-1,-1, -1, -1], // 힌트북 레벨
             }),
             whiteTeam  : new WhiteTeam({ 
                 total_pita : 500,
