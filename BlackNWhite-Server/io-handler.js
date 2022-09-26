@@ -1876,6 +1876,7 @@ module.exports = (io) => {
             var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
             var sectionDefenseProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress;
             var sectionDefenseActivationArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseActive;
+            var defenseLv = roomTotalJson[0][corpName].sections[sectionIdx].defenseLv;
 
             // for(var i=0; i<sectionAttackProgressArr.length; i++){
             for(var i=0; i<1; i++){
@@ -1901,6 +1902,9 @@ module.exports = (io) => {
                         if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
                             sectionDefenseProgressArr[i].push(newInfo);
                             console.log("sectionDefenseProgressArr : ", sectionDefenseProgressArr);
+                            // 0은 나중에 시나리오 인덱스로 변경
+                            DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
+                            socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
                         }
                     }                    
 
@@ -1932,10 +1936,13 @@ module.exports = (io) => {
                                 if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
                                     sectionDefenseProgressArr[i].push(newInfo);
                                     console.log("sectionDefenseProgressArr : ", sectionDefenseProgressArr);
+                                    // 0은 나중에 시나리오 인덱스로 변경
+                                    DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
+                                    socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+                                    console.log("start defense time : ", config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
                                 }
                             }
                         }
-
                     }
 
 
@@ -1960,6 +1967,7 @@ module.exports = (io) => {
                 }
             }
 
+            await jsonStore.updatejson(roomTotalJson[0], socket.room);
             
         });
 // ###################################################################################################################
@@ -2327,10 +2335,10 @@ module.exports = (io) => {
     
 
         // 5. 나머지 room 관련 정보 socket에서 삭제 및 빈 값으로 수정해주기!!
-       socket.room = null;
-       socket.roomID = null;
-       socket.team = null;
-       socket.color = null;
+        socket.room = null;
+        socket.roomID = null;
+        socket.team = null;
+        socket.color = null;
     };
 
 
@@ -2521,14 +2529,57 @@ module.exports = (io) => {
     }
 
     // Defense 쿨타임
-    async function DefenseCooltime(socket, ){
+    async function DefenseCooltime(socket, attackStateOrigin, corpName, sectionIdx, senarioIndex, tacticIndex, techniqueIndex, defenseLevel){
         var defenseTime = setTimeout(async function(){
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
-        });
+            var sectionDefenseProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress;
+            var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+            
+            var attackInfo = sectionAttackProgressArr[senarioIndex].filter(function(progress){
+                return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
+            })[0];
+
+            console.log("DefenseCooltime - attackInfo : ", attackInfo);
+            console.log("DefenseCooltime - config.ATTACK_CATEGORY[tacticIndex] : ", config.ATTACK_CATEGORY[tacticIndex]);
+            console.log("DefenseCooltime - config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex] : ", config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex]);
+            
+            console.log("DefenseCooltime - sectionAttackProgressArr (before) : ", sectionAttackProgressArr);
+            console.log("DefenseCooltime - sectionDefenseProgressArr (before) : ", sectionDefenseProgressArr);
+
+            // 방어 성공 (attackStateOrigin -> attackState : 1 -> 1 or 2 -> 2)
+            console.log("DefenseCooltime - attackStateOrigin : ", attackStateOrigin);
+            console.log("DefenseCooltime - attackInfo.state : ", attackInfo.state);
+            if (attackStateOrigin == attackInfo.state) {
+                console.log("DefenseCooltime - success!!");
+
+                sectionAttackProgressArr = sectionAttackProgressArr[senarioIndex].filter(function(progress){
+                    return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
+                });
+
+                sectionDefenseProgressArr = sectionDefenseProgressArr[senarioIndex].filter(function(progress){
+                    return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
+                });
+                
+            } else {   // 방어 실패
+                console.log("DefenseCooltime - faile!!");
+
+                sectionDefenseProgressArr = sectionDefenseProgressArr[senarioIndex].filter(function(progress){
+                    return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[techniqueIndex];
+                });
+
+                DefenseCooltime(socket, attackInfo.state, corpName, sectionIdx, senarioIndex, tacticIndex, techniqueIndex, defenseLevel);
+            }
+
+            console.log("DefenseCooltime - sectionAttackProgressArr (after) : ", sectionAttackProgressArr);
+            console.log("DefenseCooltime - sectionDefenseProgressArr (after) : ", sectionDefenseProgressArr);
+
+            await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+            clearTimeout(defenseTime);
+            
+        }, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLevel] * 1000);
     }
-
-
-
 
 
     // 모든 회사가 몰락인지 확인, 몰락이면 게임 종료
