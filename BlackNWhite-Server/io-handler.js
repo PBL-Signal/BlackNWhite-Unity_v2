@@ -1207,9 +1207,11 @@ module.exports = (io) => {
         socket.on('GetSectAttScenario',  async function(data) {
             console.log("[On] GetSectAttScenario ", data.section, data.company, data.scenario);
 
-            var hintTotal = {};
             var scenarioLv = 0;
+            var scenarioNum = data.scenario + 1;
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            
+            
 
             // 회사의 시나리오 레벨 &선택한 시나리오 가져옴
             var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
@@ -1218,66 +1220,67 @@ module.exports = (io) => {
                 // 시나리오 레벨에 따라 선택한 시나리오 정보 가져옴
                 scenarioLv = scenarioLvList[data.scenario];
                 console.log("!-- scenarioLv : ", scenarioLvList[data.scenario]);
+
+                var sectScenarioHint = { // 보낼 힌트 스키마
+                    selectScenario : data.scenario,
+                    scenarioLv : scenarioLv
+                };
+
                 var attackHint = []
-                var sectionAttProgSecnario = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress[data.scenario];
+                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackProgress[data.scenario];
 
 
-                if (scenarioLv == 1){
+                if (scenarioLv == 1){ // 완료
                     // lv1: 각 단계 공격 여부
                     for(let i = 0; i <= 13; i++){
-                        if(Object.values(config["SCENARIO" + data.scenario].attacks[i]).length == 0){
+                        if(Object.values(config["SCENARIO" +scenarioNum].attacks[i]).length == 0){
                             attackHint[i] =  false;
                         }else{
                             attackHint[i] =  true;
                         }
                     }
-                    hintTotal['isAttacks'] = attackHint;
+                    sectScenarioHint['isAttacks'] = attackHint;
                 }
 
-                if(scenarioLv >= 2){ // lv :2~5 적용
+                if(scenarioLv >= 2){ // lv :2~5 적용 // 완료
                     // lv2: 각 단계 공격 개수
                     for(let i = 0; i <= 13; i++){
-                        attackHint[i] =  Object.values(config.SCENARIO1.attacks[i]).length;
+                        attackHint[i] =  Object.values(config["SCENARIO" +scenarioNum].attacks[i]).length;
                     }
 
-                    hintTotal['attacksCnt'] = attackHint;
+                    sectScenarioHint['attacksCnt'] = attackHint;
                 }
 
                 if(scenarioLv >= 3){
                     // lv3: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
                     // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
-
+                    
 
                 }
 
-                if(scenarioLv >= 4){
+                if(scenarioLv >= 4){ // 완료
                     // lv4: 메인공격 공개
                     // 메인 공격 
-                    hintTotal['mainAttack']=  Object.values(config.SCENARIO1.mainAttack);
+                    sectScenarioHint['mainAttack']=  config["SCENARIO" +scenarioNum].mainAttack;
                 }
 
-                if(scenarioLv == 5){
+                if(scenarioLv == 5){ 
                     // lv5: 모든 공격, 화살표 공개
-                    hintTotal = config.SCENARIO1;
+                    // hintTotal = config.SCENARIO1;
+                    sectScenarioHint['attacks']=  config["SCENARIO" +scenarioNum].attacks;
+                    sectScenarioHint['attackConn'] = config["SCENARIO" +scenarioNum].attackConn;
                 }
             }
 
             // 전에 진행된 공격 중에 연결된 공격이 있다면 넣기
             // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
 
-            // 내용 보내기 
-            var sectionScenario = { 
-                scenarioLvList : scenarioLvList,
-                selectScenario : data.scenario,
-                // scenarioLevel : scenarioLv, 
-                // attackStep : sectionInfo.attackStep,
-                hintTotal : hintTotal
-            };
-            
-            let sectionScenarioJson = JSON.stringify(sectionScenario);
-            console.log('sectionScenarioJson', sectionScenarioJson);
 
-            socket.emit('SendScenarioInfo', sectionScenarioJson);
+            // 힌트 보내기
+            let sectScenarioHintJson = JSON.stringify(sectScenarioHint);
+            console.log('sectionScenarioJson', sectScenarioHintJson);
+
+            socket.emit('SendSectAttScenario', sectScenarioHintJson);
         });
       
 

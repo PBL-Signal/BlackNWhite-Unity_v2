@@ -116,8 +116,11 @@ module.exports = {
    /**
     *  버전 2 configure
     */
-    BUY_SCENARIO: { pita : [1000, 1100, 1200, 1300, 1400] },
-    UPGRADE_SCENARIO : { pita : [50, 100, 200, 300, 400] }, // 블랙팀 - 사전 탐색 (어택 시나리오) 0->1 : 50 pita
+    // BUY_SCENARIO: { pita : [100, 1100, 1200, 1300, 1400] },
+    // UPGRADE_SCENARIO : { pita : [50, 100, 200, 300, 400] }, // 블랙팀 - 사전 탐색 (어택 시나리오) 0->1 : 50 pita
+
+    BUY_SCENARIO: { pita : [10, 10, 1200, 1300, 1400] },
+    UPGRADE_SCENARIO : { pita : [10, 10, 10, 10, 10] }, // 블랙팀 - 사전 탐색 (어택 시나리오) 0->1 : 50 pita
             
     SCENARIO1 :{
         'attacks': {
