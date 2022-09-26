@@ -1362,8 +1362,8 @@ module.exports = (io) => {
             if (socket.team == true){
                 for (let i = 0; i <roomTotalJson[0][companyName]["sections"].length; i++){
                     console.log("[socketon - Section Activation Check] roomTotalJson[0][companyName]['sections'][i] : ", roomTotalJson[0][companyName]["sections"][i]);
-                    console.log("[socketon - Section Activation Check] roomTotalJson[0][companyName]['sections'][i]['activation'] : ", roomTotalJson[0][companyName]["sections"][i]["responsible"]);
-                    activationList.push(roomTotalJson[0][companyName]["sections"][i]["responsible"]);
+                    console.log("[socketon - Section Activation Check] roomTotalJson[0][companyName]['sections'][i]['activation'] : ", roomTotalJson[0][companyName]["sections"][i]["defensible"]);
+                    activationList.push(roomTotalJson[0][companyName]["sections"][i]["defensible"]);
                 }
 
             } else {
@@ -1405,8 +1405,8 @@ module.exports = (io) => {
             console.log("team : ", socket.team);
 
             if (socket.team == true) {
-                let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["responseActive"];
-                let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["responseLv"];
+                let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["defenseActive"];
+                let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["defenseLv"];
 
                 console.log("techniqueActivation : ", techniqueActivation);
                 console.log("techniqueLevel : ", techniqueLevel);
@@ -1428,7 +1428,7 @@ module.exports = (io) => {
                 console.log("white team upgrade attack card");
                 cardLv = roomTotalJson[0][companyName]["penetrationTestingLV"][attackIndex];
                 if (cardLv < 5) {
-                    pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["RESPONSE_" + (attackIndex + 1)]['pita'][cardLv];
+                    pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["DEFENSE_" + (attackIndex + 1)]['pita'][cardLv];
                     roomTotalJson[0]['whiteTeam']['total_pita'] = pitaNum;
 
                     console.log("[!!!!!] pita num : ", pitaNum);
@@ -1511,8 +1511,8 @@ module.exports = (io) => {
 
             if (techniqueBeActivationList.length == config.ATTACK_UPGRADE_NUM[cardLv]) {
                 // 선택 완료
-                // let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["responseActive"];
-                // let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["responseLv"];
+                // let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["defenseActive"];
+                // let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["defenseLv"];
 
                 // for(var i = 0; i < techniqueBeActivationList.length; i++){ 
                 //     techniqueActivation[categoryIndex][techniqueBeActivationList[i]] = 1;
@@ -1546,8 +1546,8 @@ module.exports = (io) => {
             // 선택 완료
             let tacticLevel = roomTotalJson[0][companyName]["penetrationTestingLV"];
             let techniqueBeActivationList = roomTotalJson[0][companyName]["sections"][section]["beActivated"];
-            let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["responseActive"];
-            let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["responseLv"];
+            let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["defenseActive"];
+            let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["defenseLv"];
 
             // 유니티에서 완료버튼 클릭 시 수정할 것!
             if (socket.team == true) {
@@ -1690,7 +1690,7 @@ module.exports = (io) => {
             var cntArr = [];
             for(i=0; i<sectionsArr.length; i++)
             {
-                var sectionData = roomTotalJson[0][corpName].sections[i].response.progress.length;
+                var sectionData = roomTotalJson[0][corpName].sections[i].defense.progress.length;
                 cntArr[i] = sectionData;
             }
             socket.emit('Issue_Count', cntArr);
@@ -1866,6 +1866,7 @@ module.exports = (io) => {
         // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행
         socket.on('check_scenario_conn', async(data, attackName, tacticName) => {
             attackName = "Phishing";
+            tacticName = "Initial Access";
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
             data = JSON.parse(data);
@@ -1874,6 +1875,8 @@ module.exports = (io) => {
 
             // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress);
             var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+            var sectionDefenseProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress;
+            var sectionDefenseActivationArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseActive;
 
             // for(var i=0; i<sectionAttackProgressArr.length; i++){
             for(var i=0; i<1; i++){
@@ -1888,6 +1891,18 @@ module.exports = (io) => {
                         var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
                         sectionAttackProgressArr[i].push(newInfo);
                         console.log(sectionAttackProgressArr[i]);
+
+                        var tacticIndex = config.ATTACK_CATEGORY.indexOf(tacticName);
+                        var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackName);
+                        console.log("tacticName : ", tacticName);
+                        console.log("tacticIndex : ", tacticIndex);
+                        console.log("attackName : ", attackName);
+                        console.log("techniqueIndex : ", techniqueIndex);
+                        console.log("sectionDefenseActivationArr[tacticIndex][techniqueIndex] : ", sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
+                        if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
+                            sectionDefenseProgressArr[i].push(newInfo);
+                            console.log("sectionDefenseProgressArr : ", sectionDefenseProgressArr);
+                        }
                     }                    
 
 
@@ -1912,6 +1927,13 @@ module.exports = (io) => {
                                 var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
                                 sectionAttackProgressArr[i].push(newInfo);
                                 console.log(sectionAttackProgressArr[i]);
+
+                                var tacticIndex = config.ATTACK_CATEGORY.indexOf(tacticName);
+                                var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackName);
+                                if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
+                                    sectionDefenseProgressArr[i].push(newInfo);
+                                    console.log("sectionDefenseProgressArr : ", sectionDefenseProgressArr);
+                                }
                             }
                         }
 
@@ -2352,16 +2374,16 @@ module.exports = (io) => {
                 sections : [
                     new Section({
                         attackable : true,
-                        responsible : true,
+                        defensible : true,
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackProgress : [ [{ tactic: "Reconnaissance", attackName: "Gather Victim Network Information", state: 2 }, { tactic: "Reconnaissance", attackName: "Exploit Public-Facing Application", state: 2 }, { tactic: "Reconnaissance", attackName: "Active Scanning", state: 1 } ], [], [], [], [] ],                        responserogress : [[], [], [], [], []],
-                        //response : progress,
+                        attackProgress : [ [{ tactic: "Reconnaissance", attackName: "Gather Victim Network Information", state: 2 }, { tactic: "Reconnaissance", attackName: "Exploit Public-Facing Application", state: 2 }, { tactic: "Reconnaissance", attackName: "Active Scanning", state: 1 } ], [], [], [], [] ],
+                        defenseProgress : [[], [], [], [], []],
                         beActivated : [],
-                        responseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        defenseActive: [[1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 1, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2373,7 +2395,7 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 활성화된 방어
-                        responseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        defenseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2387,21 +2409,19 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
-                        responseCnt : [] // 방어 횟수 
+                        defenseCnt : [] // 방어 횟수 
                     }),
     
                     new Section({
                         attackable : true,
-                        responsible : true,
+                        defensible : true,
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
-                        responseStep : 0,
-                        attack : progress,
-                        response : progress,
+                        attackProgress : [ [], [], [], [], [] ],
+                        defenseProgress : [[], [], [], [], []],
                         beActivated : [],
-                        responseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2415,7 +2435,7 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 활성화된 방어
-                        responseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        defenseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2429,21 +2449,19 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
-                        responseCnt : [] // 방어 횟수 
+                        defenseCnt : [] // 방어 횟수 
                     }),
     
                     new Section({
                         attackable : true,
-                        responsible : true,
+                        defensible : true,
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackStep : 0,
-                        responseStep : 0,
-                        attack : progress,
-                        response : progress,
+                        attackProgress : [ [], [], [], [], [] ],
+                        defenseProgress : [[], [], [], [], []],
                         beActivated : [],
-                        responseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2457,7 +2475,7 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 활성화된 방어
-                        responseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        defenseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2471,7 +2489,7 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
-                        responseCnt : [] // 방어 횟수 
+                        defenseCnt : [] // 방어 횟수 
                     }),
                 ]
             });
@@ -2502,6 +2520,16 @@ module.exports = (io) => {
       
         return RoomTotalJson
     }
+
+    // Defense 쿨타임
+    async function DefenseCooltime(socket, ){
+        var defenseTime = setTimeout(async function(){
+
+        });
+    }
+
+
+
 
 
     // 모든 회사가 몰락인지 확인, 몰락이면 게임 종료
