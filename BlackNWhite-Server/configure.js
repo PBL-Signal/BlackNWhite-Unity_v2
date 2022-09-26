@@ -127,7 +127,7 @@ module.exports = {
             '3' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
             '4' : ["Account Manipulation"],
             '5' : ["Scheduled Task/Job"],
-            '6' : ["Abuse Elevation Control Mechanism", "Indirect Command Execution"],
+            '6' : ["Abuse Elevation Control Mechanism", "Debugger Evasion", "Indirect Command Execution"],
             '7' : ["Brute Force"],
             '8' : ["Account Discovery"],
             '9' : [],
@@ -141,9 +141,13 @@ module.exports = {
             "Gather Victim Network Information"
         ],
         
-        'mainAttack' : [
-            "Brute Force", "Account Discovery", "Communication Through Removable Media", "Data Encrypted for Impact"
-        ],
+        'mainAttack' : {
+            '6' : ["Debugger Evasion"],
+            '7' : ["Brute Force"],
+            '8' : ["Account Discovery"],
+            '11' : ["Communication Through Removable Media"],
+            '13' : ["Data Encrypted for Impact"],
+        },
 
         'attackConn' : {
            'Gather Victim Network Information': ["Exploit Public-Facing Application", "Phishing", "Valid Accounts"],

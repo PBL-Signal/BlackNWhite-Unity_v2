@@ -1213,54 +1213,50 @@ module.exports = (io) => {
 
             // 회사의 시나리오 레벨 &선택한 시나리오 가져옴
             var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
-            // var scenarioNum = roomTotalJson[0][data.company]["sections"][data.section].selectScenario;
-            
-            // console.log('0', Object.values(config.SCENARIO1.attacks[0]).length);
-            // console.log('1', Object.values(config.SCENARIO1.attacks[1]).length);
-            // console.log('2', Object.values(config.SCENARIO1.attacks[2]).length);
 
             if (data.scenario != -1){
                 // 시나리오 레벨에 따라 선택한 시나리오 정보 가져옴
                 scenarioLv = scenarioLvList[data.scenario];
                 console.log("!-- scenarioLv : ", scenarioLvList[data.scenario]);
-                var attacks = []
+                var attackHint = []
+                var sectionAttProgSecnario = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress[data.scenario];
+
 
                 if (scenarioLv == 1){
                     // lv1: 각 단계 공격 여부
                     for(let i = 0; i <= 13; i++){
-                        if(Object.values(config.SCENARIO1.attacks[i]).length == 0){
-                            attacks[i] =  false;
+                        if(Object.values(config["SCENARIO" + data.scenario].attacks[i]).length == 0){
+                            attackHint[i] =  false;
                         }else{
-                            attacks[i] =  true;
+                            attackHint[i] =  true;
                         }
                     }
-                    hintTotal['attacks'] = attacks;
+                    hintTotal['isAttacks'] = attackHint;
+                }
 
-                }else if(scenarioLv == 2){
+                if(scenarioLv >= 2){ // lv :2~5 적용
                     // lv2: 각 단계 공격 개수
                     for(let i = 0; i <= 13; i++){
-                        attacks[i] =  Object.values(config.SCENARIO1.attacks[i]).length;
+                        attackHint[i] =  Object.values(config.SCENARIO1.attacks[i]).length;
                     }
-                    hintTotal['attacks'] = attacks;
 
-                }else if(scenarioLv == 3){
-                    // lv3: 메인공격 여부
-                    // 각 단계 공격 개수
-                    for(let i = 0; i <= 13; i++){
-                        attacks[i] =  Object.values(config.SCENARIO1.attacks[i]).length;
-                    }
-                    hintTotal['attacks'] = attacks;
+                    hintTotal['attacksCnt'] = attackHint;
+                }
 
-                    // 메인 공격 개수 
-                    hintTotal['mainAttack']['totalCnt'] =  Object.values(config.SCENARIO1.mainAttack).length;
-                    // 메인 공격 여부
+                if(scenarioLv >= 3){
+                    // lv3: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
                     // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
-                    //hintTotal['mainAttack']['ingCnt'] 
 
-                }else if(scenarioLv == 4){
-                    // lv4: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
-                    // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
-                }else if(scenarioLv == 5){
+
+                }
+
+                if(scenarioLv >= 4){
+                    // lv4: 메인공격 공개
+                    // 메인 공격 
+                    hintTotal['mainAttack']=  Object.values(config.SCENARIO1.mainAttack);
+                }
+
+                if(scenarioLv == 5){
                     // lv5: 모든 공격, 화살표 공개
                     hintTotal = config.SCENARIO1;
                 }
