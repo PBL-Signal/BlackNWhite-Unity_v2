@@ -9,7 +9,8 @@ const Section = new Schema({
     suspicionCount : { type : Number, required : true },   // 회사 별 첫 취약점 공격 인덱스
     responseActive : { type : Array, required : true },
     attackProgress : { type : Array, required : true },
-    responseStep : { type : Number, required : true },   // 수행해야 할 관제 단계를 뜻함 (현재는 성공한 관제 단계 -> 추후 회의를 통해 정확한 사용 방법 정해야 됨)
+    responseProgress : { type : Array, required : true },
+    // responseStep : { type : Number, required : true },   // 수행해야 할 관제 단계를 뜻함 (현재는 성공한 관제 단계 -> 추후 회의를 통해 정확한 사용 방법 정해야 됨)
     //response : { type : progress, required : true },
     beActivated : { type : Array, required : true },
     responseActive : { type : Array, required : true },

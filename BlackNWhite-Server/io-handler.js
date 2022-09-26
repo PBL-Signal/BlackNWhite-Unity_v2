@@ -2354,7 +2354,7 @@ module.exports = (io) => {
                         level  : 1,
                         suspicionCount : 0,
                         attackProgress : [ [{ attackName: "Gather Victim Network Information", state: 1 }, { attackName: "Exploit Public-Facing Application", state: 1 }, { attackName: "Active Scanning", state: 1 }], [], [], [], [] ],
-                        responseStep : 0,
+                        responserogress : [[], [], [], [], []],
                         //response : progress,
                         beActivated : [],
                         responseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
