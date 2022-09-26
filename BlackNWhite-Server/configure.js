@@ -22,20 +22,20 @@ module.exports = {
     ATTACK_14 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Impact"},
 
     //대응
-    RESPONSE_1 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Reconnaissance"},
-    RESPONSE_2 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Resource Development"},
-    RESPONSE_3 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Initial Access"},
-    RESPONSE_4 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Execution"},
-    RESPONSE_5 : { pita : [3, 4, 5, 6, 7], time : [9, 7, 6, 5, 4], name : "Persistence"},
-    RESPONSE_6 : { pita : [3, 4, 5, 6, 7], time : [9, 7, 6, 5, 4], name : "Privilege Escalation"},
-    RESPONSE_7 : { pita : [2, 3, 4, 5, 6], time : [9, 7, 6, 5, 4], name : "Defense Evasion"},
-    RESPONSE_8 : { pita : [4, 5, 6, 7, 8], time : [9, 7, 6, 5, 4], name : "Credential Access"},
-    RESPONSE_9 : { pita : [2, 3, 4, 5, 6], time : [9, 7, 6, 5, 4], name : "Discovery"},
-    RESPONSE_10 : { pita : [2, 3, 4, 5, 6], time : [9, 7, 6, 5, 4], name : "Lateral Movement"},
-    RESPONSE_11 : { pita : [2, 3, 4, 5, 6], time : [9, 7, 6, 5, 4], name : "Collection"},
-    RESPONSE_12 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Command and Control"},
-    RESPONSE_13 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Exfiltration"},
-    RESPONSE_14 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Impact"},
+    DEFENSE_1 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Reconnaissance"},
+    DEFENSE_2 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Resource Development"},
+    DEFENSE_3 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Initial Access"},
+    DEFENSE_4 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Execution"},
+    DEFENSE_5 : { pita : [3, 4, 5, 6, 7], time : [9, 7, 6, 5, 4], name : "Persistence"},
+    DEFENSE_6 : { pita : [3, 4, 5, 6, 7], time : [9, 7, 6, 5, 4], name : "Privilege Escalation"},
+    DEFENSE_7 : { pita : [2, 3, 4, 5, 6], time : [9, 7, 6, 5, 4], name : "Defense Evasion"},
+    DEFENSE_8 : { pita : [4, 5, 6, 7, 8], time : [9, 7, 6, 5, 4], name : "Credential Access"},
+    DEFENSE_9 : { pita : [2, 3, 4, 5, 6], time : [9, 7, 6, 5, 4], name : "Discovery"},
+    DEFENSE_10 : { pita : [2, 3, 4, 5, 6], time : [9, 7, 6, 5, 4], name : "Lateral Movement"},
+    DEFENSE_11 : { pita : [2, 3, 4, 5, 6], time : [9, 7, 6, 5, 4], name : "Collection"},
+    DEFENSE_12 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Command and Control"},
+    DEFENSE_13 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Exfiltration"},
+    DEFENSE_14 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Impact"},
     
     // 관제 시간
     MONITORING_1 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Reconnaissance"},
@@ -165,7 +165,7 @@ module.exports = {
             'Exfiltration Over Web Service' : ["Data Encrypted for Impact"]
         }
 
-    }
+    },
     // SCENARIO1 :{
     //     'attacks': {
     //         '0': [[0,3]],
@@ -209,5 +209,26 @@ module.exports = {
     //     }
 
     // }
+
+
+    ATTACK_CATEGORY : ["Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion",
+                        "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"],
+
+    ATTACK_TECHNIQUE : [
+        ["Active Scanning", "Gather Victim Host Information", "Gather Victim Identity Information", "Gather Victim Network Information", "Gather Victim Org Information", "Phishing for Information", "Search Closed Sources", "Search Open Technical Databases", "	Search Open Websites/Domains", "Search Victim-Owned Websites"],
+        ["Acquire Infrastructure", "Compromise Accounts", "Compromise Infrastructure", "Develop Capabilities", "Establish Accounts", "Obtain Capabilities", "Stage Capabilities"],
+        ["Drive-by Compromise", "Exploit Public-Facing Application", "External Remote Services", "Hardware Additions", "Phishing", "Replication Through Removable Media", "Supply Chain Compromise", "Trusted Relationship", "Valid Accounts"],
+        ["Command and Scripting Interpreter", "Container Administration Command", "Deploy Container", "Exploitation for Client Execution", "Inter-Process Communication", "Native API", "Scheduled Task/Job", "Shared Modules", "Software Deployment Tools", "System Services", "User Execution", "Windows Management Instrumentation"],
+        ["Account Manipulation", "BITS Jobs", "Boot or Logon Autostart Execution", "Boot or Logon Initialization Scripts", "Browser Extensions", "Compromise Client Software Binary", "Create Account", "Create or Modify System Process", "Event Triggered Execution", "External Remote Services", "Hijack Execution Flow", "Implant Internal Image", "Modify Authentication Process", "Office Application Startup", "Pre-OS Boot", "Scheduled Task/Job", "Server Software Component", "Traffic Signaling", "Valid Accounts"],
+        ["Abuse Elevation Control Mechanism", "Access Token Manipulation", "Boot or Logon Autostart Execution", "Boot or Logon Initialization Scripts", "Create or Modify System Process", "Domain Policy Modification", "Escape to Host", "Event Triggered Execution", "Exploitation for Privilege Escalation", "Hijack Execution Flow", "Process Injection", "Scheduled Task/Job", "Valid Accounts"],
+        ["Abuse Elevation Control Mechanism", "Access Token Manipulation", "BITS Jobs", "Build Image on Host", "Debugger Evasion", "Deobfuscate/Decode Files or Information", "Deploy Container", "Direct Volume Access", "Domain Policy Modification", "Execution Guardrails", "Exploitation for Defense Evasion", "File and Directory Permissions Modification", "Hide Artifacts", "Hijack Execution Flow", "Impair Defenses", "Indicator Removal on Host", "Indirect Command Execution", "Masquerading", "Modify Authentication Process", "Modify Cloud Compute Infrastructure", "Modify Registry", "Modify System Image", "Network Boundary Bridging", "Obfuscated Files or Information", "Plist File Modification", "Pre-OS Boot", "Process Injection", "Reflective Code Loading", "Rogue Domain Controller", "Rootkit", "Subvert Trust Controls", "System Binary Proxy Execution", "System Script Proxy Execution", "Template Injection", "Traffic Signaling", "Trusted Developer Utilities Proxy Execution", "Unused/Unsupported Cloud Regions", "Use Alternate Authentication Material", "Valid Accounts", "Virtualization/Sandbox Evasion", "Weaken Encryption", "XSL Script Processing"],
+        ["Adversary-in-the-Middle", "Brute Force", "Credentials from Password Stores", "Exploitation for Credential Access", "Forced Authentication", "Forge Web Credentials", "Input Capture", "Modify Authentication Process", "Multi-Factor Authentication Interception", "Multi-Factor Authentication Request Generation", "Network Sniffing", "OS Credential Dumping", "Steal Application Access Token", "Steal or Forge Kerberos Tickets", "Steal Web Session Cookie", "Unsecured Credentials"],
+        ["Account Discovery", "Application Window Discovery", "Browser Bookmark Discovery", "Cloud Infrastructure Discovery", "Cloud Service Dashboard", "Cloud Service Discovery", "Cloud Storage Object Discovery", "Container and Resource Discovery", "Debugger Evasion", "Domain Trust Discovery", "File and Directory Discovery", "Group Policy Discovery", "Network Service Discovery", "Network Share Discovery", "Network Sniffing", "Password Policy Discovery", "Peripheral Device Discovery", "Permission Groups Discovery", "Process Discovery", "Process Discovery", "Query Registry", "Remote System Discovery", "Software Discovery", "System Information Discovery", "System Location Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner/User Discovery", "System Service Discovery", "System Time Discovery", "Virtualization/Sandbox Evasion"],
+        ["Exploitation of Remote Services", "Internal Spearphishing", "Lateral Tool Transfer", "Remote Service Session Hijacking", "Remote Services", "Replication Through Removable Media", "Software Deployment Tools", "Taint Shared Content", "Use Alternate Authentication Material"],
+        ["Adversary-in-the-Middle", "Archive Collected Data", "Audio Capture", "Automated Collection", "Browser Session Hijacking", "Clipboard Data", "Data from Cloud Storage Object", "Data from Configuration Repository", "Data from Information Repositories", "Data from Local System", "Data from Network Shared Drive", "Data from Removable Media", "Data Staged", "Email Collection", "Input Capture", "Screen Capture", "Video Capture"],
+        ["Application Layer Protocol", "Communication Through Removable Media", "Data Encoding", "Data Obfuscation", "Dynamic Resolution", "Encrypted Channel", "Fallback Channels", "Ingress Tool Transfer", "Multi-Stage Channels", "Non-Application Layer Protocol", "Non-Standard Port", "Protocol Tunneling", "Proxy", "Remote Access Software", "Traffic Signaling", "Web Service"],
+        ["Automated Exfiltration", "Data Transfer Size Limits", "Exfiltration Over Alternative Protocol", "Exfiltration Over C2 Channel", "Exfiltration Over Other Network Medium", "Exfiltration Over Physical Medium", "Exfiltration Over Web Service", "Scheduled Transfer", "Transfer Data to Cloud Account"],
+        ["Account Access Removal", "Data Destruction", "Data Encrypted for Impact", "Data Manipulation", "Defacement", "Disk Wipe", "Endpoint Denial of Service", "Firmware Corruption", "Inhibit System Recovery", "Network Denial of Service", "Resource Hijacking", "Service Stop", "System Shutdown/Reboot"]
+    ]
   
 }
