@@ -1553,8 +1553,26 @@ module.exports = (io) => {
                 console.log("white team upgrade attack card");
                 roomTotalJson[0][companyName]["penetrationTestingLV"][categoryIndex] += 1;
             }
+            
+            var sectionAttackProgressArr = roomTotalJson[0][companyName].sections[section].attackProgress;
+            console.log("sectionAttackProgressArr : ", sectionAttackProgressArr);
 
+            var alreadyAttackList = [];
             for(var i = 0; i < techniqueBeActivationList.length; i++){ 
+                if (techniqueActivation[categoryIndex][techniqueBeActivationList[i]] == 2) {
+                    // 0 나중에 시나리오 인덱스로 변경할 것
+                    // sectionAttackProgressArr = sectionAttackProgressArr[senarioIndex].filter(function(progress){
+                        sectionAttackProgressArr = sectionAttackProgressArr[0].filter(function(progress){
+                        return progress.tactic != config.ATTACK_CATEGORY[categoryIndex] && progress.attackName != config.ATTACK_TECHNIQUE[categoryIndex][techniqueBeActivationList[i]];
+                    });
+                    console.log("sectionAttackProgressArr : ", sectionAttackProgressArr);
+                    console.log("sectionAttackProgressArr[0].state : ", sectionAttackProgressArr[0].state);
+
+                    var attackJson = {category : categoryIndex, technique : techniqueBeActivationList[i], cooltime : config["DEFENSE_" + (categoryIndex + 1)]["time"][techniqueLevel[categoryIndex][techniqueBeActivationList[i]]],
+                                        state : sectionAttackProgressArr[0].state, level : techniqueLevel[categoryIndex][techniqueBeActivationList[i]]};
+                    alreadyAttackList.push(attackJson);
+                }
+
                 techniqueActivation[categoryIndex][techniqueBeActivationList[i]] = 1;
             }
 
@@ -1563,6 +1581,12 @@ module.exports = (io) => {
 
             socket.emit("Get Technique", companyName, techniqueActivation, techniqueLevel);
             socket.emit("Get Tactic Level", companyName, tacticLevel);
+
+            // 여러 공격도 처리될 수 있도록 하기
+            for (var i = 0; i < alreadyAttackList.length; i++) {
+                DefenseCooltime(socket, alreadyAttackList[i].state, companyName, section, 0, alreadyAttackList[i].category, alreadyAttackList[i].technique, alreadyAttackList[i].level);
+                socket.emit('Start Defense', companyName, section, alreadyAttackList[i].category, alreadyAttackList[i].technique, alreadyAttackList[i].cooltime);
+            }
 
             await jsonStore.updatejson(roomTotalJson[0], socket.room);
             roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
@@ -1892,7 +1916,6 @@ module.exports = (io) => {
                     if(startAttackArr.includes(attackName)) { // startkAttack인 경우 공격 리스트에 추가  & 사전대응 시작
                         var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
                         let newArrCount = sectionAttackProgressArr[i].push(newInfo);
-                        await jsonStore.updatejson(roomTotalJson[0], socket.room);
                         console.log(sectionAttackProgressArr[i]);
                         AttackCoolTime(socket, corpName, sectionIdx, i, (newArrCount-1), taticIdx, attackLv);
 
@@ -1904,13 +1927,21 @@ module.exports = (io) => {
                         console.log("attackName : ", attackName);
                         console.log("techniqueIndex : ", techniqueIndex);
                         console.log("sectionDefenseActivationArr[tacticIndex][techniqueIndex] : ", sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
+
                         if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
                             sectionDefenseProgressArr[i].push(newInfo);
-                            console.log("sectionDefenseProgressArr : ", sectionDefenseProgressArr);
+                            console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
                             // 0은 나중에 시나리오 인덱스로 변경
                             DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
                             socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+                        } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
+                            sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
+                            let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
+                            socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
+                            console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
                         }
+
+                        await jsonStore.updatejson(roomTotalJson[0], socket.room);
                     }                    
 
 
@@ -1932,7 +1963,6 @@ module.exports = (io) => {
                             if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가 & 사전대응 시작
                                 var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
                                 let newArrCount = sectionAttackProgressArr[i].push(newInfo);
-                                await jsonStore.updatejson(roomTotalJson[0], socket.room);
                                 console.log(sectionAttackProgressArr[i]);
                                 AttackCoolTime(socket, corpName, sectionIdx, i, (newArrCount-1), taticIdx, attackLv);
 
@@ -1946,7 +1976,15 @@ module.exports = (io) => {
                                     DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
                                     socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
                                     console.log("start defense time : ", config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+                                } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
+                                    // 해당 공격이 비활성화인 상태에서 공격이 수행된 경우
+                                    sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
+                                    let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
+                                    socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
+                                    console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
                                 }
+
+                                await jsonStore.updatejson(roomTotalJson[0], socket.room);
                             }
                         }
                     }
