@@ -1952,8 +1952,7 @@ module.exports = (io) => {
                 }
             }
 
-            // await jsonStore.updatejson(roomTotalJson[0], socket.room);
-            
+            //await jsonStore.updatejson(roomTotalJson[0], socket.room);
         });
 // ###################################################################################################################
         
@@ -2526,6 +2525,11 @@ module.exports = (io) => {
             if(sectionAttackProgressArr[senarioIdx][attackIdx].state == 1) {
                 sectionAttackProgressArr[senarioIdx][attackIdx].state = 2;
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+                const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
+               
+                var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress[0];
+                console.log("test: ", sectionAttackProgressArr2);
             }
 
            
