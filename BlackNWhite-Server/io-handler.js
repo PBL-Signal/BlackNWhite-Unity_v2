@@ -1458,8 +1458,10 @@ module.exports = (io) => {
                     console.log("black team upgrade attack card");
                     roomTotalJson[0][companyName]["attackLV"][attackIndex] += 1;
 
-                    socket.to(socket.room + socket.team).emit("Get Tactic Level", companyName, roomTotalJson[0][companyName]["attackLV"][attackIndex]);
-                    socket.emit("Get Tactic Level", companyName, roomTotalJson[0][companyName]["attackLV"][attackIndex]);
+                    console.log("black team tactic upgrade : ", roomTotalJson[0][companyName]["attackLV"]);
+
+                    socket.to(socket.room + socket.team).emit("Get Tactic Level", companyName, roomTotalJson[0][companyName]["attackLV"]);
+                    socket.emit("Get Tactic Level", companyName, roomTotalJson[0][companyName]["attackLV"]);
                 }
 
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
@@ -2372,9 +2374,9 @@ module.exports = (io) => {
                         attackProgress : [ [{tactic: 'Reconnaissance',attackName: 'Gather Victim Network Information',state: 2}], [], [], [], [] ],
                         defenseProgress : [[], [], [], [], []],
                         beActivated : [],
-                        defenseActive: [[1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                        defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2537,8 +2539,6 @@ module.exports = (io) => {
             clearTimeout(attackTime);
 
         }, config["ATTACK_" + (taticIdx + 1)]["time"][attackLv] * 1000);
-        
-        
     }
 
     // Defense 쿨타임
