@@ -69,9 +69,7 @@ module.exports = (io) => {
     let evenNumPlayer = false;
     let numPlayer = 1;
     let companyNameList = ["companyA", "companyB", "companyC", "companyD", "companyE"];
-    let sectionNames = [["Area_DMZ", "Area_Interal", "Area_Sec"], ["Area_DMZ", "Area_Interal", "Area_Sec"],["Area_DMZ", "Area_Interal", "Area_Sec"],["Area_DMZ", "Area_Interal", "Area_Sec"],["Area_DMZ", "Area_Interal", "Area_Sec"]];
-    let vulnArray = ["Reconnaissance", "Credential Access", "Discovery", "Collection"];      
-    let attack_name_list = ["Reconnaissance", "Credential Access", "Discovery", "Collection", "Resource Development", "Initial Access", "Execution", "Privilege Escalation", "Persistence", "Defense Evasion", "Command and Control", "Exfiltration", "Impact"];      
+    let taticNamesList = ["Reconnaissance", "Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"];
 
     let timerId;
     let pitaTimerId;
@@ -1859,18 +1857,21 @@ module.exports = (io) => {
 
 // ===================================================================================================================
 
-        // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행
+        // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행 + 사전대응
         socket.on('check_scenario_conn', async(data, attackName, tacticName) => {
             attackName = "Phishing";
             tacticName = "Initial Access";
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             data = JSON.parse(data);
             var corpName = data.Corp;
             var sectionIdx = data.areaIdx;
-
-            // console.log(roomTotalJson[0][corpName].sections[sectionIdx].attackProgress);
+            var taticIdx = taticNamesList.indexOf(tacticName);
             var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+            var attackLv = roomTotalJson[0][corpName].attackLV[taticIdx];
+            
+
+            // 대응
             var sectionDefenseProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress;
             var sectionDefenseActivationArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseActive;
             var defenseLv = roomTotalJson[0][corpName].sections[sectionIdx].defenseLv;
@@ -1880,15 +1881,17 @@ module.exports = (io) => {
                 var scenarioName = "SCENARIO" + (i+1);
 
                 // 진행된 공격이 없는 경우 -> startkAttack인지 확인 -> 공격 리스트에 바로 추가
-                if(sectionAttackProgressArr[i].length <= 0){ 
-                    console.log("if1");
-                    var startAttackArr = (Object.values(config[scenarioName].startAttack)); // startkAttack인지 확인
+                if(sectionAttackProgressArr[i].length <= 0){
+                    var startAttackArr = (Object.values(config[scenarioName].startAttack));
                     
-                    if(startAttackArr.includes(attackName)) { // 공격 리스트에 추가
+                    if(startAttackArr.includes(attackName)) { // startkAttack인 경우 공격 리스트에 추가  & 사전대응 시작
                         var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
-                        sectionAttackProgressArr[i].push(newInfo);
+                        let newArrCount = sectionAttackProgressArr[i].push(newInfo);
+                        await jsonStore.updatejson(roomTotalJson[0], socket.room);
                         console.log(sectionAttackProgressArr[i]);
+                        AttackCoolTime(socket, corpName, sectionIdx, i, (newArrCount-1), taticIdx, attackLv);
 
+                        // 대응
                         var tacticIndex = config.ATTACK_CATEGORY.indexOf(tacticName);
                         var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackName);
                         console.log("tacticName : ", tacticName);
@@ -1917,17 +1920,18 @@ module.exports = (io) => {
 
                         var attacksArr;
                         if(config[scenarioName].attackConn[checkLastAttack] == null) { // attackConn 확인
-                            console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
+                            console.log(i, k, "시나리오에 해당되는 공격 아님 또는 메인 공격임");
                         } else {
-                            console.log("if2-1");
                             attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
-                            console.log(attacksArr);
-                            if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가
-                                console.log("if2-2");
+                            console.log(i, k, attacksArr);
+                            if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가 & 사전대응 시작
                                 var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
-                                sectionAttackProgressArr[i].push(newInfo);
+                                let newArrCount = sectionAttackProgressArr[i].push(newInfo);
+                                await jsonStore.updatejson(roomTotalJson[0], socket.room);
                                 console.log(sectionAttackProgressArr[i]);
+                                AttackCoolTime(socket, corpName, sectionIdx, i, (newArrCount-1), taticIdx, attackLv);
 
+                                // 대응
                                 var tacticIndex = config.ATTACK_CATEGORY.indexOf(tacticName);
                                 var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackName);
                                 if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
@@ -1942,29 +1946,10 @@ module.exports = (io) => {
                         }
                     }
 
-
-                    // var checkLastAttack = sectionAttackProgress[i][sectionAttackProgress[i].length - 1].attackName; // 마지막 공격
-
-                    // var attacksArr;
-                    // if(config[scenarioName].attackConn[checkLastAttack] == null) {
-                    //     console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
-                    // } else {
-                    //     console.log("if2-1");
-                    //     attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
-                    //     console.log(attacksArr);
-                    //     if(attacksArr.includes(attackName)){
-                    //         console.log("if2-2");
-                    //         var newInfo = { attackName: "test", state: 1 }; 
-                    //         sectionAttackProgress[i].push(newInfo);
-                    //         console.log(sectionAttackProgress[i]);
-                    //     }
-                    // }
-
-
                 }
             }
 
-            await jsonStore.updatejson(roomTotalJson[0], socket.room);
+            // await jsonStore.updatejson(roomTotalJson[0], socket.room);
             
         });
 // ###################################################################################################################
@@ -2382,7 +2367,7 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackProgress : [ [{ tactic: "Reconnaissance", attackName: "Gather Victim Network Information", state: 2 }, { tactic: "Reconnaissance", attackName: "Exploit Public-Facing Application", state: 2 }, { tactic: "Reconnaissance", attackName: "Active Scanning", state: 1 } ], [], [], [], [] ],
+                        attackProgress : [ [{tactic: 'Reconnaissance',attackName: 'Gather Victim Network Information',state: 2}], [], [], [], [] ],
                         defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -2523,6 +2508,30 @@ module.exports = (io) => {
         };
       
         return RoomTotalJson
+    }
+
+    // Attack 쿨타임
+    function AttackCoolTime(socket, corpName, sectionIdx, senarioIdx, attackIdx, taticIdx, attackLv){
+        console.log("타이머 시작", taticIdx, attackLv);
+        var attackTime = setTimeout(async function(){
+            console.log("attack 쿨타임 종료 - 서버");
+
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+
+            console.log(sectionAttackProgressArr[senarioIdx][attackIdx].attackName, sectionAttackProgressArr[senarioIdx][attackIdx].state);
+            if(sectionAttackProgressArr[senarioIdx][attackIdx].state == 1) {
+                sectionAttackProgressArr[senarioIdx][attackIdx].state = 2;
+                await jsonStore.updatejson(roomTotalJson[0], socket.room);
+            }
+
+           
+
+            clearTimeout(attackTime);
+
+        }, config["ATTACK_" + (taticIdx + 1)]["time"][attackLv] * 1000);
+        
+        
     }
 
     // Defense 쿨타임
