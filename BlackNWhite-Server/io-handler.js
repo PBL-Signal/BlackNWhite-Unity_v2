@@ -1224,10 +1224,25 @@ module.exports = (io) => {
                     scenarioLv : scenarioLv
                 };
 
-                var attackHint = []
+                var attackHint = [];
                 var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackProgress[data.scenario];
+                
+                var progressAtt = [];
 
+                // 단계 1. 현재 진행된 (state 2) 공격 뽑기
+                sectionAttProgSenario.forEach((value, index, array) => {
+                    console.log(`${index} : ${value.state} ${value.attackName}`); 
+                    if(value.state==2){
+                        var attIdx = config.ATTACK_CATEGORY_DICT[value.tactic];
+                    //    progressAtt[attIdx] = [value.attackName]; // 중복 들어가면 어쩌지
+                        progressAtt.push    ({'attIdx' : attIdx, 'attack' : value.attackName});
+                    }
+                });
 
+                sectScenarioHint['progressAtt'] = progressAtt;
+                console.log(`sectScenarioHint : ` + progressAtt); 
+
+                // 단계 2. 레벨별 힌트 저장 
                 if (scenarioLv == 1){ // 완료
                     // lv1: 각 단계 공격 여부
                     for(let i = 0; i <= 13; i++){
@@ -1251,28 +1266,35 @@ module.exports = (io) => {
 
                 if(scenarioLv >= 3){
                     // lv3: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
-                    // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
+                    var progAttackConn = {};
+                    // 현재 완료된 공격 불러와서 연결된 공격 저장 
+                    for (const attack of progressAtt){
+                        // progAttackConn[attack.attack] = 
+                        // {
+                        //     'category' : config.ATTACK_CATEGORY_DICT[attack.attIdx],
+                        //     'attack' :   config.SCENARIO1.attackConn[attack.attack]
+                        // }
+                        progAttackConn[attack.attack] = config.SCENARIO1.attackConn[attack.attack];
                     
+                 
+                    }
 
+                    sectScenarioHint['progAttackConn'] = progAttackConn;
                 }
 
-                if(scenarioLv >= 4){ // 완료
-                    // lv4: 메인공격 공개
-                    // 메인 공격 
-                    sectScenarioHint['mainAttack']=  config["SCENARIO" +scenarioNum].mainAttack;
-                }
-
-                if(scenarioLv == 5){ 
-                    // lv5: 모든 공격, 화살표 공개
+                if(scenarioLv >= 4){ 
+                    // lv4: 모든 공격, 화살표 공개
                     // hintTotal = config.SCENARIO1;
                     sectScenarioHint['attacks']=  config["SCENARIO" +scenarioNum].attacks;
                     sectScenarioHint['attackConn'] = config["SCENARIO" +scenarioNum].attackConn;
                 }
+
+                if(scenarioLv >= 5){ // 완료
+                    // lv5: 메인공격 공개
+                    // 메인 공격 
+                    sectScenarioHint['mainAttack'] = config["SCENARIO" +scenarioNum].mainAttack;
+                }
             }
-
-            // 전에 진행된 공격 중에 연결된 공격이 있다면 넣기
-            // <<TODO>> -- 현재 진행된 공격 스키마 정해지면 개발
-
 
             // 힌트 보내기
             let sectScenarioHintJson = JSON.stringify(sectScenarioHint);
@@ -2409,7 +2431,7 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackProgress : [ [{tactic: 'Reconnaissance',attackName: 'Gather Victim Network Information',state: 2}], [], [], [], [] ],
+                        attackProgress : [ [{tactic: 'Reconnaissance',attackName: 'Gather Victim Network Information',state: 2}, {tactic: 'Initial Access',attackName: 'Exploit Public-Facing Application',state: 2},{tactic: 'Initial Access',attackName: 'Phishing',state: 2}], [], [], [], [] ],
                         defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

@@ -213,6 +213,9 @@ module.exports = {
 
     // }
 
+    ATTACK_CATEGORY_DICT : {"Reconnaissance" : 0, "Resource Development" : 1, "Initial Access" : 2, "Execution" : 3, "Persistence" : 4 , "Privilege Escalation" : 5 , "Defense Evasion" : 6,
+    "Credential Access" :7, "Discovery" : 8, "Lateral Movement" :  9, "Collection" : 10, "Command and Control" : 11, "Exfiltration" : 12, "Impact" : 13},
+
 
     ATTACK_CATEGORY : ["Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion",
                         "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"],
