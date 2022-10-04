@@ -1225,18 +1225,19 @@ module.exports = (io) => {
                 };
 
                 var attackHint = [];
-                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackProgress[data.scenario];
+                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackSenarioProgress[data.scenario];
                 
                 var progressAtt = [];
 
                 // 단계 1. 현재 진행된 (state 2) 공격 뽑기
+                // 수정 ver. state 2인건 뺌
                 sectionAttProgSenario.forEach((value, index, array) => {
-                    console.log(`${index} : ${value.state} ${value.attackName}`); 
-                    if(value.state==2){
+                    console.log(`${index} :  ${value.attackName}`); 
+                    // if(value.state==2){
                         var attIdx = config.ATTACK_CATEGORY_DICT[value.tactic];
                     //    progressAtt[attIdx] = [value.attackName]; // 중복 들어가면 어쩌지
                         progressAtt.push    ({'attIdx' : attIdx, 'attack' : value.attackName});
-                    }
+                    // }
                 });
 
                 sectScenarioHint['progressAtt'] = progressAtt;
