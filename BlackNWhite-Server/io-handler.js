@@ -2660,7 +2660,7 @@ module.exports = (io) => {
         var attackTime = setTimeout(async function(){
             console.log("attack 쿨타임 종료 - 서버");
 
-            let prob = config["DEFENSE_" + (tacticIdx + 1)]["success"][attackLv] * 0.01;
+            let prob = config["ATTACK_" + (tacticIdx + 1)]["success"][attackLv] * 0.01;
             let percent = Math.random();
 
             console.log("prob : ", prob, ", percent : ", percent); 
