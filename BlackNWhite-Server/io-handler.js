@@ -1916,9 +1916,9 @@ module.exports = (io) => {
             data = JSON.parse(data);
             var corpName = data.Corp;
             var sectionIdx = data.areaIdx;
-            var taticIdx = taticNamesList.indexOf(tacticName);
+            var tacticIdx = taticNamesList.indexOf(tacticName);
             var attackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
-            var attackLv = roomTotalJson[0][corpName].attackLV[taticIdx];
+            var attackLv = roomTotalJson[0][corpName].attackLV[tacticIdx];
 
             // 공격 중복 확인
             var overlap = false;
@@ -1939,7 +1939,7 @@ module.exports = (io) => {
                 console.log(attackProgressArr);
 
                 // 쿨타임 및 state 2로 변경
-                AttackCoolTime(socket, corpName, sectionIdx, (newArrCount-1), taticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, taticIdx, attackLv, tacticName, attackName)
+                AttackCoolTime(socket, corpName, sectionIdx, (newArrCount-1), tacticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName)
 
             }
         });
