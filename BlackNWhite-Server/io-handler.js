@@ -2403,7 +2403,22 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]] // 방어 횟수 
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
+                        attackConn : {
+                            'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
+                            'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
+                            'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
+                            'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
+                            'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                            'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                            'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
+                            'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                            'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
+                            'Indirect Command Execution' : {"Brute Force": false},
+                            'Screen Capture' : {"Communication Through Removable Media": false},
+                            'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
+                            'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                            }
                     }),
     
                     new Section({
@@ -2444,7 +2459,22 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
-                        defenseCnt : [] // 방어 횟수 
+                        defenseCnt : [], // 방어 횟수 ,
+                        attackConn : {
+                            'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
+                            'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
+                            'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
+                            'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
+                            'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                            'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                            'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
+                            'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                            'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
+                            'Indirect Command Execution' : {"Brute Force": false},
+                            'Screen Capture' : {"Communication Through Removable Media": false},
+                            'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
+                            'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                            }
                     }),
     
                     new Section({
@@ -2485,7 +2515,22 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
-                        defenseCnt : [] // 방어 횟수 
+                        defenseCnt : [], // 방어 횟수
+                        attackConn : {
+                            'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
+                            'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
+                            'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
+                            'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
+                            'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                            'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                            'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
+                            'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                            'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
+                            'Indirect Command Execution' : {"Brute Force": false},
+                            'Screen Capture' : {"Communication Through Removable Media": false},
+                            'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
+                            'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                            } 
                     }),
                 ]
             });
