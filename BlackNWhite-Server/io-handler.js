@@ -1225,18 +1225,19 @@ module.exports = (io) => {
                 };
 
                 var attackHint = [];
-                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackProgress[data.scenario];
+                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackSenarioProgress[data.scenario];
                 
                 var progressAtt = [];
 
                 // 단계 1. 현재 진행된 (state 2) 공격 뽑기
+                // 수정 ver. state 2인건 뺌
                 sectionAttProgSenario.forEach((value, index, array) => {
-                    console.log(`${index} : ${value.state} ${value.attackName}`); 
-                    if(value.state==2){
+                    console.log(`${index} :  ${value.attackName}`); 
+                    // if(value.state==2){
                         var attIdx = config.ATTACK_CATEGORY_DICT[value.tactic];
                     //    progressAtt[attIdx] = [value.attackName]; // 중복 들어가면 어쩌지
                         progressAtt.push    ({'attIdx' : attIdx, 'attack' : value.attackName});
-                    }
+                    // }
                 });
 
                 sectScenarioHint['progressAtt'] = progressAtt;
@@ -1942,6 +1943,159 @@ module.exports = (io) => {
 
             }
         });
+<<<<<<< HEAD
+=======
+
+        // // [Attack Matrix] 선택한 공격 각 시나리오에 연결되는지 확인 -> 공격 프로세스 진행 + 사전대응
+        // socket.on('check_scenario_conn', async(data, attackName, tacticName) => {
+        //     attackName = "Phishing";
+        //     tacticName = "Initial Access";
+
+        //     const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+        //     data = JSON.parse(data);
+        //     var corpName = data.Corp;
+        //     var sectionIdx = data.areaIdx;
+        //     var taticIdx = taticNamesList.indexOf(tacticName);
+        //     var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+        //     var attackLv = roomTotalJson[0][corpName].attackLV[taticIdx];
+            
+
+        //     // 대응
+        //     var sectionDefenseProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress;
+        //     var sectionDefenseActivationArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseActive;
+        //     var defenseLv = roomTotalJson[0][corpName].sections[sectionIdx].defenseLv;
+
+        //     // for(var i=0; i<sectionAttackProgressArr.length; i++){
+        //     for(var i=0; i<1; i++){
+        //         var scenarioName = "SCENARIO" + (i+1);
+        //         console.log(scenarioName);
+
+        //         // 진행된 공격이 없는 경우 -> startkAttack인지 확인 -> 공격 리스트에 바로 추가
+        //         if(sectionAttackProgressArr[i].length <= 0){
+        //             var startAttackArr = (Object.values(config[scenarioName].startAttack));
+                    
+        //             if(startAttackArr.includes(attackName)) { // startkAttack인 경우 공격 리스트에 추가  & 사전대응 시작
+                        
+        //                 // 공격 이름 중복 확인
+        //                 var overlap = false;
+        //                 console.log("sectionAttackProgressArr >> ", sectionAttackProgressArr[i]);
+        //                 sectionAttackProgressArr[i].forEach(element => {
+        //                     console.log(element);
+        //                     console.log(element.attackName);
+        //                     console.log(attackName);
+        //                     console.log(element.attackName == attackName);
+        //                     if(element.attackName == attackName) {
+        //                         overlap = true;
+        //                         console.log("공격 중복");
+        //                         return false;
+        //                     }
+        //                 });
+
+        //                 if(!overlap) {
+        //                     var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
+        //                     let newArrCount = sectionAttackProgressArr[i].push(newInfo);
+        //                     await jsonStore.updatejson(roomTotalJson[0], socket.room);
+        //                     console.log(sectionAttackProgressArr[i]);
+        //                     AttackCoolTime(socket, corpName, sectionIdx, i, (newArrCount-1), taticIdx, attackLv);
+
+        //                     // 대응
+        //                     var tacticIndex = config.ATTACK_CATEGORY.indexOf(tacticName);
+        //                     var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackName);
+        //                     console.log("tacticName : ", tacticName);
+        //                     console.log("tacticIndex : ", tacticIndex);
+        //                     console.log("attackName : ", attackName);
+        //                     console.log("techniqueIndex : ", techniqueIndex);
+        //                     console.log("sectionDefenseActivationArr[tacticIndex][techniqueIndex] : ", sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
+
+        //                     if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
+        //                         sectionDefenseProgressArr[i].push(newInfo);
+        //                         console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
+        //                         // 0은 나중에 시나리오 인덱스로 변경
+        //                         DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
+        //                         socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+        //                     } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
+        //                         sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
+        //                         let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
+        //                         socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
+        //                         console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
+        //                     }
+        //                     await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+        //                 }
+                        
+        //             }                    
+
+
+        //         // 진행된 공격이 있는 경우 -> 마지막 공격부터 conn을 확인 -> 해당되는 경우 공격 리스트에 추가    
+        //         } else { 
+        //             console.log("if2");
+        //             for(var k=sectionAttackProgressArr[i].length - 1; k>=0; k--){
+        //                 var checkLastAttack;
+        //                 if(sectionAttackProgressArr[i][k].state == 2) {
+        //                     checkLastAttack = sectionAttackProgressArr[i][k].attackName;
+        //                 }
+
+        //                 var attacksArr;
+        //                 if(config[scenarioName].attackConn[checkLastAttack] == null) { // attackConn 확인
+        //                     console.log(i, k, "시나리오에 해당되는 공격 아님 또는 메인 공격임");
+        //                 } else {
+        //                     attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
+        //                     console.log(i, k, attacksArr);
+        //                     if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가 & 사전대응 시작
+
+        //                         // 공격 이름 중복 확인
+        //                         var overlap = false;
+        //                         console.log("sectionAttackProgressArr >> ", sectionAttackProgressArr[i]);
+        //                         sectionAttackProgressArr[i].forEach(element => {
+        //                             console.log(element);
+        //                             console.log(element.attackName);
+        //                             console.log(attackName);
+        //                             console.log(element.attackName == attackName);
+        //                             if(element.attackName == attackName) {
+        //                                 overlap = true;
+        //                                 console.log("공격 중복");
+        //                                 return false;
+        //                             }
+        //                         });
+
+        //                         if(!overlap) {
+        //                             var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
+        //                             let newArrCount = sectionAttackProgressArr[i].push(newInfo);
+        //                             await jsonStore.updatejson(roomTotalJson[0], socket.room);
+        //                             console.log(sectionAttackProgressArr[i]);
+        //                             AttackCoolTime(socket, corpName, sectionIdx, i, (newArrCount-1), taticIdx, attackLv);
+
+        //                             // 대응
+        //                             var tacticIndex = config.ATTACK_CATEGORY.indexOf(tacticName);
+        //                             var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackName);
+        //                             if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
+        //                                 sectionDefenseProgressArr[i].push(newInfo);
+        //                                 console.log("sectionDefenseProgressArr : ", sectionDefenseProgressArr);
+        //                                 // 0은 나중에 시나리오 인덱스로 변경
+        //                                 DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
+        //                                 socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+        //                                 console.log("start defense time : ", config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+        //                             } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
+        //                                 // 해당 공격이 비활성화인 상태에서 공격이 수행된 경우
+        //                                 sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
+        //                                 let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
+        //                                 socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
+        //                                 console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
+        //                             }
+
+        //                             await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+        //                         }
+        //                     }
+        //                 }
+        //             }
+
+        //         }
+        //     }
+
+        //     //await jsonStore.updatejson(roomTotalJson[0], socket.room);
+        // });
+>>>>>>> 61af5f722dc1872ae04d196e50356ecfa6568840
 // ###################################################################################################################
         
         socket.on('disconnect', async function() {
@@ -2504,29 +2658,51 @@ module.exports = (io) => {
     }
 
     // Attack 쿨타임
+<<<<<<< HEAD
     function AttackCoolTime(socket, corpName, sectionIdx, attackIdx, taticIdx, attackLv, tacticName, attackName){
         console.log("타이머 시작", taticIdx, attackLv);
+=======
+    function AttackCoolTime(socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, attackName){
+        console.log("타이머 시작", tacticIdx, attackLv);
+>>>>>>> 61af5f722dc1872ae04d196e50356ecfa6568840
         var attackTime = setTimeout(async function(){
             console.log("attack 쿨타임 종료 - 서버");
 
-            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var attackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+            let prob = config["ATTACK_" + (tacticIdx + 1)]["success"][attackLv] * 0.01;
+            let percent = Math.random();
 
-            // 쿨타임 종료 -> state 2로 변경
-            console.log(attackProgressArr[attackIdx].attackName, attackProgressArr[attackIdx].state);
-            if(attackProgressArr[attackIdx].state == 1) {
-                attackProgressArr[attackIdx].state = 2;
-                await jsonStore.updatejson(roomTotalJson[0], socket.room);
+            console.log("prob : ", prob, ", percent : ", percent); 
 
-                const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
-                var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
-                console.log("test: ", sectionAttackProgressArr2);
+            // 공격 성공
+            if (prob >= percent) {
+                let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+                var attackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+    
+                // 쿨타임 종료 -> state 2로 변경
+                console.log(attackProgressArr[attackIdx].attackName, attackProgressArr[attackIdx].state);
+                if(attackProgressArr[attackIdx].state == 1) {
+                    attackProgressArr[attackIdx].state = 2;
+                    await jsonStore.updatejson(roomTotalJson[0], socket.room);
+    
+                    const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
+                    var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
+                    console.log("test: ", sectionAttackProgressArr2);
+                }
+    
+                CheckScenarioAttack(socket, corpName, sectionIdx, attackName) // 시나리오에 포함되는지 확인 후 attackSenarioProgress 에 이름 저장
+            } else{
+                console.log("Failed due to success rate!!")
+                socket.emit('Failed to success rate');
             }
+<<<<<<< HEAD
 
             CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName) // 시나리오에 포함되는지 확인 후 attackSenarioProgress 에 이름 저장
+=======
+            
+>>>>>>> 61af5f722dc1872ae04d196e50356ecfa6568840
             clearTimeout(attackTime);
 
-        }, config["ATTACK_" + (taticIdx + 1)]["time"][attackLv] * 1000);
+        }, config["ATTACK_" + (tacticIdx + 1)]["time"][attackLv] * 1000);
     }
 
     async function CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName){
@@ -2568,7 +2744,6 @@ module.exports = (io) => {
                         }
                     }
                 }
-
             }
             idx++;
         });
@@ -2584,48 +2759,60 @@ module.exports = (io) => {
         var defenseTime = setTimeout(async function(){
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
-            var sectionDefenseProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress;
-            var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
-            
-            var attackInfo = sectionAttackProgressArr[senarioIndex].filter(function(progress){
-                return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
-            })[0];
+            let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel];
+            let percent = Math.random();
 
-            console.log("DefenseCooltime - attackInfo : ", attackInfo);
-            console.log("DefenseCooltime - config.ATTACK_CATEGORY[tacticIndex] : ", config.ATTACK_CATEGORY[tacticIndex]);
-            console.log("DefenseCooltime - config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex] : ", config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex]);
-            
-            console.log("DefenseCooltime - sectionAttackProgressArr (before) : ", sectionAttackProgressArr);
-            console.log("DefenseCooltime - sectionDefenseProgressArr (before) : ", sectionDefenseProgressArr);
+            console.log("prob : ", prob, ", percent : ", percent); 
 
-            // 방어 성공 (attackStateOrigin -> attackState : 1 -> 1 or 2 -> 2)
-            console.log("DefenseCooltime - attackStateOrigin : ", attackStateOrigin);
-            console.log("DefenseCooltime - attackInfo.state : ", attackInfo.state);
-            if (attackStateOrigin == attackInfo.state) {
-                console.log("DefenseCooltime - success!!");
-
-                sectionAttackProgressArr = sectionAttackProgressArr[senarioIndex].filter(function(progress){
-                    return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
-                });
-
-                sectionDefenseProgressArr = sectionDefenseProgressArr[senarioIndex].filter(function(progress){
-                    return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
-                });
+            // 공격 성공
+            if (prob >= percent) {
+                var sectionDefenseProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress;
+                var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
                 
-            } else {   // 방어 실패
-                console.log("DefenseCooltime - faile!!");
+                var attackInfo = sectionAttackProgressArr[senarioIndex].filter(function(progress){
+                    return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
+                })[0];
+    
+                console.log("DefenseCooltime - attackInfo : ", attackInfo);
+                console.log("DefenseCooltime - config.ATTACK_CATEGORY[tacticIndex] : ", config.ATTACK_CATEGORY[tacticIndex]);
+                console.log("DefenseCooltime - config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex] : ", config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex]);
+                
+                console.log("DefenseCooltime - sectionAttackProgressArr (before) : ", sectionAttackProgressArr);
+                console.log("DefenseCooltime - sectionDefenseProgressArr (before) : ", sectionDefenseProgressArr);
+    
+                // 방어 성공 (attackStateOrigin -> attackState : 1 -> 1 or 2 -> 2)
+                console.log("DefenseCooltime - attackStateOrigin : ", attackStateOrigin);
+                console.log("DefenseCooltime - attackInfo.state : ", attackInfo.state);
+                if (attackStateOrigin == attackInfo.state) {
+                    console.log("DefenseCooltime - success!!");
+    
+                    sectionAttackProgressArr = sectionAttackProgressArr[senarioIndex].filter(function(progress){
+                        return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
+                    });
+    
+                    sectionDefenseProgressArr = sectionDefenseProgressArr[senarioIndex].filter(function(progress){
+                        return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
+                    });
+                    
+                } else {   // 방어 실패
+                    console.log("DefenseCooltime - faile!!");
+    
+                    sectionDefenseProgressArr = sectionDefenseProgressArr[senarioIndex].filter(function(progress){
+                        return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[techniqueIndex];
+                    });
+    
+                    DefenseCooltime(socket, attackInfo.state, corpName, sectionIdx, senarioIndex, tacticIndex, techniqueIndex, defenseLevel);
+                }
+    
+                console.log("DefenseCooltime - sectionAttackProgressArr (after) : ", sectionAttackProgressArr);
+                console.log("DefenseCooltime - sectionDefenseProgressArr (after) : ", sectionDefenseProgressArr);
+    
+                await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
-                sectionDefenseProgressArr = sectionDefenseProgressArr[senarioIndex].filter(function(progress){
-                    return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[techniqueIndex];
-                });
-
-                DefenseCooltime(socket, attackInfo.state, corpName, sectionIdx, senarioIndex, tacticIndex, techniqueIndex, defenseLevel);
+            } else { // 공격 실패 (성공률로 인해)
+                console.log("Failed due to success rate!!")
+                socket.emit('Failed to success rate');
             }
-
-            console.log("DefenseCooltime - sectionAttackProgressArr (after) : ", sectionAttackProgressArr);
-            console.log("DefenseCooltime - sectionDefenseProgressArr (after) : ", sectionDefenseProgressArr);
-
-            await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
             clearTimeout(defenseTime);
             
@@ -2649,7 +2836,7 @@ module.exports = (io) => {
             clearInterval(timerId);
             clearInterval(pitaTimerId);
             io.sockets.in(socket.room).emit('Load_ResultPage');
-            socket.on('Finish_Load_ResultPage', async()=> {                
+            socket.on('Finish_Load_ResultPage', async()=> {
                 // 남은 피타
                 var blackPitaNum = roomTotalJson[0]["blackTeam"]["total_pita"];
                 var whitePitaNum = roomTotalJson[0]["whiteTeam"]["total_pita"];
