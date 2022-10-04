@@ -21,7 +21,7 @@ module.exports = {
     ATTACK_13 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Exfiltration"},
     ATTACK_14 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Impact"},
 
-    //대응
+    //대응 (나중에 tactic이랑 technique를 분리해야 함)
     DEFENSE_1 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Reconnaissance"},
     DEFENSE_2 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Resource Development"},
     DEFENSE_3 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Initial Access"},
@@ -37,6 +37,9 @@ module.exports = {
     DEFENSE_13 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Exfiltration"},
     DEFENSE_14 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Impact"},
     
+    DEFENSE_UPGRADE : [0, 20, 40, 60, 80, 100],
+    DEFENSE_TECHNIQUE_UPGRADE : [0, 2, 4, 6, 8, 10],
+
     // 관제 시간
     MONITORING_1 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Reconnaissance"},
     MONITORING_2 : { pita : [1, 2, 3, 4, 5], time : [9, 7, 6, 5, 4], name : "Resource Development"},
@@ -155,7 +158,7 @@ module.exports = {
         'attackConn' : {
            'Gather Victim Network Information': ["Exploit Public-Facing Application", "Phishing", "Valid Accounts"],
            'Exploit Public-Facing Application' :  ["Command and Scripting Interpreter", "Software Deployment Tools"],
-            'Phishing' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
+           'Phishing' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
             'Valid Accounts' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
             'Command and Scripting Interpreter' : ["Account Manipulation", "Scheduled Task/Job"],
             'Software Deployment Tools' : ["Account Manipulation", "Scheduled Task/Job"],
@@ -167,7 +170,6 @@ module.exports = {
             'Exfiltration Over Alternative Protocol' : ["Data Encrypted for Impact"],
             'Exfiltration Over Web Service' : ["Data Encrypted for Impact"]
         }
-
     },
     // SCENARIO1 :{
     //     'attacks': {
