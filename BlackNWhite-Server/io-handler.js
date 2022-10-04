@@ -2505,8 +2505,8 @@ module.exports = (io) => {
     }
 
     // Attack 쿨타임
-    function AttackCoolTime(socket, corpName, sectionIdx, attackIdx, taticIdx, attackLv, tacticName, attackName){
-        console.log("타이머 시작", taticIdx, attackLv);
+    function AttackCoolTime(socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName){
+        console.log("타이머 시작", tacticIdx, attackLv);
         var attackTime = setTimeout(async function(){
             console.log("attack 쿨타임 종료 - 서버");
 
