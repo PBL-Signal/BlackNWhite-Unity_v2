@@ -2619,7 +2619,7 @@ module.exports = (io) => {
             })[0];
 
             if (typeof attackInfo != "undefined") {
-                let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel];
+                let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel] * 0.01;
                 let percent = Math.random();
 
                 console.log("prob : ", prob, ", percent : ", percent); 
