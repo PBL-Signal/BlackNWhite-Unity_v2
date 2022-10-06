@@ -14,6 +14,7 @@ const Section = new Schema({
     defenseActive : { type : Array, required : true },
     defenseLv : { type : Array, required : true },
     defenseCnt : { type : Array, required : true },
+    attackConn   : { type : {}, required : true },
 })
 
 module.exports = mongoose.model('Section', Section); 
