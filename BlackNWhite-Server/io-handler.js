@@ -1934,12 +1934,12 @@ module.exports = (io) => {
             if(!overlap) {
                 // state 1로 공격 저장
                 var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
-                let newArrCount = attackProgressArr.push(newInfo);
+                attackProgressArr.push(newInfo);
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
                 console.log(attackProgressArr);
 
-                // 쿨타임 및 state 2로 변경
-                AttackCoolTime(socket, corpName, sectionIdx, (newArrCount-1), tacticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName)
+                // 쿨타임 및 성공 여부 결정(by.성공률)
+                AttackCoolTime(socket, corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName)
 
             }
         });
@@ -2518,39 +2518,70 @@ module.exports = (io) => {
     }
 
     // Attack 쿨타임
-    function AttackCoolTime(socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName){
-        console.log("타이머 시작", tacticIdx, attackLv);
+    function AttackCoolTime(socket, corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName){
         var attackTime = setTimeout(async function(){
             console.log("attack 쿨타임 종료 - 서버");
 
             let prob = config["ATTACK_" + (tacticIdx + 1)]["success"][attackLv] * 0.01;
             let percent = Math.random();
-
             console.log("prob : ", prob, ", percent : ", percent); 
 
-            // 공격 성공
+            // 공격 성공 (by.성공률)
             if (prob >= percent) {
                 let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
                 var attackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+                console.log("attackProgressArr<< ", attackProgressArr);
     
-                // 쿨타임 종료 -> state 2로 변경
-                console.log(attackProgressArr[attackIdx].attackName, attackProgressArr[attackIdx].state);
-                if(attackProgressArr[attackIdx].state == 1) {
-                    attackProgressArr[attackIdx].state = 2;
-                    await jsonStore.updatejson(roomTotalJson[0], socket.room);
+                // state 2로 변경
+                attackProgressArr.filter( async (element) => {
+                    if(element.attackName == attackName && element.state == 1) {
+                        element.state = 2;
+                        await jsonStore.updatejson(roomTotalJson[0], socket.room);
     
-                    const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
-                    var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
-                    console.log("test: ", sectionAttackProgressArr2);
-                }
-    
-                CheckScenarioAttack(socket, corpName, sectionIdx, attackName) // 시나리오에 포함되는지 확인 후 attackSenarioProgress 에 이름 저장
-            } else{
-                console.log("Failed due to success rate!!")
-                socket.emit('Failed to success rate');
-            }
+                        const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
+                        var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
+                        console.log("state2 test: ", sectionAttackProgressArr2);
+                    }
+                })
 
-            CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName) // 시나리오에 포함되는지 확인 후 attackSenarioProgress 에 이름 저장
+                // 시나리오 포함 여부 확인 함수 호출
+                CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName); 
+
+                // if(attackProgressArr[attackIdx].state == 1) {
+                //     attackProgressArr[attackIdx].state = 2;
+                //     await jsonStore.updatejson(roomTotalJson[0], socket.room);
+    
+                //     const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
+                //     var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
+                //     console.log("test: ", sectionAttackProgressArr2);
+                // }
+    
+                
+
+            // 공격 실패 (by.성공률)
+            } else{
+                console.log("Failed due to success rate!!");
+                socket.emit('Failed to success rate');
+
+                let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+                var attackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+                console.log("attackProgressArr<< ", attackProgressArr);
+
+                // state 1인 해당 공격 attackProgress에서 제거
+                attackProgressArr.filter(async (element, index) => {
+                    if(element.attackName == attackName && element.state == 1) {
+                        attackProgressArr.splice(index, 1);
+                        console.log("state 1 remove >> ", attackProgressArr);
+
+                        await jsonStore.updatejson(roomTotalJson[0], socket.room);
+    
+                        const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
+                        var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
+                        console.log("delete test: ", sectionAttackProgressArr2);
+                    }
+                });
+
+            }
             clearTimeout(attackTime);
 
         }, config["ATTACK_" + (tacticIdx + 1)]["time"][attackLv] * 1000);
