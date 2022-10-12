@@ -70,6 +70,7 @@ module.exports = (io) => {
     let numPlayer = 1;
     let companyNameList = ["companyA", "companyB", "companyC", "companyD", "companyE"];
     let taticNamesList = ["Reconnaissance", "Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"];
+    let areaNameList = ["DMZ", "Internal", "Security"]
 
     let timerId;
     let pitaTimerId;
@@ -1732,14 +1733,77 @@ module.exports = (io) => {
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             var corpName = corp;
             var sectionsArr = roomTotalJson[0][corpName].sections;
-
             var cntArr = [];
-            for(i=0; i<sectionsArr.length; i++)
-            {
-                var sectionData = roomTotalJson[0][corpName].sections[i].defense.progress.length;
-                cntArr[i] = sectionData;
-            }
+            sectionsArr.forEach( async(element, idx) => {
+                var sectionData = element.attackProgress.length;
+                cntArr[idx] = sectionData;
+            });
             socket.emit('Issue_Count', cntArr);
+        });
+
+
+        // [Security Monitoring] MonitoringLog 분석 결과 전송 및 자동 대응
+        socket.on('Get_Monitoring_Log', async(corp) => {    
+            // 분석 결과 전송        
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            var corpName = corp;
+            var sectionsArr = roomTotalJson[0][corpName].sections;
+            var logArr = [];
+            sectionsArr.forEach( async(element, idx) => {
+                var sectionLogData = element.attackProgress;
+                sectionLogData.forEach(logElement => {
+                    switch (logElement.state) {
+                        case 1 :
+                            var newLog = {
+                                area: areaNameList[idx],
+                                tactic: logElement.tactic,
+                                attackName: logElement.attackName + " is in progress."
+                            }
+                            break;
+                        case 2 : 
+                            var newLog = {
+                                area: areaNameList[idx],
+                                tactic: logElement.tactic,
+                                attackName: logElement.attackName + "has been carried out."
+                            }
+                            break;
+                    }
+                    logArr.push(newLog);
+                });                
+            });
+            socket.emit('Monitoring_Log', logArr);
+
+            // 자동대응
+            // var sectionsArr = roomTotalJson[0][corpName].sections;
+            sectionsArr.forEach( async(element, sectionIdx) => {
+                var sectionDefenseProgressArr = element.defenseProgress;
+                var sectionDefenseActivationArr = element.defenseActive;
+                var defenseLv = element.defenseLv;
+
+                var sectionAttackData = element.attackProgress;
+                sectionAttackData.forEach( async(attackElement) => {
+                    console.log(attackElement.tactic, attackElement.attackName);
+                    
+                    var tacticIndex = config.ATTACK_CATEGORY.indexOf(attackElement.tactic);
+                    var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackElement.attackName);
+                    console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
+
+                    if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
+                        sectionDefenseProgressArr[i].push(newInfo);
+                        console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
+                        // 0은 나중에 시나리오 인덱스로 변경
+                        DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
+                        socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+                    } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
+                        sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
+                        let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
+                        socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
+                        console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
+                    }
+                    await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+                });                
+            });
         });
 
 
@@ -1836,26 +1900,26 @@ module.exports = (io) => {
             
         });
 
-        // [Monitoring] monitoringLog 스키마 데이터 보내기
-        socket.on('Get_MonitoringLog', async(corp) => {
-            const monitoringLogJson = JSON.parse(await jsonStore.getjson(socket.room+":whiteLog"));
+        // // [Monitoring] monitoringLog 스키마 데이터 보내기
+        // socket.on('Get_MonitoringLog', async(corp) => {
+        //     const monitoringLogJson = JSON.parse(await jsonStore.getjson(socket.room+":whiteLog"));
 
-            var jsonArray = [];
-            for (var i=0; i<monitoringLogJson[0].length; i++) {
-                if(monitoringLogJson[0][i]["targetCompany"] == corp){
-                    var newResult = {
-                        time : monitoringLogJson[0][i]["time"],
-                        nickname : monitoringLogJson[0][i]["nickname"],
-                        targetCompany : corp,
-                        targetSection : monitoringLogJson[0][i]["targetSection"],
-                        actionType : monitoringLogJson[0][i]["actionType"],
-                        detail : monitoringLogJson[0][i]["detail"]
-                    }
-                    jsonArray.push(newResult);
-                } 
-            }
-            socket.emit('MonitoringLog', jsonArray);
-        });
+        //     var jsonArray = [];
+        //     for (var i=0; i<monitoringLogJson[0].length; i++) {
+        //         if(monitoringLogJson[0][i]["targetCompany"] == corp){
+        //             var newResult = {
+        //                 time : monitoringLogJson[0][i]["time"],
+        //                 nickname : monitoringLogJson[0][i]["nickname"],
+        //                 targetCompany : corp,
+        //                 targetSection : monitoringLogJson[0][i]["targetSection"],
+        //                 actionType : monitoringLogJson[0][i]["actionType"],
+        //                 detail : monitoringLogJson[0][i]["detail"]
+        //             }
+        //             jsonArray.push(newResult);
+        //         } 
+        //     }
+        //     socket.emit('MonitoringLog', jsonArray);
+        // });
 
 
         // [Result] 최종 결과 보내기
@@ -2358,7 +2422,17 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackProgress : [],
+                        attackProgress : [{ tactic: 'Reconnaissance', attackName: 'Active Scanning', state: 2 }, 
+                        {
+                          tactic: 'Reconnaissance',
+                          attackName: 'Gather Victim Network Information',
+                          state: 2
+                        }, 
+                        {
+                          tactic: 'Reconnaissance',
+                          attackName: 'Gather Victim Host Information',
+                          state: 1
+                        }],
                         attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
                         defenseProgress : [[], [], [], [], []],
                         beActivated : [],
