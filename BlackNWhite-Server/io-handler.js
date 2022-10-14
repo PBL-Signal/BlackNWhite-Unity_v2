@@ -69,7 +69,7 @@ module.exports = (io) => {
     let evenNumPlayer = false;
     let numPlayer = 1;
     let companyNameList = ["companyA", "companyB", "companyC", "companyD", "companyE"];
-    let taticNamesList = ["Reconnaissance", "Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"];
+    let taticNamesList = ["Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"];
     let areaNameList = ["DMZ", "Internal", "Security"]
 
     let timerId;
@@ -1974,6 +1974,7 @@ module.exports = (io) => {
 // ===================================================================================================================
 
         socket.on('click_technique_button', async(data, attackName, tacticName) => {
+            console.log("wasd >> ", attackName, tacticName);
             if(attackName.includes("\n")) { attackName = attackName.substring(1); }
 
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
@@ -1983,6 +1984,13 @@ module.exports = (io) => {
             var tacticIdx = taticNamesList.indexOf(tacticName);
             var attackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
             var attackLv = roomTotalJson[0][corpName].attackLV[tacticIdx];
+            var suspicionCount = roomTotalJson[0][corpName].sections[sectionIdx].suspicionCount;
+            var areaLv = roomTotalJson[0][corpName].sections[sectionIdx].level;
+
+            var lvCoolTime = config["ATTACK_" + (tacticIdx + 1)]["time"][attackLv];
+
+            // 유니티에 쿨타임 시간(레벨별) 전송
+            socket.emit('CoolTime_LV', lvCoolTime);
 
             // 공격 중복 확인
             var overlap = false;
@@ -1999,11 +2007,30 @@ module.exports = (io) => {
                 // state 1로 공격 저장
                 var newInfo = { tactic: tacticName, attackName: attackName, state: 1 }; 
                 attackProgressArr.push(newInfo);
+                // 영역 레벨에 따른 의심 개수 갱신
+                var fakeCnt = 0;
+                switch (areaLv) {
+                    case 1: // 1~5개
+                        fakeCnt = Math.floor(Math.random() * 5) + 1;
+                        break;
+                    case 2: // 1~3개
+                        fakeCnt = Math.floor(Math.random() * 3) + 1;
+                        break;
+                    case 3: // 0~3개
+                        fakeCnt = Math.floor(Math.random() * 4);
+                        break;
+                    case 4: // 0~2개
+                        fakeCnt = Math.floor(Math.random() * 3);
+                        break;
+                }
+                suspicionCount = (suspicionCount + 1) + fakeCnt;
+                console.log("sus CNT >> ", suspicionCount);
+
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
                 console.log(attackProgressArr);
 
                 // 쿨타임 및 성공 여부 결정(by.성공률)
-                AttackCoolTime(socket, corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName)
+                AttackCoolTime(socket, (lvCoolTime*1000), corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName)
 
             }
         });
@@ -2433,7 +2460,7 @@ module.exports = (io) => {
                           attackName: 'Gather Victim Host Information',
                           state: 1
                         }],
-                        attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
+                        attackSenarioProgress  : [ [], [], [], [], [] ],
                         defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2637,7 +2664,8 @@ module.exports = (io) => {
     }
 
     // Attack 쿨타임
-    function AttackCoolTime(socket, corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName){
+    async function AttackCoolTime(socket, lvCoolTime, corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName){
+        console.log("attack 쿨타임 시작 - 서버",lvCoolTime );
         var attackTime = setTimeout(async function(){
             console.log("attack 쿨타임 종료 - 서버");
 
@@ -2703,7 +2731,7 @@ module.exports = (io) => {
             }
             clearTimeout(attackTime);
 
-        }, config["ATTACK_" + (tacticIdx + 1)]["time"][attackLv] * 1000);
+        }, lvCoolTime);
     }
 
     async function CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName){
