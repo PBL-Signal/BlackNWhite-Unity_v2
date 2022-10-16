@@ -1772,6 +1772,16 @@ module.exports = (io) => {
                 });                
             });
             socket.emit('Monitoring_Log', logArr);
+            // [GameLog] 로그 추가
+            let today = new Date();   
+            let hours = today.getHours(); // 시
+            let minutes = today.getMinutes();  // 분
+            let seconds = today.getSeconds();  // 초
+            let now = hours+":"+minutes+":"+seconds;
+            var gameLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", detail: "Log analysis is complete."};
+            var logArr = [];
+            logArr.push(gameLog);
+            io.sockets.in(socket.room+'true').emit('addLog', logArr);
 
             // 자동대응
             // var sectionsArr = roomTotalJson[0][corpName].sections;
@@ -2691,8 +2701,20 @@ module.exports = (io) => {
                     }
                 })
 
+                // [GameLog] 로그 추가
+                let today = new Date();   
+                let hours = today.getHours(); // 시
+                let minutes = today.getMinutes();  // 분
+                let seconds = today.getSeconds();  // 초
+                let now = hours+":"+minutes+":"+seconds;
+                var gameLog = {time: now, nickname: socket.nickname, targetCompany: corpName, targetSection: areaNameList[sectionIdx], detail: attackName+" is completed."};
+
+                var logArr = [];
+                logArr.push(gameLog);
+                io.sockets.in(socket.room+'false').emit('addLog', logArr);
+
                 // 시나리오 포함 여부 확인 함수 호출
-                CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName); 
+                //CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName); 
 
                 // if(attackProgressArr[attackIdx].state == 1) {
                 //     attackProgressArr[attackIdx].state = 2;
@@ -2831,6 +2853,17 @@ module.exports = (io) => {
                         if (defenseLvArr != 5 & defenseCntArr[tacticIndex][techniqueIndex] > config.DEFENSE_TECHNIQUE_UPGRADE) {
                             defenseLvArr += 1;
                         }
+
+                        // [GameLog] 로그 추가
+                        let today = new Date();   
+                        let hours = today.getHours(); // 시
+                        let minutes = today.getMinutes();  // 분
+                        let seconds = today.getSeconds();  // 초
+                        let now = hours+":"+minutes+":"+seconds;
+                        var gameLog = {time: now, nickname: "", targetCompany: corpName, targetSection: areaNameList[sectionIdx], detail: config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex]+" response has been completed."};
+                        var logArr = [];
+                        logArr.push(gameLog);
+                        io.sockets.in(socket.room+'true').emit('addLog', logArr);
                         
                     } else {   // 방어 실패
                         console.log("DefenseCooltime - faile!!");
