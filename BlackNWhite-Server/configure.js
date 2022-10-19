@@ -169,7 +169,62 @@ module.exports = {
             'Screen Capture' : ["Communication Through Removable Media"],
             'Exfiltration Over Alternative Protocol' : ["Data Encrypted for Impact"],
             'Exfiltration Over Web Service' : ["Data Encrypted for Impact"]
-        }
+        },
+
+        'attackConnDetail':
+        {
+            'Gather Victim Network Information': [
+                {'tactic' : "Initial Access", "tacticNum" : 2, "tech" : "Exploit Public-Facing Application"},
+                {'tactic' : "Initial Access", "tacticNum" : 2, "tech" : "Phishing"},
+                {'tactic' : "Initial Access", "tacticNum" : 2, "tech" : "Valid Accounts"},
+            ],
+
+            'Exploit Public-Facing Application' :  [
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Command and Scripting Interpreter"},
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Software Deployment Tools"},
+           ],
+            'Phishing' : [
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Command and Scripting Interpreter"},
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Software Deployment Tools"},
+           ],
+            'Valid Accounts' :[
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Command and Scripting Interpreter"},
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Software Deployment Tools"},
+           ],
+            'Command and Scripting Interpreter' : [
+                {'tactic' : "Persistence", "tacticNum" : 4, "tech" : "Account Manipulation"},
+                {'tactic' : "Privilege Escalation", "tacticNum" : 5, "tech" : "Scheduled Task/Job"},
+            ],
+            'Software Deployment Tools' : [
+                {'tactic' : "Persistence", "tacticNum" : 4, "tech" : "Account Manipulation"},
+                {'tactic' : "Privilege Escalation", "tacticNum" : 5, "tech" : "Scheduled Task/Job"},
+            ],
+            'Account Manipulation' : [
+                {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Abuse Elevation Control Mechanism"},
+                {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Indirect Command Execution"},
+            ],
+            'Scheduled Task/Job' : [
+                {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Screen Capture"},
+                {'tactic' : "Exfiltration", "tacticNum" : 12, "tech" : "Exfiltration Over Alternative Protocol"},
+                {'tactic' : "Exfiltration", "tacticNum" : 12, "tech" : "Exfiltration Over Web Service"},
+            ],
+            'Abuse Elevation Control Mechanism' : [
+                {'tactic' : "Credential Access", "tacticNum" : 7, "tech" : "Brute Force"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Account Discovery"},
+            ],
+            'Indirect Command Execution' : [
+                {'tactic' : "Credential Access", "tacticNum" : 7, "tech" : "Brute Force"},
+            ],
+            'Screen Capture' : [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Communication Through Removable Media"},
+            ],
+            'Exfiltration Over Alternative Protocol' : [
+                {'tactic' : "Impact", "tacticNum" : 13, "tech" :  "Data Encrypted for Impact"},
+               ],
+            'Exfiltration Over Web Service' : [
+                {'tactic' : "Impact", "tacticNum" : 13, "tech" :  "Data Encrypted for Impact"},
+            ]
+    }
     },
     // SCENARIO1 :{
     //     'attacks': {
