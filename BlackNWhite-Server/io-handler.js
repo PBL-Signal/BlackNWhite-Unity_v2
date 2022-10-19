@@ -2359,7 +2359,8 @@ module.exports = (io) => {
                         level  : 1,
                         suspicionCount : 0,
                         attackProgress : [],
-                        attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
+                        // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
+                        attackSenarioProgress  : [ [] ],
                         defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2404,21 +2405,23 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
-                        attackConn : {
-                            'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
-                            'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
-                            'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
-                            'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
-                            'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                            'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                            'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
-                            'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
-                            'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
-                            'Indirect Command Execution' : {"Brute Force": false},
-                            'Screen Capture' : {"Communication Through Removable Media": false},
-                            'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
-                            'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                        attackConn : [
+                            { 
+                                'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
+                                'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
+                                'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
+                                'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
+                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
+                                'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                                'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
+                                'Indirect Command Execution' : {"Brute Force": false},
+                                'Screen Capture' : {"Communication Through Removable Media": false},
+                                'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
+                                'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
                             }
+                        ]
                     }),
     
                     new Section({
@@ -2570,6 +2573,7 @@ module.exports = (io) => {
             let prob = config["ATTACK_" + (tacticIdx + 1)]["success"][attackLv] * 0.01;
             let percent = Math.random();
             console.log("prob : ", prob, ", percent : ", percent); 
+            prob = 1; // test
 
             // 공격 성공 (by.성공률)
             if (prob >= percent) {
@@ -2635,45 +2639,133 @@ module.exports = (io) => {
     async function CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName){
         const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
         var attackSenarioProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackSenarioProgress;
+        var attackProgress = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
+        var attackConn = roomTotalJson[0][corpName].sections[sectionIdx].attackConn;
         
-        var idx = 1;
-        attackSenarioProgressArr.forEach(element => {
-            console.log("element : ", element);
-            var scenarioName = "SCENARIO" + idx;
-            // 진행된 공격이 없는 경우 -> startkAttack인지 확인 -> 공격 리스트에 바로 추가
-            if(element.length <= 0){
-                var startAttackArr = (Object.values(config[scenarioName].startAttack));
+        // var idx = 1;
 
-                // startAttack인지 확인
-                if(startAttackArr.includes(attackName)) {
-                    // 중복 확인
+        // startAttack인지 확인
+        for (var i = 0; i < attackConn.length; i++) {
+            var scenarioName = "SCENARIO" + (i + 1);
+            var startAttackArr = (Object.values(config[scenarioName].startAttack));
 
-                    var newInfo = { tactic: tacticName, attackName: attackName }; 
-                    element.push(newInfo);
-                }
-
-            // 진행된 공격이 있는 경우 -> 마지막 공격부터 conn을 확인 -> 해당되는 경우 공격 리스트에 추가 
+            if(startAttackArr.includes(attackName)) {
+                console.log("start attack!!");
+                var newInfo = { tactic: tacticName, attackName: attackName }; 
+                attackSenarioProgressArr.push(newInfo);
             } else {
-                for(var k=element.length - 1; k>=0; k--){
-                    var checkLastAttack = element[k];
-
-                    var attacksArr;
-                    if(config[scenarioName].attackConn[checkLastAttack] == null) { // attackConn 확인
-                        console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
-                    } else {
-                        attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
-                        if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가 & 사전대응 시작
-                            // 중복 확인
-
+                console.log("not start attack!!");
+                for(key in attackConn[i]) {
+                    var attackConnArr = (Object.values(attackConn[i][key]));
+                    if (attackConnArr.hasOwnProperty(attackName)) {
+                        console.log("키 존재 attack!!");
+                        if (attackConnArr[attackName] == true) {
+                            console.log("키 값이 true attack!!");
                             var newInfo = { tactic: tacticName, attackName: attackName }; 
-                            element.push(newInfo);
-                            continue;
+                            attackSenarioProgressArr.push(newInfo);
+                        } else {
+                            console.log("키 값이 false attack!!");
+                            // 나중에 tactic도 같이 필터링해줄 수 있는 방법 찾아야 됨
+                            var attackInfo = attackProgress.filter(function(progress){
+                                return progress.attackName == key;
+                            })[0];
+                            console.log("attackInfo attack!! : ". attackInfo);
+                            
+                            if (typeof attackInfo != "undefined" && attackInfo.state == 2) {
+                                var newInfo = { tactic: tacticName, attackName: attackName }; 
+                                attackSenarioProgressArr.push(newInfo);
+                                attackConnArr[attackName] = true;
+                                console.log("attackSenarioProgressArr : ", attackSenarioProgressArr);
+                            }
                         }
                     }
                 }
             }
-            idx++;
-        });
+        
+            console.log("attackConn : ", attackConn);
+        }
+        
+
+
+
+        // attackSenarioProgressArr.forEach(element => {
+        //     console.log("element : ", element);
+        //     var scenarioName = "SCENARIO" + idx;
+        //     // 진행된 공격이 없는 경우 -> startkAttack인지 확인 -> 공격 리스트에 바로 추가
+        //     if(element.length <= 0){
+        //         var startAttackArr = (Object.values(config[scenarioName].startAttack));
+
+        //         // startAttack인지 확인
+        //         if(startAttackArr.includes(attackName)) {
+        //             // 시나리오 반복문
+                    
+        //         } else if(attacksArr.includes(attackName)) {
+        //             // 시나리오 반복문
+        //             for (var i = 0; i < attackConn.length; i++) {
+        //                 for(key in attackConn[i]) {
+        //                     if (attackConn[i][key].hasOwnProperty(attackName)) {
+        //                         if (attackConn[i][key][attackName] == true) {
+        //                             var newInfo = { tactic: tacticName, attackName: attackName }; 
+        //                             element.push(newInfo);
+        //                         } else {
+        //                             var attackInfo = attackProgress[i].filter(function(progress){
+        //                                 return progress.tactic == tacticName && progress.attackName == key;
+        //                             })[0];
+                                    
+        //                             if (typeof attackInfo != "undefined" && attackInfo.state == 2) {
+        //                                 var newInfo = { tactic: tacticName, attackName: attackName }; 
+        //                                 element.push(newInfo);
+        //                                 attackConn[i][key][attackName] = true;
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+
+        //             console.log("attackConn : ", attackConn);
+
+        //         }
+
+        //     // 진행된 공격이 있는 경우 -> 마지막 공격부터 conn을 확인 -> 해당되는 경우 공격 리스트에 추가 
+        //     } else {
+        //         for(var k=element.length - 1; k>=0; k--){
+        //             var checkLastAttack = element[k];
+
+        //             var attacksArr;
+        //             if(config[scenarioName].attackConn[checkLastAttack] == null) { // attackConn 확인
+        //                 console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
+        //             } else {
+        //                 attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
+        //                 if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가 & 사전대응 시작
+        //                     // 시나리오 반복문
+        //                     for (var i = 0; i < attackConn.length; i++) {
+        //                         for(key in attackConn[i]) {
+        //                             if (attackConn[i][key].hasOwnProperty(attackName)) {
+        //                                 if (attackConn[i][key][attackName] == true) {
+        //                                     var newInfo = { tactic: tacticName, attackName: attackName }; 
+        //                                     element.push(newInfo);
+        //                                 } else {
+        //                                     var attackInfo = attackProgress[i].filter(function(progress){
+        //                                         return progress.tactic == tacticName && progress.attackName == key;
+        //                                     })[0];
+                                            
+        //                                     if (typeof attackInfo != "undefined" && attackInfo.state == 2) {
+        //                                         var newInfo = { tactic: tacticName, attackName: attackName }; 
+        //                                         element.push(newInfo);
+        //                                         attackConn[i][key][attackName] = true;
+        //                                     }
+        //                                 }
+        //                             }
+        //                         }
+        //                     }
+        
+        //                     console.log("attackConn : ", attackConn);
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     idx++;
+        // });
         await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
         const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
@@ -2701,7 +2793,7 @@ module.exports = (io) => {
 
                 console.log("prob : ", prob, ", percent : ", percent); 
 
-                // 공격 성공
+                // 대응 성공
                 if (prob >= percent) {
                     console.log("DefenseCooltime - attackInfo : ", attackInfo);
                     console.log("DefenseCooltime - config.ATTACK_CATEGORY[tacticIndex] : ", config.ATTACK_CATEGORY[tacticIndex]);
