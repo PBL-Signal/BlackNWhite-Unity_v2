@@ -1211,7 +1211,6 @@ module.exports = (io) => {
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             
             
-
             // 회사의 시나리오 레벨 &선택한 시나리오 가져옴
             var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
 
@@ -1276,7 +1275,7 @@ module.exports = (io) => {
                         //     'category' : config.ATTACK_CATEGORY_DICT[attack.attIdx],
                         //     'attack' :   config.SCENARIO1.attackConn[attack.attack]
                         // }
-                        progAttackConn[attack.attack] = config.SCENARIO1.attackConn[attack.attack];
+                        progAttackConn[attack.attack] = config["SCENARIO" +scenarioNum].attackConn[attack.attack];
                     
                  
                     }
@@ -1305,6 +1304,38 @@ module.exports = (io) => {
             socket.emit('SendSectAttScenario', sectScenarioHintJson);
         });
       
+
+        // [블랙팀] 선택한 공격에 연결된 다음 공격 정보 가져오기
+        socket.on('GetConnectedAtt',  async function(data) {
+            console.log("[On] OnGetConnectedAtt ", data.section, data.company, data.scenario, data.attack);
+
+            var scenarioLv = 0;
+            var scenarioNum = data.scenario + 1;
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            
+            
+            // 회사의 시나리오 레벨 &선택한 시나리오 가져옴
+            var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
+
+            // 시나리오 레벨에 따라 선택한 시나리오 정보 가져옴
+            scenarioLv = scenarioLvList[data.scenario];
+            console.log("!-- scenarioLv : ", scenarioLvList[data.scenario]);
+
+            // check1. 레벨 3이상인지 확인
+            if(scenarioLv < 3) return; 
+
+            // check2. 진행된 공격인지 확인
+            // <<TODO>>
+
+
+            // 공격 정보 뿌려주기
+            var connectedAttHint = {};
+            connectedAttHint['attack'] = data.attack;
+            connectedAttHint['connection'] = config["SCENARIO" +scenarioNum].attackConnDetail[data.attack];
+            let connectedAttJson = JSON.stringify(connectedAttHint);
+            console.log("!-- connectedAttJson : ", connectedAttJson);
+            socket.emit('SendConnectedAtt', connectedAttJson);
+        });
 
     
         ////////////////////////////////////////////////////////////////////////////////////
