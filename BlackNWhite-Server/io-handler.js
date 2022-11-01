@@ -1065,8 +1065,8 @@ module.exports = (io) => {
             console.log("[[[InitGame]] socket.nickname, team : ", socket.nickname, socket.team);
             socket.emit('Visible LimitedTime', socket.team.toString()); // actionbar
 
-            // Timer 시작
-            var time = 600; //600=10분, 1분 -> 60
+            // Timer 시작(게임전체시간)
+            var time = 30; //600=10분, 1분 -> 60
             var min = "";
             var sec = "";
 
@@ -1879,100 +1879,70 @@ module.exports = (io) => {
                 });                
             });
         });
+      
 
-
-        // [SectionState] Section Destroy
-        socket.on('Get_Section_Destroy_State', async(corp) => {            
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var corpName = corp;
-            var sections = {sections: roomTotalJson[0][corpName].sections};
-            socket.emit('Section_Destroy_State', JSON.stringify(sections));
-        });
-
-        // [SectionState] Section Attacked Name
-        socket.on('Get_Section_Attacked_Name', async(corp) => {
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var corpName = corp;
-            var sections = {sections: roomTotalJson[0][corpName].sections}
-            socket.emit('Section_Attacked_Name', JSON.stringify(sections));
-        });
-
-        
-
-        // [Abandon] 한 회사의 모든 영역이 파괴되었는지 확인 후 몰락 여부 결정
-        socket.on('is_All_Sections_Destroyed', async(corpName) => {
-            console.log("[Abandon]is_All_Sections_Destroyed " + corpName);
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+        // // [Abandon] 한 회사의 모든 영역이 파괴되었는지 확인 후 몰락 여부 결정
+        // socket.on('is_All_Sections_Destroyed', async(corpName) => {
+        //     console.log("[Abandon]is_All_Sections_Destroyed " + corpName);
+        //     const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             
-            var isAbondon = true;
-            var sectionsArr = roomTotalJson[0][corpName].sections;
-            for(i=0; i<sectionsArr.length; i++)
-            {
-                var isDestroy = roomTotalJson[0][corpName].sections[i].destroyStatus;
-                console.log("[Abandon]isDestroy " + i+isDestroy.toString());
-                if(isDestroy == false){ // 한 영역이라도 false면 반복문 나감
-                    isAbondon = false;
-                    break;
-                }
-            }
-            console.log("[Abandon] isAbondon " + isAbondon);
+        //     var isAbondon = true;
+        //     var sectionsArr = roomTotalJson[0][corpName].sections;
+        //     for(i=0; i<sectionsArr.length; i++)
+        //     {
+        //         var isDestroy = roomTotalJson[0][corpName].sections[i].destroyStatus;
+        //         console.log("[Abandon]isDestroy " + i+isDestroy.toString());
+        //         if(isDestroy == false){ // 한 영역이라도 false면 반복문 나감
+        //             isAbondon = false;
+        //             break;
+        //         }
+        //     }
+        //     console.log("[Abandon] isAbondon " + isAbondon);
 
-            if(isAbondon == true){ // 회사 몰락
-                console.log("[Abandon] 회사몰락 " + corpName);
-                roomTotalJson[0][corpName].abandonStatus = true;
-                await jsonStore.updatejson(roomTotalJson[0], socket.room);
+        //     if(isAbondon == true){ // 회사 몰락
+        //         console.log("[Abandon] 회사몰락 " + corpName);
+        //         roomTotalJson[0][corpName].abandonStatus = true;
+        //         await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
-                // [GameLog] 로그 추가
-                const blackLogJson = JSON.parse(await jsonStore.getjson(socket.room+":blackLog"));
-                const whiteLogJson = JSON.parse(await jsonStore.getjson(socket.room+":whiteLog"));
+        //         // [GameLog] 로그 추가
+        //         const blackLogJson = JSON.parse(await jsonStore.getjson(socket.room+":blackLog"));
+        //         const whiteLogJson = JSON.parse(await jsonStore.getjson(socket.room+":whiteLog"));
 
-                let today = new Date();   
-                let hours = today.getHours(); // 시
-                let minutes = today.getMinutes();  // 분
-                let seconds = today.getSeconds();  // 초
-                let now = hours+":"+minutes+":"+seconds;
-                var monitoringLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", actionType: "Damage", detail: corpName+"회사가 파괴되었습니다"};
+        //         let today = new Date();   
+        //         let hours = today.getHours(); // 시
+        //         let minutes = today.getMinutes();  // 분
+        //         let seconds = today.getSeconds();  // 초
+        //         let now = hours+":"+minutes+":"+seconds;
+        //         var monitoringLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", actionType: "Damage", detail: corpName+"회사가 파괴되었습니다"};
 
-                blackLogJson[0].push(monitoringLog);
-                whiteLogJson[0].push(monitoringLog);
-                await jsonStore.updatejson(blackLogJson[0], socket.room+":blackLog");
-                await jsonStore.updatejson(whiteLogJson[0], socket.room+":whiteLog");
+        //         blackLogJson[0].push(monitoringLog);
+        //         whiteLogJson[0].push(monitoringLog);
+        //         await jsonStore.updatejson(blackLogJson[0], socket.room+":blackLog");
+        //         await jsonStore.updatejson(whiteLogJson[0], socket.room+":whiteLog");
 
-                var logArr = [];
-                logArr.push(monitoringLog);
-                io.sockets.in(socket.room+'false').emit('addLog', logArr);
-                io.sockets.in(socket.room+'true').emit('addLog', logArr);
+        //         var logArr = [];
+        //         logArr.push(monitoringLog);
+        //         io.sockets.in(socket.room+'false').emit('addLog', logArr);
+        //         io.sockets.in(socket.room+'true').emit('addLog', logArr);
 
-                // 회사 아이콘 색상 변경
-                let abandonStatusList = [];
-                for(let company of companyNameList){
-                    abandonStatusList.push(roomTotalJson[0][company]["abandonStatus"]);
-                }
+        //         // 회사 아이콘 색상 변경
+        //         let abandonStatusList = [];
+        //         for(let company of companyNameList){
+        //             abandonStatusList.push(roomTotalJson[0][company]["abandonStatus"]);
+        //         }
                 
-                console.log("Section Destroy -> abandonStatusList : ", abandonStatusList);
+        //         console.log("Section Destroy -> abandonStatusList : ", abandonStatusList);
 
-                io.sockets.in(socket.room).emit('Company Status', abandonStatusList);  // 블랙, 화이트 두 팀 모두에게 보냄
-                // io.sockets.in(socket.room).emit('Company Status', abandonStatusList);
+        //         io.sockets.in(socket.room).emit('Company Status', abandonStatusList);  // 블랙, 화이트 두 팀 모두에게 보냄
+        //         // io.sockets.in(socket.room).emit('Company Status', abandonStatusList);
 
 
-                // 모든 회사가 몰락인지 확인
-                AllAbandon(socket, roomTotalJson);
+        //         // 모든 회사가 몰락인지 확인
+        //         AllAbandon(socket, roomTotalJson);
 
-                gameLogger.info("game:destroy company", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userId,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : "sdfsdfb124gvv",
-                        companyName : corpName
-                    },
-                });
-
-            }
+        //     }
             
-        });
+        // });
 
         // // [Monitoring] monitoringLog 스키마 데이터 보내기
         // socket.on('Get_MonitoringLog', async(corp) => {
@@ -3042,7 +3012,6 @@ module.exports = (io) => {
 
     // 모든 회사가 몰락인지 확인, 몰락이면 게임 종료
     async function AllAbandon(socket, roomTotalJson){
-        console.log("#---------- 게임 종료됨(AllAbandon)----------#");
         var gameover = true;
         for(let company of companyNameList){
             if(roomTotalJson[0][company]["abandonStatus"] == false){
@@ -3053,6 +3022,7 @@ module.exports = (io) => {
         
         var winTeam = false;
         if(gameover){
+            console.log("#---------- 게임 종료됨(AllAbandon)----------#");
             clearInterval(timerId);
             clearInterval(pitaTimerId);
             io.sockets.in(socket.room).emit('Load_ResultPage');
@@ -3074,25 +3044,6 @@ module.exports = (io) => {
                     winTeam = null;
                 }
                 io.sockets.in(socket.room).emit('Abandon_Gameover', winTeam, blackScore, whiteScore);
-
-                // 개발자 로그 - 게임 종료(모든 회사 몰락)
-                gameLogger.info("game:Game Over", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userID,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : socket.room,
-                        winTeam : false, 
-                        cause : "AllDestroyed", 
-                        blackScore : blackScore,
-                        whiteScore : whiteScore,
-                        blackPita : blackPitaNum,
-                        whitePita : whitePitaNum,
-                        remainCompanyNum : 0,
-                    },
-                });
 
                 await SaveDeleteGameInfo(socket.room);
             });
@@ -3131,25 +3082,6 @@ module.exports = (io) => {
         }
 
         io.sockets.in(socket.room).emit('Timeout_Gameover', winTeam, blackScore, whiteScore);
-
-        // 개발자 로그 - 게임 종료(시간종료)
-        gameLogger.info("game:Game Over", {
-            server : 'server1',
-            userIP : '192.0.0.1',
-            sessionID : socket.sessionID,
-            userID : socket.userID,
-            nickname : socket.nickname,
-            data : 	{
-                roomID : socket.room,
-                winTeam : winTeam, 
-                cause : "Timeout", 
-                blackScore : blackScore,
-                whiteScore : whiteScore,
-                blackPita : blackPitaNum,
-                whitePita : whitePitaNum,
-                remainCompanyNum : aliveCnt,
-            },
-        });
 
         await SaveDeleteGameInfo(socket.room);
     }   
