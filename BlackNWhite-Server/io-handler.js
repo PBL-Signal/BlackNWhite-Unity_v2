@@ -1749,11 +1749,44 @@ module.exports = (io) => {
                     var newTotalPita = white_total_pita - config.MAINTENANCE_SECTION_INFO.pita[roomTotalJson[0][corpName].sections[sectionIdx].level]; //pita 감소
                     roomTotalJson[0].whiteTeam.total_pita = newTotalPita;
                     roomTotalJson[0][corpName].sections[sectionIdx].level += 1; // 레벨 증가
+                    var attackProgressLen = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress.length;
+                    newLevel = roomTotalJson[0][corpName].sections[sectionIdx].level;
+
+                    // 레벨에 맞게 의심 개수 갱신
+                    newSusCnt = 0
+                    switch (newLevel) {
+                        case 1: // 1~5개
+                            for (var i=0; i<attackProgressLen; i++){
+                                newSusCnt = newSusCnt + (Math.floor(Math.random() * 5) + 1);
+                            }
+                            break;
+                        case 2: // 1~3개
+                            for (var i=0; i<attackProgressLen; i++){
+                                newSusCnt = newSusCnt + Math.floor(Math.random() * 3) + 1;
+                            }                            
+                            break;
+                        case 3: // 0~3개
+                            for (var i=0; i<attackProgressLen; i++){
+                                newSusCnt = newSusCnt + Math.floor(Math.random() * 4);
+                            }                             
+                            break;
+                        case 4: // 0~2개
+                            for (var i=0; i<attackProgressLen; i++){
+                                newSusCnt = newSusCnt + Math.floor(Math.random() * 3);
+                            } 
+                            break;
+                        case 5:
+                            newSusCnt = attackProgressLen;
+                            break;
+                    }
+                    roomTotalJson[0][corpName].sections[sectionIdx].suspicionCount = newSusCnt;
+                    console.log("new sus CNT LV >> ", newSusCnt);
                     await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
                     var area_level = sectionIdx.toString() + "-" + (roomTotalJson[0][corpName].sections[sectionIdx].level);
                     io.sockets.in(socket.room+'true').emit('New_Level', corpName, area_level.toString());
                     io.sockets.in(socket.room+'true').emit('Update Pita', newTotalPita);
+                    io.sockets.in(socket.room+'true').emit('Issue_Count_Update', corpName);
                 }
             }
         });
@@ -1766,7 +1799,7 @@ module.exports = (io) => {
             var sectionsArr = roomTotalJson[0][corpName].sections;
             var cntArr = [];
             sectionsArr.forEach( async(element, idx) => {
-                var sectionData = element.attackProgress.length;
+                var sectionData = element.suspicionCount;
                 cntArr[idx] = sectionData;
             });
             socket.emit('Issue_Count', cntArr);
@@ -2065,10 +2098,12 @@ module.exports = (io) => {
                         break;
                 }
                 suspicionCount = (suspicionCount + 1) + fakeCnt;
+                roomTotalJson[0][corpName].sections[sectionIdx].suspicionCount = suspicionCount;
                 console.log("sus CNT >> ", suspicionCount);
-
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
-                console.log(attackProgressArr);
+
+                // 관제 issue Count 갱신 신호 유니티에 전송
+                io.sockets.in(socket.room+'true').emit('Issue_Count_Update', corpName);
 
                 // 쿨타임 및 성공 여부 결정(by.성공률)
                 AttackCoolTime(socket, (lvCoolTime*1000), corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName)
