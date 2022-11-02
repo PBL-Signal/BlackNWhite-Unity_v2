@@ -1224,20 +1224,19 @@ module.exports = (io) => {
                     scenarioLv : scenarioLv
                 };
 
-                var attackHint = [];
-                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackSenarioProgress[data.scenario];
-                
+                var attackHint = []; 
                 var progressAtt = [];
 
-                // 단계 1. 현재 진행된 (state 2) 공격 뽑기
-                // 수정 ver. state 2인건 뺌
+                // 단계 1. 현재 진행 중인 공격 뽑기 (attackSenarioProgress스키마)
+                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackSenarioProgress[data.scenario];
+                console.log("sectionAttProgSenario :", sectionAttProgSenario);
                 sectionAttProgSenario.forEach((value, index, array) => {
                     console.log(`${index} :  ${value.attackName}`); 
-                    // if(value.state==2){
+                    if(value.state==2){
                         var attIdx = config.ATTACK_CATEGORY_DICT[value.tactic];
                     //    progressAtt[attIdx] = [value.attackName]; // 중복 들어가면 어쩌지
                         progressAtt.push    ({'attIdx' : attIdx, 'attack' : value.attackName});
-                    // }
+                    }
                 });
 
                 sectScenarioHint['progressAtt'] = progressAtt;
@@ -1265,23 +1264,24 @@ module.exports = (io) => {
                     sectScenarioHint['attacksCnt'] = attackHint;
                 }
 
-                if(scenarioLv >= 3){
-                    // lv3: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
-                    var progAttackConn = {};
-                    // 현재 완료된 공격 불러와서 연결된 공격 저장 
-                    for (const attack of progressAtt){
-                        // progAttackConn[attack.attack] = 
-                        // {
-                        //     'category' : config.ATTACK_CATEGORY_DICT[attack.attIdx],
-                        //     'attack' :   config.SCENARIO1.attackConn[attack.attack]
-                        // }
-                        progAttackConn[attack.attack] = config["SCENARIO" +scenarioNum].attackConn[attack.attack];
+                // 다음 공격 해주는건 GetConnectedAtt 함수에서 해주는 것으로 변경
+                // if(scenarioLv >= 3){
+                //     // lv3: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
+                //     var progAttackConn = {};
+                //     // 현재 완료된 공격 불러와서 연결된 공격 저장 
+                //     for (const attack of progressAtt){
+                //         // progAttackConn[attack.attack] = 
+                //         // {
+                //         //     'category' : config.ATTACK_CATEGORY_DICT[attack.attIdx],
+                //         //     'attack' :   config.SCENARIO1.attackConn[attack.attack]
+                //         // }
+                //         progAttackConn[attack.attack] = config["SCENARIO" +scenarioNum].attackConn[attack.attack];
                     
                  
-                    }
+                //     }
 
-                    sectScenarioHint['progAttackConn'] = progAttackConn;
-                }
+                //     sectScenarioHint['progAttackConn'] = progAttackConn;
+                // }
 
                 if(scenarioLv >= 4){ 
                     // lv4: 모든 공격, 화살표 공개
@@ -1322,10 +1322,34 @@ module.exports = (io) => {
             console.log("!-- scenarioLv : ", scenarioLvList[data.scenario]);
 
             // check1. 레벨 3이상인지 확인
-            if(scenarioLv < 3) return; 
+            if(scenarioLv <= 2) return; 
 
-            // check2. 진행된 공격인지 확인
-            // <<TODO>>
+            // check2. 레벨 3이면 진행된 공격인지 확인 (attackConn 연결이 true이면 됨)
+            if(scenarioLv == 3){
+                var isAttacked = false;
+                
+                var sectionAttProgSenario = Object.values(roomTotalJson[0][data.company].sections[data.section].attackConn[0]);
+                console.log("sectionAttProgSenario :", sectionAttProgSenario);
+
+                var attackParents = [];
+                attackParents = config["SCENARIO" +scenarioNum].attackConnParent[data.attack];
+
+                console.log("attackParents :", attackParents);
+
+                for (const attParent in attackParents) {
+                    console.log("세부 t/f 1 : " , sectionAttProgSenario[attParent]);
+                    console.log("세부 t/f 2 : " , sectionAttProgSenario[attParent][data.attack]);
+                    if (sectionAttProgSenario[attParent][data.attack] == true){
+                        isAttacked = true;
+                        break;
+                    }
+                    
+                }
+
+                if (isAttacked == false){
+                    return;
+                }
+            } 
 
 
             // 공격 정보 뿌려주기
@@ -2497,7 +2521,7 @@ module.exports = (io) => {
                         suspicionCount : 0,
                         attackProgress : [],
                         // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
-                        attackSenarioProgress  : [ [] ],
+                        attackSenarioProgress  : [ [{ tactic: 'Reconnaissance', attackName: 'Gather Victim Network Information', state: 2}, { tactic: 'Initial Access', attackName: 'Exploit Public-Facing Application', state: 2}], [], [], [], []],
                         defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2544,7 +2568,7 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
                         attackConn : [
                             { 
-                                'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
+                                'Gather Victim Network Information': {"Exploit Public-Facing Application" : true, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
                                 'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
