@@ -227,7 +227,49 @@ module.exports = {
             'Exfiltration Over Web Service' : [
                 {'tactic' : "Impact", "tacticNum" : 13, "tech" :  "Data Encrypted for Impact"},
             ]
-    }
+        },
+
+        'attackConnParent': // 키 : 자식 공격, 값 : 자식과 연결 부모 공격들
+        {
+            'Exploit Public-Facing Application' : ['Gather Victim Network Information'],
+            'Phishing' : ['Gather Victim Network Information'],
+            'Valid Accounts' : ['Gather Victim Network Information'],
+
+
+            'Command and Scripting Interpreter' : ['Exploit Public-Facing Application',
+                                    'Phishing',
+                                    "Valid Accounts"],
+            
+            'Software Deployment Tools' : ['Exploit Public-Facing Application',
+                                    'Phishing',
+                                    "Valid Accounts"],
+
+            "Account Manipulation" : ['Command and Scripting Interpreter',
+                                    'Software Deployment Tools'],
+            
+            
+            "Scheduled Task/Job" : ['Command and Scripting Interpreter',
+                                    'Software Deployment Tools'],
+
+            "Abuse Elevation Control Mechanism" : ['Account Manipulation'],
+            "Indirect Command Execution" : ['Account Manipulation'],
+
+            'Screen Capture' : ['Scheduled Task/Job'],
+
+            'Exfiltration Over Alternative Protocol' : ['Scheduled Task/Job'],
+            'Exfiltration Over Web Service' : ['Scheduled Task/Job'],
+         
+            'Account Discovery' :  ['Abuse Elevation Control Mechanism'],
+            
+            'Brute Force' :  ['Abuse Elevation Control Mechanism',
+                            'Indirect Command Execution'],
+
+            "Communication Through Removable Media" :  ['Screen Capture'],
+
+            "Data Encrypted for Impact" : ['Exfiltration Over Alternative Protocol',
+                                    'Exfiltration Over Web Service']
+        }
+        
     },
     // SCENARIO1 :{
     //     'attacks': {
