@@ -1807,77 +1807,101 @@ module.exports = (io) => {
 
 
         // [Security Monitoring] MonitoringLog 분석 결과 전송 및 자동 대응
-        socket.on('Get_Monitoring_Log', async(corp) => {    
-            // 분석 결과 전송        
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+        socket.on('Get_Monitoring_Log', async(corp) => {
+            // 피타 확인 및 차감
+            const roomTotalJson_pita = JSON.parse(await jsonStore.getjson(socket.room));
+            var white_total_pita = roomTotalJson_pita[0].whiteTeam.total_pita;
+
             var corpName = corp;
-            var sectionsArr = roomTotalJson[0][corpName].sections;
-            var logArr = [];
-            sectionsArr.forEach( async(element, idx) => {
-                var sectionLogData = element.attackProgress;
-                sectionLogData.forEach(logElement => {
-                    switch (logElement.state) {
-                        case 1 :
-                            var newLog = {
-                                area: areaNameList[idx],
-                                tactic: logElement.tactic,
-                                attackName: logElement.attackName + " is in progress."
-                            }
-                            break;
-                        case 2 : 
-                            var newLog = {
-                                area: areaNameList[idx],
-                                tactic: logElement.tactic,
-                                attackName: logElement.attackName + "has been carried out."
-                            }
-                            break;
-                    }
-                    logArr.push(newLog);
-                });                
+            var areaArray = roomTotalJson_pita[0][corpName].sections;
+            var totalSuspicionCount = 0;
+            areaArray.forEach(element => {
+                totalSuspicionCount += element.suspicionCount;
             });
-            socket.emit('Monitoring_Log', logArr);
-            // [GameLog] 로그 추가
-            let today = new Date();   
-            let hours = today.getHours(); // 시
-            let minutes = today.getMinutes();  // 분
-            let seconds = today.getSeconds();  // 초
-            let now = hours+":"+minutes+":"+seconds;
-            var gameLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", detail: "Log analysis is complete."};
-            var logArr = [];
-            logArr.push(gameLog);
-            io.sockets.in(socket.room+'true').emit('addLog', logArr);
+            var totalCharge = (config.ANLAYZE_PER_ATTACKCNT * totalSuspicionCount);
+            console.log("공격개수 총합 >> ", totalSuspicionCount, totalCharge);
+            
+            if(white_total_pita - totalCharge < 0)
+            {
+                socket.emit("Short of Money");
+            } else {
+                // pita 차감
+                var newTotalPita = white_total_pita - totalCharge; //pita 감소
+                // 분석 결과 전송 및 차감
+                const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+                var corpName = corp;
+                var sectionsArr = roomTotalJson[0][corpName].sections;
+                var logArr = [];
+                roomTotalJson[0].whiteTeam.total_pita = newTotalPita;
+                await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
-            // 자동대응
-            // var sectionsArr = roomTotalJson[0][corpName].sections;
-            sectionsArr.forEach( async(element, sectionIdx) => {
-                var sectionDefenseProgressArr = element.defenseProgress;
-                var sectionDefenseActivationArr = element.defenseActive;
-                var defenseLv = element.defenseLv;
+                sectionsArr.forEach( async(element, idx) => {
+                    var sectionLogData = element.attackProgress;
+                    sectionLogData.forEach(logElement => {
+                        switch (logElement.state) {
+                            case 1 :
+                                var newLog = {
+                                    area: areaNameList[idx],
+                                    tactic: logElement.tactic,
+                                    attackName: logElement.attackName + " is in progress."
+                                }
+                                break;
+                            case 2 : 
+                                var newLog = {
+                                    area: areaNameList[idx],
+                                    tactic: logElement.tactic,
+                                    attackName: logElement.attackName + "has been carried out."
+                                }
+                                break;
+                        }
+                        logArr.push(newLog);
+                    });                
+                });
+                socket.emit('Monitoring_Log', logArr);
+                // [GameLog] 로그 추가
+                let today = new Date();   
+                let hours = today.getHours(); // 시
+                let minutes = today.getMinutes();  // 분
+                let seconds = today.getSeconds();  // 초
+                let now = hours+":"+minutes+":"+seconds;
+                var gameLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", detail: "Log analysis is complete."};
+                var logArr = [];
+                logArr.push(gameLog);
+                io.sockets.in(socket.room+'true').emit('addLog', logArr);
 
-                var sectionAttackData = element.attackProgress;
-                sectionAttackData.forEach( async(attackElement) => {
-                    console.log(attackElement.tactic, attackElement.attackName);
-                    
-                    var tacticIndex = config.ATTACK_CATEGORY.indexOf(attackElement.tactic);
-                    var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackElement.attackName);
-                    console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
+                // 자동대응
+                // var sectionsArr = roomTotalJson[0][corpName].sections;
+                sectionsArr.forEach( async(element, sectionIdx) => {
+                    var sectionDefenseProgressArr = element.defenseProgress;
+                    var sectionDefenseActivationArr = element.defenseActive;
+                    var defenseLv = element.defenseLv;
 
-                    if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
-                        sectionDefenseProgressArr[i].push(newInfo);
-                        console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
-                        // 0은 나중에 시나리오 인덱스로 변경
-                        DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
-                        socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
-                    } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
-                        sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
-                        let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
-                        socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
-                        console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
-                    }
-                    await jsonStore.updatejson(roomTotalJson[0], socket.room);
+                    var sectionAttackData = element.attackProgress;
+                    sectionAttackData.forEach( async(attackElement) => {
+                        console.log(attackElement.tactic, attackElement.attackName);
+                        
+                        var tacticIndex = config.ATTACK_CATEGORY.indexOf(attackElement.tactic);
+                        var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackElement.attackName);
+                        console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
 
-                });                
-            });
+                        if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
+                            sectionDefenseProgressArr[i].push(newInfo);
+                            console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
+                            // 0은 나중에 시나리오 인덱스로 변경
+                            DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
+                            socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+                        } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
+                            sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
+                            let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
+                            socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
+                            console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
+                        }
+                        await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+                    });                
+                });
+
+            }
         });
       
 

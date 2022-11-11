@@ -71,7 +71,10 @@ module.exports = {
     DELAY_TIME_PERCENT : [1, 1.5, 1.8, -1, -1],
     
     // 유지보수
-    MAINTENANCE_SECTION_INFO : { pita : [5, 6, 7, 8, 9] },
+    MAINTENANCE_SECTION_INFO : { pita : [40, 80, 120, 200, 320] },
+
+    // 로그 분석(공격 개수 당 피타)
+    ANLAYZE_PER_ATTACKCNT : 3,
     
     // 사전탐색
     EXPLORE_INFO : { pita : 10, time : 10 },
