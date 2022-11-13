@@ -71,7 +71,10 @@ module.exports = {
     DELAY_TIME_PERCENT : [1, 1.5, 1.8, -1, -1],
     
     // 유지보수
-    MAINTENANCE_SECTION_INFO : { pita : [5, 6, 7, 8, 9] },
+    MAINTENANCE_SECTION_INFO : { pita : [40, 80, 120, 200, 320] },
+
+    // 로그 분석(공격 개수 당 피타)
+    ANLAYZE_PER_ATTACKCNT : 3,
     
     // 사전탐색
     EXPLORE_INFO : { pita : 10, time : 10 },
@@ -224,51 +227,597 @@ module.exports = {
             'Exfiltration Over Web Service' : [
                 {'tactic' : "Impact", "tacticNum" : 13, "tech" :  "Data Encrypted for Impact"},
             ]
-    }
-    },
-    // SCENARIO1 :{
-    //     'attacks': {
-    //         '0': [[0,3]],
-    //         '1' : [],
-    //         '2' : [[2,1], [2,4], [2,8]],
-    //         '3' : [[3,0], [3,8]],
-    //         '4' : [[4,0]],
-    //         '5' : [[5,11]],
-    //         '6' : [[6,0], [6,4], [6,16]],
-    //         '7' : [[7,1]],
-    //         '8' : [[8,0]],
-    //         '9' : [],
-    //         '10' : [[10,15]],
-    //         '11' : [[11,1]],
-    //         '12' : [[12,2],[12,6]],
-    //         '13' : [[13,2]],
-    //     },
+        },
 
-    //     'startAttack' : [
-    //         [0,3]
-    //     ],
+        'attackConnParent': // 키 : 자식 공격, 값 : 자식과 연결 부모 공격들
+        {
+            'Exploit Public-Facing Application' : ['Gather Victim Network Information'],
+            'Phishing' : ['Gather Victim Network Information'],
+            'Valid Accounts' : ['Gather Victim Network Information'],
+
+
+            'Command and Scripting Interpreter' : ['Exploit Public-Facing Application',
+                                    'Phishing',
+                                    "Valid Accounts"],
+            
+            'Software Deployment Tools' : ['Exploit Public-Facing Application',
+                                    'Phishing',
+                                    "Valid Accounts"],
+
+            "Account Manipulation" : ['Command and Scripting Interpreter',
+                                    'Software Deployment Tools'],
+            
+            
+            "Scheduled Task/Job" : ['Command and Scripting Interpreter',
+                                    'Software Deployment Tools'],
+
+            "Abuse Elevation Control Mechanism" : ['Account Manipulation'],
+            "Indirect Command Execution" : ['Account Manipulation'],
+
+            'Screen Capture' : ['Scheduled Task/Job'],
+
+            'Exfiltration Over Alternative Protocol' : ['Scheduled Task/Job'],
+            'Exfiltration Over Web Service' : ['Scheduled Task/Job'],
+         
+            'Account Discovery' :  ['Abuse Elevation Control Mechanism'],
+            
+            'Brute Force' :  ['Abuse Elevation Control Mechanism',
+                            'Indirect Command Execution'],
+
+            "Communication Through Removable Media" :  ['Screen Capture'],
+
+            "Data Encrypted for Impact" : ['Exfiltration Over Alternative Protocol',
+                                    'Exfiltration Over Web Service']
+        }
         
-    //     'mainAttack' : [
-    //         [7,1], [8,0], [11,1], [13,2]
-    //     ],
+    },
 
-    //     'attackConn' : {
-    //        '[0,3]': [[2,1], [2,4], [2,8]],
-    //        '[2,1]' :  [[3,0], [3,8]],
-    //         '[2,4]' : [[3,0], [3,8]],
-    //         '[2,8]' : [[3,0], [3,8]],
-    //         '[3,0]' : [[4,0], [5,11]],
-    //         '[3,8]' : [[4,0], [5,11]],
-    //         '[4,0]' : [[6,0], [6,16]],
-    //         '[5,11]' : [[10,15],[12,2],[12,6]],
-    //         '[6,0]' : [[7,1], [8,0]],
-    //         '[6,16]' : [[7,1]],
-    //         '[10,15]' : [[11,1]],
-    //         '[12,2]' : [[13,2]],
-    //         '[12,6]' : [[13,2]]
-    //     }
+    SCENARIO2 :{
+        'attacks': {
+            '0': [],
+            '1' : ["Obtain Capabilities"],
+            '2' : ["Drive-by Compromise"],
+            '3' : ["Native API"],
+            '4' : [],
+            '5' : [],
+            '6' : ["Modify Registry"],
+            '7' : ["Brute Force"],
+            '8' : ["Browser Bookmark Discovery", "File and Directory Discovery", "Network Share Discovery", "Process Discovery",  "System Information Discovery", "System Network Configuration Discovery", "System Network Connections Discovery"],
+            '9' : [],
+            '10' : ["Clipboard Data", "Data from Local System"],
+            '11' : ["Ingress Tool Transfer"],
+            '12' : [],
+            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+        },
 
-    // }
+        'startAttack' : [
+            "Obtain Capabilities"
+        ],
+        
+        'mainAttack' : {
+            '11' : ["Ingress Tool Transfer"],
+            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+        },
+
+        'attackConn' : {
+            "Obtain Capabilities" : ["Drive-by Compromise", "Native API"],
+            "Drive-by Compromise" : ["Native API"],
+            "Native API" : ["Modify Registry"],
+            "Modify Registry" : ["Brute Force"],
+            "Brute Force" : ["Browser Bookmark Discovery", "File and Directory Discovery", "Network Share Discovery", "Process Discovery",  "System Information Discovery", "System Network Configuration Discovery", "System Network Connections Discovery"],
+            "Browser Bookmark Discovery" : ["Clipboard Data"],
+            "File and Directory Discovery" : ["Data from Local System"],
+            "Network Share Discovery" : ["Data from Local System"],
+            "Process Discovery"  : ["Data from Local System"],
+            "System Information Discovery" : ["Clipboard Data"],
+            "System Network Configuration Discovery" : ["Data from Local System"],
+            "System Network Connections Discovery": ["Data from Local System"],
+            "Clipboard Data" : ["Ingress Tool Transfer",  "System Shutdown/Reboot"],
+            "Data from Local System" : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+        },
+
+        'attackConnDetail':
+        {
+            "Obtain Capabilities" : [
+                {'tactic' : "Initial Access", "tacticNum" : 2, "tech" : "Drive-by Compromise"},
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Native API"},
+            ],
+            "Drive-by Compromise" : [
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Native API"},
+            ],
+
+            "Native API" : [
+                {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" :  "Modify Registry"},
+            ],
+
+            "Modify Registry" : [
+                {'tactic' : "Credential Access", "tacticNum" : 7, "tech" :   "Brute Force"},
+            ],
+
+            "Brute Force" : [
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Browser Bookmark Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "File and Directory Discovery", },
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Network Share Discovery" },
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Process Discovery"  },
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Information Discovery" },
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Network Configuration Discovery" },
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Network Connections Discovery" },
+            ],
+
+            "Browser Bookmark Discovery" : [
+                {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Clipboard Data"},
+            ],
+            "File and Directory Discovery" : [
+                {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],
+
+            "Network Share Discovery" : [
+                {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],
+
+            "Process Discovery"  : [
+                {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],
+
+            "System Information Discovery" : [
+                {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Clipboard Data"},
+            ],
+            "System Network Configuration Discovery" : [
+                {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],
+            "System Network Connections Discovery": [
+                {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],
+
+            "Clipboard Data" : [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Ingress Tool Transfer"},
+                {'tactic' : "Impact", "tacticNum" : 13, "tech" : "System Shutdown/Reboot"},
+            ],
+            
+            "Data from Local System" : [
+                {'tactic' : "Impact", "tacticNum" : 13, "tech" : "Data Destruction"},
+                {'tactic' : "Impact", "tacticNum" : 13, "tech" : "Data Encrypted for Impact"},
+                {'tactic' : "Impact", "tacticNum" : 13, "tech" : "System Shutdown/Reboot"},
+            ]
+        },
+
+        'attackConnParent': // 키 : 자식 공격, 값 : 자식과 연결 부모 공격들
+        {
+            "Drive-by Compromise" : [ "Obtain Capabilities" ],
+            "Native API" : ["Obtain Capabilities","Drive-by Compromise"],
+            "Modify Registry" : ["Native API"],
+            "Brute Force" : ["Modify Registry"],
+            "Browser Bookmark Discovery" : ["Brute Force"],
+            "File and Directory Discovery": ["Brute Force"], 
+            "Network Share Discovery": ["Brute Force"],
+            "Process Discovery": ["Brute Force"],
+            "System Information Discovery": ["Brute Force"],
+            "System Network Configuration Discovery": ["Brute Force"],
+            "System Network Connections Discovery": ["Brute Force"],
+            "Clipboard Data" : ["Browser Bookmark Discovery", "System Information Discovery"],
+            "Data from Local System" : ["File and Directory Discovery", "Network Share Discovery", "Process Discovery",  "System Information Discovery", "System Network Configuration Discovery", "System Network Connections Discovery"],
+            "Ingress Tool Transfer" : ["Clipboard Data"],
+            "Data Destruction" : ["Data from Local System"],
+            "Data Encrypted for Impact" : ["Data from Local System"],
+            "System Shutdown/Reboot" : ["Clipboard Data","Data from Local System"]
+        }
+        
+    },
+
+    SCENARIO3 :{
+        'attacks': {
+            '0': ["Gather Victim Org Information", "Search Victim-Owned Websites"],
+            '1' : ["Develop Capabilities"],
+            '2' : ["Exploit Public-Facing Application", "External Remote Services" ],
+            '3' : [],
+            '4' : ["Account Manipulation", "Browser Extensions"],
+            '5' : ["Process Injection"],
+            '6' : ["Deobfuscate/Decode Files or Information", "Masquerading", "Modify Registry", "Obfuscated Files or Information", "Process Injection" ],
+            '7' : ["Adversary-in-the-Middle", "Multi-Factor Authentication Interception"],
+            '8' : ["File and Directory Discovery", "Network Sniffing", "Process Discovery", "Query Registry", "System Information Discovery", "System Network Configuration Discovery", "System Service Discovery"],
+            '9' : ["Internal Spearphishing"],
+            '10' : ["Adversary-in-the-Middle", "Data from Local System"],
+            '11' : ["Ingress Tool Transfer", "Remote Access Software"],
+            '12' : ["Exfiltration Over C2 Channel"],
+            '13' : [],
+        },
+
+        'startAttack' : [
+            "Gather Victim Org Information", "Search Victim-Owned Websites"
+        ],
+        
+        'mainAttack' : {
+            '11' : ["Ingress Tool Transfer", "Remote Access Software"],
+            '12' : ["Exfiltration Over C2 Channel"],
+        },
+
+        'attackConn' : {
+            "Gather Victim Org Information" : ["Exploit Public-Facing Application", "External Remote Services" ],
+            "Search Victim-Owned Websites" : ["Develop Capabilities"],
+            "Develop Capabilities" : ["Exploit Public-Facing Application", "External Remote Services" ],
+            "Exploit Public-Facing Application" : ["Account Manipulation"],
+            "External Remote Services" : ["Account Manipulation", "Browser Extensions"],
+            "Account Manipulation" :  ["Process Injection"],
+            "Browser Extensions" :  ["Process Injection"],
+            "Process Injection" : ["Deobfuscate/Decode Files or Information","Multi-Factor Authentication Interception", "Masquerading", "Modify Registry", "Obfuscated Files or Information" ],
+            "Deobfuscate/Decode Files or Information" : ["Multi-Factor Authentication Interception"],
+            "Masquerading" : [ "Network Sniffing"],
+            "Modify Registry" : ["Query Registry"],
+            "Obfuscated Files or Information" : ["System Information Discovery", "System Network Configuration Discovery", "System Service Discovery"],
+            "Multi-Factor Authentication Interception" : ["File and Directory Discovery", "Process Discovery"],
+            "File and Directory Discovery" : ["Internal Spearphishing", "Data from Local System"],
+            "Network Sniffing": ["Internal Spearphishing"], 
+            "Process Discovery" :["Data from Local System"],
+            "Query Registry":["Data from Local System"], 
+            "System Information Discovery" : ["Remote Access Software"],
+            "System Network Configuration Discovery": ["Remote Access Software"],
+            "System Service Discovery" : ["Ingress Tool Transfer"],
+            "Internal Spearphishing": ["Adversary-in-the-Middle", "Data from Local System","Exfiltration Over C2 Channel"],
+            "Adversary-in-the-Middle" : ["Remote Access Software"], 
+            "Data from Local System": ["Ingress Tool Transfer"]
+        
+        },
+
+        'attackConnDetail':
+        {
+            "Gather Victim Org Information" : [
+                {'tactic' : "Initial Access", "tacticNum" : 2, "tech" : "Exploit Public-Facing Application"},
+                {'tactic' : "Initial Access", "tacticNum" : 2, "tech" :  "External Remote Services"},
+            ],
+            "Search Victim-Owned Websites" : [
+                {'tactic' : "Resource Development", "tacticNum" : 1, "tech" :  "Develop Capabilities"},
+            ],
+
+            "Develop Capabilities" : [ 
+                {'tactic' : "Initial Access", "tacticNum" : 2, "tech" : "Exploit Public-Facing Application"},
+                {'tactic' : "Initial Access", "tacticNum" : 2, "tech" :  "External Remote Services"},
+            ],
+            "Exploit Public-Facing Application" : [
+                {'tactic' : "Persistence" , "tacticNum" : 4, "tech" : "Account Manipulation"},
+            ],
+
+            "External Remote Services" : [
+                {'tactic' : "Persistence" , "tacticNum" : 4, "tech" : "Account Manipulation"},
+                {'tactic' : "Persistence" , "tacticNum" : 4, "tech" : "Browser Extensions"},
+            ],
+            "Account Manipulation" :  [
+                {'tactic' : "Privilege Escalation" , "tacticNum" : 5, "tech" : "Process Injection"},
+            ],
+            "Browser Extensions" :  [
+                {'tactic' : "Privilege Escalation" , "tacticNum" : 5, "tech" : "Process Injection"},
+            ],
+
+            "Process Injection" : [
+                {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Deobfuscate/Decode Files or Information"},
+                {'tactic' : "Credential Access" , "tacticNum" : 7, "tech" :  "Multi-Factor Authentication Interception" },
+                {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Masquerading" },
+                {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Modify Registry", },
+                {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Obfuscated Files or Information" },
+            ],
+
+            "Deobfuscate/Decode Files or Information" : [
+                {'tactic' : "Credential Access" , "tacticNum" : 7, "tech" :  "Multi-Factor Authentication Interception" },
+            ],
+            "Masquerading" : [
+                {'tactic' : "Discovery"  , "tacticNum" : 8, "tech" :  "Network Sniffing"},
+            ],
+            "Modify Registry" : [
+                {'tactic' : "Discovery"  , "tacticNum" : 8, "tech" :  "Query Registry"}
+            ],
+            "Obfuscated Files or Information" : [
+                {'tactic' : "Discovery"  , "tacticNum" : 8, "tech" :    "System Information Discovery"},
+                {'tactic' : "Discovery"  , "tacticNum" : 8, "tech" :  "System Network Configuration Discovery"},
+                {'tactic' : "Discovery"  , "tacticNum" : 8, "tech" :  "System Service Discovery"}
+            ],
+            "Multi-Factor Authentication Interception" : [
+                {'tactic' : "Discovery"  , "tacticNum" : 8, "tech" :  "File and Directory Discovery"},
+                {'tactic' : "Discovery"  , "tacticNum" : 8, "tech" :  "Process Discovery"},
+            ],
+            "File and Directory Discovery" : [
+                {'tactic' : "Lateral Movement"  , "tacticNum" : 9, "tech" : "Internal Spearphishing"},
+                {'tactic' : "Collection"   , "tacticNum" : 10, "tech" :"Data from Local System"},
+            ],
+            "Network Sniffing": [
+                {'tactic' : "Lateral Movement"  , "tacticNum" : 9, "tech" : "Internal Spearphishing"},
+            ], 
+            "Process Discovery" :[
+                {'tactic' : "Collection"   , "tacticNum" : 10, "tech" :"Data from Local System"},
+            ],
+            "Query Registry":[
+                {'tactic' : "Collection"   , "tacticNum" : 10, "tech" :"Data from Local System"},
+            ], 
+            "System Information Discovery" : [
+                {'tactic' : "Command and Control"  , "tacticNum" : 11, "tech" :"Remote Access Software"},
+            ],
+            "System Network Configuration Discovery": [
+                {'tactic' : "Command and Control"  , "tacticNum" : 11, "tech" :"Remote Access Software"},
+            ],
+            "System Service Discovery" : [
+                {'tactic' : "Command and Control"  , "tacticNum" : 11, "tech" :"Ingress Tool Transfer"},
+            ],
+            "Internal Spearphishing": [
+                {'tactic' : "Collection"   , "tacticNum" : 10, "tech" :"Adversary-in-the-Middle"},
+                {'tactic' : "Collection"   , "tacticNum" : 10, "tech" :"Data from Local System"},
+                {'tactic' : "Exfiltration"    , "tacticNum" : 12, "tech" :"Exfiltration Over C2 Channel"},
+            ],
+            "Adversary-in-the-Middle" : [
+                {'tactic' : "Command and Control"  , "tacticNum" : 11, "tech" :"Remote Access Software"},
+            ],
+            "Data from Local System": [
+                {'tactic' : "Command and Control"  , "tacticNum" : 11, "tech" :"Ingress Tool Transfer"},
+            ]
+        },
+
+        'attackConnParent': // 키 : 자식 공격, 값 : 자식과 연결 부모 공격들
+        {
+            "Develop Capabilities" : ["Search Victim-Owned Websites"],
+            "Exploit Public-Facing Application" : ["Gather Victim Org Information","Develop Capabilities" ],
+            "External Remote Services" : ["Gather Victim Org Information","Develop Capabilities" ],
+            "Account Manipulation" : [ "Exploit Public-Facing Application",   "External Remote Services" ],
+            "Browser Extensions" :  [ "Exploit Public-Facing Application",   "External Remote Services" ],
+            "Process Injection" : ["Account Manipulation","Browser Extensions" ],
+            "Deobfuscate/Decode Files or Information" : ["Process Injection"],
+            "Masquerading" : ["Process Injection"],
+            "Modify Registry" :["Process Injection"],
+            "Obfuscated Files or Information" : ["Process Injection"],
+            "Multi-Factor Authentication Interception" : ["Deobfuscate/Decode Files or Information", "Process Injection"],
+            "File and Directory Discovery" : [ "Multi-Factor Authentication Interception"],
+            "Network Sniffing": ["Masquerading"],
+            "Process Discovery" : [ "Multi-Factor Authentication Interception"],
+            "Query Registry": ["Modify Registry"],
+            "System Information Discovery" : ["Obfuscated Files or Information"],
+            "System Network Configuration Discovery": ["Obfuscated Files or Information"],
+            "System Service Discovery" : ["Obfuscated Files or Information"],
+            "Internal Spearphishing":  [  "File and Directory Discovery","Network Sniffing"],
+            "Adversary-in-the-Middle"  : ["Internal Spearphishing"],
+            "Data from Local System": ["Internal Spearphishing","File and Directory Discovery",  "Process Discovery", "Query Registry"],
+            "Ingress Tool Transfer" : [   "System Service Discovery" , "Data from Local System"],
+            "Remote Access Software" : ["Adversary-in-the-Middle" ,"System Information Discovery", "System Network Configuration Discovery"],
+            "Exfiltration Over C2 Channel" : ["Internal Spearphishing"]
+        }
+        
+    },
+
+    SCENARIO4 :{
+        'attacks': {
+            '0': [],
+            '1' : [],
+            '2' : ["Drive-by Compromise"],
+            '3' : ["Native API"],
+            '4' : [],
+            '5' : [],
+            '6' : ["Modify Registry"],
+            '7' : ["Brute Force"],
+            '8' : ["Browser Bookmark Discovery", "File and Directory Discovery", "Network Share Discovery", "Process Discovery", "System Information Discovery", "System Network Connections Discovery", "System Owner/User Discovery"],
+            '9' : [],
+            '10' : ["Clipboard Data", "Data from Local System" ],
+            '11' : ["Ingress Tool Transfer"],
+            '12' : [],
+            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+        },
+
+        'startAttack' : [
+            "Drive-by Compromise"
+        ],
+        
+        'mainAttack' : {
+            '7' : ["Brute Force"],
+            '11' : ["Ingress Tool Transfer"],
+            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+        },
+
+        'attackConn' : {
+            "Drive-by Compromise" : ["Native API"],
+            "Native API" : ["Modify Registry"],
+            "Modify Registry" : ["Brute Force","Browser Bookmark Discovery", "File and Directory Discovery", "Network Share Discovery", "Process Discovery", "System Information Discovery", "System Network Connections Discovery", "System Owner/User Discovery"],
+            "Browser Bookmark Discovery" : ["Clipboard Data"], 
+            "File and Directory Discovery": ["Clipboard Data"],  
+            "Network Share Discovery": ["Data from Local System"], 
+            "Process Discovery": ["Data from Local System"],  
+            "System Information Discovery": ["Data from Local System"], 
+            "System Network Connections Discovery": ["Data from Local System"], 
+            "System Owner/User Discovery": ["Data from Local System"], 
+            "Clipboard Data": [ "System Shutdown/Reboot" ],
+            "Data from Local System" : ["Ingress Tool Transfer", "Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+        },
+
+        'attackConnDetail':
+        {
+            "Drive-by Compromise" : [
+                {'tactic' : "Execution" , "tacticNum" : 3, "tech" :  "Native API"},
+            ],
+            "Native API" : [
+                {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Modify Registry"},
+            ],
+            "Modify Registry" : [
+                {'tactic' : "Credential Access" , "tacticNum" : 7, "tech" :  "Brute Force"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "Browser Bookmark Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "File and Directory Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "Network Share Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "Process Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Information Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Network Connections Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Owner/User Discovery"},
+            ],
+
+            "Browser Bookmark Discovery" : [
+                {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Clipboard Data"},
+            ], 
+            "File and Directory Discovery": [
+                {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Clipboard Data"},
+            ], 
+            "Network Share Discovery": [
+                {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],  
+            "Process Discovery": [
+                {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],    
+            "System Information Discovery": [
+                {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],  
+            "System Network Connections Discovery": [
+                {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],  
+            "System Owner/User Discovery": [
+                {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Data from Local System"},
+            ],  
+            "Clipboard Data": [ 
+                {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "System Shutdown/Reboot"},
+            ],
+            "Data from Local System" : [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Ingress Tool Transfer"},
+                {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "Data Destruction"},
+                {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "Data Encrypted for Impact"},
+                {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "System Shutdown/Reboot"},
+            ],
+        },
+
+        'attackConnParent': // 키 : 자식 공격, 값 : 자식과 연결 부모 공격들
+        {
+            "Native API" : ["Drive-by Compromise"],
+            "Modify Registry" : ["Native API"],
+            "Brute Force" : ["Modify Registry" ],
+            "Browser Bookmark Discovery" : ["Modify Registry"],
+            "File and Directory Discovery" : ["Modify Registry"],
+            "Network Share Discovery" : ["Modify Registry"],
+            "Process Discovery" : ["Modify Registry"],
+            "System Information Discovery" : ["Modify Registry"],
+            "System Network Connections Discovery" : ["Modify Registry"],
+            "System Owner/User Discovery" : ["Modify Registry"],
+            "Clipboard Data" :["Browser Bookmark Discovery", "File and Directory Discovery","System Information Discovery" ],
+            "Data from Local System" : ["Network Share Discovery", "Process Discovery", "System Network Connections Discovery", "System Owner/User Discovery" ],
+            "Ingress Tool Transfer" : [  "Data from Local System"],
+            "Data Destruction" :  [  "Data from Local System"],
+            "Data Encrypted for Impact" : [  "Data from Local System"], 
+            "System Shutdown/Reboot" : [ "Clipboard Data",  "Data from Local System"],
+        }
+        
+    },
+
+    SCENARIO5 :{
+        'attacks': {
+            '0': [],
+            '1' : [],
+            '2' : ["Drive-by Compromise", "Exploit Public-Facing Application"],
+            '3' : ["Windows Management Instrumentation"],
+            '4' : ["Scheduled Task/Job"],
+            '5' : [],
+            '6' : ["Deobfuscate/Decode Files or Information", "Modify Registry", "Obfuscated Files or Information" ],
+            '7' : [],
+            '8' : ["Domain Trust Discovery", "Process Discovery", "Remote System Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner/User Discovery", "System Service Discovery"  ],
+            '9' : ["Exploitation of Remote Services"],
+            '10' : [],
+            '11' : ["Proxy"],
+            '12' : [],
+            '13' : [],
+        },
+
+        'startAttack' : [
+            "Drive-by Compromise", "Exploit Public-Facing Application"
+        ],
+        
+        'mainAttack' : {
+            '9' : ["Exploitation of Remote Services"],
+            '11' : ["Proxy"],
+        },
+
+        'attackConn' : {
+            "Drive-by Compromise": ["Windows Management Instrumentation"],
+            "Exploit Public-Facing Application": ["Windows Management Instrumentation"],
+            "Windows Management Instrumentation" : ["Scheduled Task/Job"],
+            "Scheduled Task/Job" : ["Deobfuscate/Decode Files or Information", "Modify Registry", "Obfuscated Files or Information" ],
+            "Deobfuscate/Decode Files or Information" : ["Domain Trust Discovery", "System Network Configuration Discovery",  "System Owner/User Discovery"  ],
+            "Modify Registry" : ["Process Discovery"],
+            "Obfuscated Files or Information"  : ["Remote System Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner/User Discovery", "System Service Discovery"  ],
+            "Domain Trust Discovery" : ["Proxy"],
+            "Process Discovery" : ["Proxy"],
+            "Remote System Discovery" : ["Exploitation of Remote Services"],
+            "System Network Configuration Discovery": ["Proxy"],
+            "System Network Connections Discovery": ["Proxy"],
+            "System Owner/User Discovery": ["Proxy"],
+            "System Service Discovery": ["Proxy"]
+        },
+
+        'attackConnDetail':
+        {
+            "Drive-by Compromise": [
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Windows Management Instrumentation"},
+            ],
+            
+            "Exploit Public-Facing Application": [   
+                {'tactic' : "Execution", "tacticNum" : 3, "tech" : "Windows Management Instrumentation"},
+            ],
+
+            "Windows Management Instrumentation" : [
+                {'tactic' : "Persistence", "tacticNum" : 4, "tech" : "Scheduled Task/Job"},
+            ],
+        
+            "Scheduled Task/Job" : [
+                {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Deobfuscate/Decode Files or Information"},
+                {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Modify Registry"},
+                {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Obfuscated Files or Information"},
+            ],
+            
+            "Deobfuscate/Decode Files or Information" : [
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Domain Trust Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Network Configuration Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Owner/User Discovery"},
+            ],
+            
+            "Modify Registry" : [
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Process Discovery"},
+            ],
+
+            "Obfuscated Files or Information"  : [
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Remote System Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Network Configuration Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Network Connections Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Owner/User Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Service Discovery"},
+            ],
+            "Domain Trust Discovery" : [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Proxy"},
+            ],
+            "Process Discovery" : [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Proxy"},
+            ],
+            "Remote System Discovery" : [
+                {'tactic' : "Lateral Movemen", "tacticNum" : 9, "tech" : "Exploitation of Remote Services"},
+            ],
+            "System Network Configuration Discovery": [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Proxy"},
+            ],
+            "System Network Connections Discovery": [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Proxy"},
+            ],
+            "System Owner/User Discovery": [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Proxy"},
+            ],
+            "System Service Discovery": [
+                {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Proxy"},
+            ],
+        },
+
+        'attackConnParent': // 키 : 자식 공격, 값 : 자식과 연결 부모 공격들
+        {
+            "Windows Management Instrumentation" : ["Drive-by Compromise", "Exploit Public-Facing Application"],
+            "Scheduled Task/Job" : ["Windows Management Instrumentation"],
+            "Deobfuscate/Decode Files or Information": ["Scheduled Task/Job"],
+            "Modify Registry": ["Scheduled Task/Job"],
+            "Obfuscated Files or Information" : ["Scheduled Task/Job"],
+            "Domain Trust Discovery": ["Deobfuscate/Decode Files or Information"],
+            "Process Discovery" : [ "Modify Registry"] ,
+            "Remote System Discovery": [ "Modify Registry"] , 
+            "System Network Configuration Discovery": [ "Deobfuscate/Decode Files or Information", "Obfuscated Files or Information"] ,
+            "System Network Connections Discovery": [ "Obfuscated Files or Information"] ,
+            "System Owner/User Discovery": [ "Deobfuscate/Decode Files or Information", "Obfuscated Files or Information"] , 
+            "System Service Discovery": [ "Obfuscated Files or Information"] ,
+            "Exploitation of Remote Services": [ "Process Discovery" ],
+            "Proxy" : ["Domain Trust Discovery",   "Process Discovery","System Network Configuration Discovery", "System Network Connections Discovery",
+                        "System Owner/User Discovery", "System Service Discovery" ]
+        }
+        
+    },
 
     ATTACK_CATEGORY_DICT : {"Reconnaissance" : 0, "Resource Development" : 1, "Initial Access" : 2, "Execution" : 3, "Persistence" : 4 , "Privilege Escalation" : 5 , "Defense Evasion" : 6,
     "Credential Access" :7, "Discovery" : 8, "Lateral Movement" :  9, "Collection" : 10, "Command and Control" : 11, "Exfiltration" : 12, "Impact" : 13},

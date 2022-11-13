@@ -1065,7 +1065,7 @@ module.exports = (io) => {
             console.log("[[[InitGame]] socket.nickname, team : ", socket.nickname, socket.team);
             socket.emit('Visible LimitedTime', socket.team.toString()); // actionbar
 
-            // Timer 시작
+            // Timer 시작(게임전체시간)
             var time = 600; //600=10분, 1분 -> 60
             var min = "";
             var sec = "";
@@ -1224,20 +1224,19 @@ module.exports = (io) => {
                     scenarioLv : scenarioLv
                 };
 
-                var attackHint = [];
-                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackSenarioProgress[data.scenario];
-                
+                var attackHint = []; 
                 var progressAtt = [];
 
-                // 단계 1. 현재 진행된 (state 2) 공격 뽑기
-                // 수정 ver. state 2인건 뺌
+                // 단계 1. 현재 진행 중인 공격 뽑기 (attackSenarioProgress스키마)
+                var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackSenarioProgress[data.scenario];
+                console.log("sectionAttProgSenario :", sectionAttProgSenario);
                 sectionAttProgSenario.forEach((value, index, array) => {
                     console.log(`${index} :  ${value.attackName}`); 
-                    // if(value.state==2){
+                    if(value.state==2){
                         var attIdx = config.ATTACK_CATEGORY_DICT[value.tactic];
                     //    progressAtt[attIdx] = [value.attackName]; // 중복 들어가면 어쩌지
                         progressAtt.push    ({'attIdx' : attIdx, 'attack' : value.attackName});
-                    // }
+                    }
                 });
 
                 sectScenarioHint['progressAtt'] = progressAtt;
@@ -1265,23 +1264,24 @@ module.exports = (io) => {
                     sectScenarioHint['attacksCnt'] = attackHint;
                 }
 
-                if(scenarioLv >= 3){
-                    // lv3: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
-                    var progAttackConn = {};
-                    // 현재 완료된 공격 불러와서 연결된 공격 저장 
-                    for (const attack of progressAtt){
-                        // progAttackConn[attack.attack] = 
-                        // {
-                        //     'category' : config.ATTACK_CATEGORY_DICT[attack.attIdx],
-                        //     'attack' :   config.SCENARIO1.attackConn[attack.attack]
-                        // }
-                        progAttackConn[attack.attack] = config["SCENARIO" +scenarioNum].attackConn[attack.attack];
+                // 다음 공격 해주는건 GetConnectedAtt 함수에서 해주는 것으로 변경
+                // if(scenarioLv >= 3){
+                //     // lv3: 현재 완료된 공격 다음에 갈 수 있는 다음 화살표
+                //     var progAttackConn = {};
+                //     // 현재 완료된 공격 불러와서 연결된 공격 저장 
+                //     for (const attack of progressAtt){
+                //         // progAttackConn[attack.attack] = 
+                //         // {
+                //         //     'category' : config.ATTACK_CATEGORY_DICT[attack.attIdx],
+                //         //     'attack' :   config.SCENARIO1.attackConn[attack.attack]
+                //         // }
+                //         progAttackConn[attack.attack] = config["SCENARIO" +scenarioNum].attackConn[attack.attack];
                     
                  
-                    }
+                //     }
 
-                    sectScenarioHint['progAttackConn'] = progAttackConn;
-                }
+                //     sectScenarioHint['progAttackConn'] = progAttackConn;
+                // }
 
                 if(scenarioLv >= 4){ 
                     // lv4: 모든 공격, 화살표 공개
@@ -1322,10 +1322,34 @@ module.exports = (io) => {
             console.log("!-- scenarioLv : ", scenarioLvList[data.scenario]);
 
             // check1. 레벨 3이상인지 확인
-            if(scenarioLv < 3) return; 
+            if(scenarioLv <= 2) return; 
 
-            // check2. 진행된 공격인지 확인
-            // <<TODO>>
+            // check2. 레벨 3이면 진행된 공격인지 확인 (attackConn 연결이 true이면 됨)
+            if(scenarioLv == 3){
+                var isAttacked = false;
+                
+                var sectionAttProgSenario = Object.values(roomTotalJson[0][data.company].sections[data.section].attackConn[0]);
+                console.log("sectionAttProgSenario :", sectionAttProgSenario);
+
+                var attackParents = [];
+                attackParents = config["SCENARIO" +scenarioNum].attackConnParent[data.attack];
+
+                console.log("attackParents :", attackParents);
+
+                for (const attParent in attackParents) {
+                    console.log("세부 t/f 1 : " , sectionAttProgSenario[attParent]);
+                    console.log("세부 t/f 2 : " , sectionAttProgSenario[attParent][data.attack]);
+                    if (sectionAttProgSenario[attParent][data.attack] == true){
+                        isAttacked = true;
+                        break;
+                    }
+                    
+                }
+
+                if (isAttacked == false){
+                    return;
+                }
+            } 
 
 
             // 공격 정보 뿌려주기
@@ -1749,11 +1773,44 @@ module.exports = (io) => {
                     var newTotalPita = white_total_pita - config.MAINTENANCE_SECTION_INFO.pita[roomTotalJson[0][corpName].sections[sectionIdx].level]; //pita 감소
                     roomTotalJson[0].whiteTeam.total_pita = newTotalPita;
                     roomTotalJson[0][corpName].sections[sectionIdx].level += 1; // 레벨 증가
+                    var attackProgressLen = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress.length;
+                    newLevel = roomTotalJson[0][corpName].sections[sectionIdx].level;
+
+                    // 레벨에 맞게 의심 개수 갱신
+                    newSusCnt = 0
+                    switch (newLevel) {
+                        case 1: // 1~5개
+                            for (var i=0; i<attackProgressLen; i++){
+                                newSusCnt = newSusCnt + (Math.floor(Math.random() * 5) + 1);
+                            }
+                            break;
+                        case 2: // 1~3개
+                            for (var i=0; i<attackProgressLen; i++){
+                                newSusCnt = newSusCnt + Math.floor(Math.random() * 3) + 1;
+                            }                            
+                            break;
+                        case 3: // 0~3개
+                            for (var i=0; i<attackProgressLen; i++){
+                                newSusCnt = newSusCnt + Math.floor(Math.random() * 4);
+                            }                             
+                            break;
+                        case 4: // 0~2개
+                            for (var i=0; i<attackProgressLen; i++){
+                                newSusCnt = newSusCnt + Math.floor(Math.random() * 3);
+                            } 
+                            break;
+                        case 5:
+                            newSusCnt = attackProgressLen;
+                            break;
+                    }
+                    roomTotalJson[0][corpName].sections[sectionIdx].suspicionCount = newSusCnt;
+                    console.log("new sus CNT LV >> ", newSusCnt);
                     await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
                     var area_level = sectionIdx.toString() + "-" + (roomTotalJson[0][corpName].sections[sectionIdx].level);
                     io.sockets.in(socket.room+'true').emit('New_Level', corpName, area_level.toString());
                     io.sockets.in(socket.room+'true').emit('Update Pita', newTotalPita);
+                    io.sockets.in(socket.room+'true').emit('Issue_Count_Update', corpName);
                 }
             }
         });
@@ -1766,71 +1823,94 @@ module.exports = (io) => {
             var sectionsArr = roomTotalJson[0][corpName].sections;
             var cntArr = [];
             sectionsArr.forEach( async(element, idx) => {
-                var sectionData = element.attackProgress.length;
+                var sectionData = element.suspicionCount;
                 cntArr[idx] = sectionData;
             });
-            socket.emit('Issue_Count', cntArr);
+            socket.emit('Issue_Count', cntArr, corpName);
         });
 
 
         // [Security Monitoring] MonitoringLog 분석 결과 전송 및 자동 대응
-        socket.on('Get_Monitoring_Log', async(corp) => {    
-            // 분석 결과 전송        
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+        socket.on('Get_Monitoring_Log', async(corp) => {
+            // 피타 확인 및 차감
+            const roomTotalJson_pita = JSON.parse(await jsonStore.getjson(socket.room));
+            var white_total_pita = roomTotalJson_pita[0].whiteTeam.total_pita;
+
             var corpName = corp;
-            var sectionsArr = roomTotalJson[0][corpName].sections;
-            var logArr = [];
-            sectionsArr.forEach( async(element, idx) => {
-                var sectionLogData = element.attackProgress;
-                sectionLogData.forEach(logElement => {
-                    switch (logElement.state) {
-                        case 1 :
-                            var newLog = {
-                                area: areaNameList[idx],
-                                tactic: logElement.tactic,
-                                attackName: logElement.attackName + " is in progress."
-                            }
-                            break;
-                        case 2 : 
-                            var newLog = {
-                                area: areaNameList[idx],
-                                tactic: logElement.tactic,
-                                attackName: logElement.attackName + "has been carried out."
-                            }
-                            break;
-                    }
-                    logArr.push(newLog);
-                });                
+            var areaArray = roomTotalJson_pita[0][corpName].sections;
+            var totalSuspicionCount = 0;
+            areaArray.forEach(element => {
+                totalSuspicionCount += element.suspicionCount;
             });
-            socket.emit('Monitoring_Log', logArr);
-            // [GameLog] 로그 추가
-            let today = new Date();   
-            let hours = today.getHours(); // 시
-            let minutes = today.getMinutes();  // 분
-            let seconds = today.getSeconds();  // 초
-            let now = hours+":"+minutes+":"+seconds;
-            var gameLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", detail: "Log analysis is complete."};
-            var logArr = [];
-            logArr.push(gameLog);
-            io.sockets.in(socket.room+'true').emit('addLog', logArr);
+            var totalCharge = (config.ANLAYZE_PER_ATTACKCNT * totalSuspicionCount);
+            console.log("공격개수 총합 >> ", totalSuspicionCount, totalCharge);
+            
+            if(white_total_pita - totalCharge < 0)
+            {
+                socket.emit("Short of Money");
+            } else {
+                // pita 차감
+                var newTotalPita = white_total_pita - totalCharge; //pita 감소
+                // 분석 결과 전송 및 차감
+                const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+                var corpName = corp;
+                var sectionsArr = roomTotalJson[0][corpName].sections;
+                var logArr = [];
+                roomTotalJson[0].whiteTeam.total_pita = newTotalPita;
+                await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
-            // 자동대응
-            // var sectionsArr = roomTotalJson[0][corpName].sections;
-            sectionsArr.forEach( async(element, sectionIdx) => {
-                var sectionDefenseProgressArr = element.defenseProgress;
-                var sectionDefenseActivationArr = element.defenseActive;
-                var defenseLv = element.defenseLv;
+                sectionsArr.forEach( async(element, idx) => {
+                    var sectionLogData = element.attackProgress;
+                    sectionLogData.forEach(logElement => {
+                        switch (logElement.state) {
+                            case 1 :
+                                var newLog = {
+                                    area: areaNameList[idx],
+                                    tactic: logElement.tactic,
+                                    attackName: logElement.attackName + " is in progress."
+                                }
+                                break;
+                            case 2 : 
+                                var newLog = {
+                                    area: areaNameList[idx],
+                                    tactic: logElement.tactic,
+                                    attackName: logElement.attackName + "has been carried out."
+                                }
+                                break;
+                        }
+                        logArr.push(newLog);
+                    });                
+                });
+                //socket.emit('Monitoring_Log', logArr, corpName);
+                io.sockets.in(socket.room+'true').emit('Monitoring_Log', logArr, corpName);
+                // [GameLog] 로그 추가
+                let today = new Date();   
+                let hours = today.getHours(); // 시
+                let minutes = today.getMinutes();  // 분
+                let seconds = today.getSeconds();  // 초
+                let now = hours+":"+minutes+":"+seconds;
+                var gameLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", detail: "Log analysis is complete."};
+                var logArr = [];
+                logArr.push(gameLog);
+                io.sockets.in(socket.room+'true').emit('addLog', logArr);
 
-                var sectionAttackData = element.attackProgress;
-                sectionAttackData.forEach( async(attackElement) => {
-                    console.log(attackElement.tactic, attackElement.attackName);
-                    
-                    var tacticIndex = config.ATTACK_CATEGORY.indexOf(attackElement.tactic);
-                    var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackElement.attackName);
-                    console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
+                // 자동대응
+                // var sectionsArr = roomTotalJson[0][corpName].sections;
+                sectionsArr.forEach( async(element, sectionIdx) => {
+                    var sectionDefenseProgressArr = element.defenseProgress;
+                    var sectionDefenseActivationArr = element.defenseActive;
+                    var defenseLv = element.defenseLv;
+
+                    var sectionAttackData = element.attackProgress;
+                    sectionAttackData.forEach( async(attackElement) => {
+                        console.log(attackElement.tactic, attackElement.attackName);
+                        
+                        var tacticIndex = config.ATTACK_CATEGORY.indexOf(attackElement.tactic);
+                        var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackElement.attackName);
+                        console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
 
                     if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
-                        sectionDefenseProgressArr.push(newInfo);
+                        sectionDefenseProgressArr[i].push(newInfo);
                         console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
                         // 0은 나중에 시나리오 인덱스로 변경
                         DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
@@ -1843,103 +1923,75 @@ module.exports = (io) => {
                     }
                     await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
-                });                
-            });
-        });
-
-
-        // [SectionState] Section Destroy
-        socket.on('Get_Section_Destroy_State', async(corp) => {            
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var corpName = corp;
-            var sections = {sections: roomTotalJson[0][corpName].sections};
-            socket.emit('Section_Destroy_State', JSON.stringify(sections));
-        });
-
-        // [SectionState] Section Attacked Name
-        socket.on('Get_Section_Attacked_Name', async(corp) => {
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            var corpName = corp;
-            var sections = {sections: roomTotalJson[0][corpName].sections}
-            socket.emit('Section_Attacked_Name', JSON.stringify(sections));
-        });
-
-        
-
-        // [Abandon] 한 회사의 모든 영역이 파괴되었는지 확인 후 몰락 여부 결정
-        socket.on('is_All_Sections_Destroyed', async(corpName) => {
-            console.log("[Abandon]is_All_Sections_Destroyed " + corpName);
-            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            
-            var isAbondon = true;
-            var sectionsArr = roomTotalJson[0][corpName].sections;
-            for(i=0; i<sectionsArr.length; i++)
-            {
-                var isDestroy = roomTotalJson[0][corpName].sections[i].destroyStatus;
-                console.log("[Abandon]isDestroy " + i+isDestroy.toString());
-                if(isDestroy == false){ // 한 영역이라도 false면 반복문 나감
-                    isAbondon = false;
-                    break;
-                }
-            }
-            console.log("[Abandon] isAbondon " + isAbondon);
-
-            if(isAbondon == true){ // 회사 몰락
-                console.log("[Abandon] 회사몰락 " + corpName);
-                roomTotalJson[0][corpName].abandonStatus = true;
-                await jsonStore.updatejson(roomTotalJson[0], socket.room);
-
-                // [GameLog] 로그 추가
-                const blackLogJson = JSON.parse(await jsonStore.getjson(socket.room+":blackLog"));
-                const whiteLogJson = JSON.parse(await jsonStore.getjson(socket.room+":whiteLog"));
-
-                let today = new Date();   
-                let hours = today.getHours(); // 시
-                let minutes = today.getMinutes();  // 분
-                let seconds = today.getSeconds();  // 초
-                let now = hours+":"+minutes+":"+seconds;
-                var monitoringLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", actionType: "Damage", detail: corpName+"회사가 파괴되었습니다"};
-
-                blackLogJson[0].push(monitoringLog);
-                whiteLogJson[0].push(monitoringLog);
-                await jsonStore.updatejson(blackLogJson[0], socket.room+":blackLog");
-                await jsonStore.updatejson(whiteLogJson[0], socket.room+":whiteLog");
-
-                var logArr = [];
-                logArr.push(monitoringLog);
-                io.sockets.in(socket.room+'false').emit('addLog', logArr);
-                io.sockets.in(socket.room+'true').emit('addLog', logArr);
-
-                // 회사 아이콘 색상 변경
-                let abandonStatusList = [];
-                for(let company of companyNameList){
-                    abandonStatusList.push(roomTotalJson[0][company]["abandonStatus"]);
-                }
-                
-                console.log("Section Destroy -> abandonStatusList : ", abandonStatusList);
-
-                io.sockets.in(socket.room).emit('Company Status', abandonStatusList);  // 블랙, 화이트 두 팀 모두에게 보냄
-                // io.sockets.in(socket.room).emit('Company Status', abandonStatusList);
-
-
-                // 모든 회사가 몰락인지 확인
-                AllAbandon(socket, roomTotalJson);
-
-                gameLogger.info("game:destroy company", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userId,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : "sdfsdfb124gvv",
-                        companyName : corpName
-                    },
+                    });                
                 });
 
             }
-            
         });
+      
+
+        // // [Abandon] 한 회사의 모든 영역이 파괴되었는지 확인 후 몰락 여부 결정
+        // socket.on('is_All_Sections_Destroyed', async(corpName) => {
+        //     console.log("[Abandon]is_All_Sections_Destroyed " + corpName);
+        //     const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            
+        //     var isAbondon = true;
+        //     var sectionsArr = roomTotalJson[0][corpName].sections;
+        //     for(i=0; i<sectionsArr.length; i++)
+        //     {
+        //         var isDestroy = roomTotalJson[0][corpName].sections[i].destroyStatus;
+        //         console.log("[Abandon]isDestroy " + i+isDestroy.toString());
+        //         if(isDestroy == false){ // 한 영역이라도 false면 반복문 나감
+        //             isAbondon = false;
+        //             break;
+        //         }
+        //     }
+        //     console.log("[Abandon] isAbondon " + isAbondon);
+
+        //     if(isAbondon == true){ // 회사 몰락
+        //         console.log("[Abandon] 회사몰락 " + corpName);
+        //         roomTotalJson[0][corpName].abandonStatus = true;
+        //         await jsonStore.updatejson(roomTotalJson[0], socket.room);
+
+        //         // [GameLog] 로그 추가
+        //         const blackLogJson = JSON.parse(await jsonStore.getjson(socket.room+":blackLog"));
+        //         const whiteLogJson = JSON.parse(await jsonStore.getjson(socket.room+":whiteLog"));
+
+        //         let today = new Date();   
+        //         let hours = today.getHours(); // 시
+        //         let minutes = today.getMinutes();  // 분
+        //         let seconds = today.getSeconds();  // 초
+        //         let now = hours+":"+minutes+":"+seconds;
+        //         var monitoringLog = {time: now, nickname: "", targetCompany: corpName, targetSection: "", actionType: "Damage", detail: corpName+"회사가 파괴되었습니다"};
+
+        //         blackLogJson[0].push(monitoringLog);
+        //         whiteLogJson[0].push(monitoringLog);
+        //         await jsonStore.updatejson(blackLogJson[0], socket.room+":blackLog");
+        //         await jsonStore.updatejson(whiteLogJson[0], socket.room+":whiteLog");
+
+        //         var logArr = [];
+        //         logArr.push(monitoringLog);
+        //         io.sockets.in(socket.room+'false').emit('addLog', logArr);
+        //         io.sockets.in(socket.room+'true').emit('addLog', logArr);
+
+        //         // 회사 아이콘 색상 변경
+        //         let abandonStatusList = [];
+        //         for(let company of companyNameList){
+        //             abandonStatusList.push(roomTotalJson[0][company]["abandonStatus"]);
+        //         }
+                
+        //         console.log("Section Destroy -> abandonStatusList : ", abandonStatusList);
+
+        //         io.sockets.in(socket.room).emit('Company Status', abandonStatusList);  // 블랙, 화이트 두 팀 모두에게 보냄
+        //         // io.sockets.in(socket.room).emit('Company Status', abandonStatusList);
+
+
+        //         // 모든 회사가 몰락인지 확인
+        //         AllAbandon(socket, roomTotalJson);
+
+        //     }
+            
+        // });
 
         // // [Monitoring] monitoringLog 스키마 데이터 보내기
         // socket.on('Get_MonitoringLog', async(corp) => {
@@ -2031,7 +2083,7 @@ module.exports = (io) => {
             var lvCoolTime = config["ATTACK_" + (tacticIdx + 1)]["time"][attackLv];
 
             // 유니티에 쿨타임 시간(레벨별) 전송
-            socket.emit('CoolTime_LV', lvCoolTime);
+            socket.emit('CoolTime_LV', lvCoolTime, corpName);
 
             // 공격 중복 확인
             var overlap = false;
@@ -2065,10 +2117,12 @@ module.exports = (io) => {
                         break;
                 }
                 suspicionCount = (suspicionCount + 1) + fakeCnt;
+                roomTotalJson[0][corpName].sections[sectionIdx].suspicionCount = suspicionCount;
                 console.log("sus CNT >> ", suspicionCount);
-
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
-                console.log(attackProgressArr);
+
+                // 관제 issue Count 갱신 신호 유니티에 전송
+                io.sockets.in(socket.room+'true').emit('Issue_Count_Update', corpName);
 
                 // 쿨타임 및 성공 여부 결정(by.성공률)
                 AttackCoolTime(socket, (lvCoolTime*1000), corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName)
@@ -2493,7 +2547,7 @@ module.exports = (io) => {
                         attackProgress : [],
                         // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
                         attackSenarioProgress  : [ [] ],
-                        defenseProgress : [],
+                        defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
@@ -2538,7 +2592,7 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
                         attackConn : [
-                            {
+                            { 
                                 'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
@@ -3007,7 +3061,6 @@ module.exports = (io) => {
 
     // 모든 회사가 몰락인지 확인, 몰락이면 게임 종료
     async function AllAbandon(socket, roomTotalJson){
-        console.log("#---------- 게임 종료됨(AllAbandon)----------#");
         var gameover = true;
         for(let company of companyNameList){
             if(roomTotalJson[0][company]["abandonStatus"] == false){
@@ -3018,6 +3071,7 @@ module.exports = (io) => {
         
         var winTeam = false;
         if(gameover){
+            console.log("#---------- 게임 종료됨(AllAbandon)----------#");
             clearInterval(timerId);
             clearInterval(pitaTimerId);
             io.sockets.in(socket.room).emit('Load_ResultPage');
@@ -3039,25 +3093,6 @@ module.exports = (io) => {
                     winTeam = null;
                 }
                 io.sockets.in(socket.room).emit('Abandon_Gameover', winTeam, blackScore, whiteScore);
-
-                // 개발자 로그 - 게임 종료(모든 회사 몰락)
-                gameLogger.info("game:Game Over", {
-                    server : 'server1',
-                    userIP : '192.0.0.1',
-                    sessionID : socket.sessionID,
-                    userID : socket.userID,
-                    nickname : socket.nickname,
-                    data : 	{
-                        roomID : socket.room,
-                        winTeam : false, 
-                        cause : "AllDestroyed", 
-                        blackScore : blackScore,
-                        whiteScore : whiteScore,
-                        blackPita : blackPitaNum,
-                        whitePita : whitePitaNum,
-                        remainCompanyNum : 0,
-                    },
-                });
 
                 await SaveDeleteGameInfo(socket.room);
             });
@@ -3096,25 +3131,6 @@ module.exports = (io) => {
         }
 
         io.sockets.in(socket.room).emit('Timeout_Gameover', winTeam, blackScore, whiteScore);
-
-        // 개발자 로그 - 게임 종료(시간종료)
-        gameLogger.info("game:Game Over", {
-            server : 'server1',
-            userIP : '192.0.0.1',
-            sessionID : socket.sessionID,
-            userID : socket.userID,
-            nickname : socket.nickname,
-            data : 	{
-                roomID : socket.room,
-                winTeam : winTeam, 
-                cause : "Timeout", 
-                blackScore : blackScore,
-                whiteScore : whiteScore,
-                blackPita : blackPitaNum,
-                whitePita : whitePitaNum,
-                remainCompanyNum : aliveCnt,
-            },
-        });
 
         await SaveDeleteGameInfo(socket.room);
     }   
