@@ -1066,7 +1066,7 @@ module.exports = (io) => {
             socket.emit('Visible LimitedTime', socket.team.toString()); // actionbar
 
             // Timer 시작(게임전체시간)
-            var time = 30; //600=10분, 1분 -> 60
+            var time = 600; //600=10분, 1분 -> 60
             var min = "";
             var sec = "";
 
@@ -1826,7 +1826,7 @@ module.exports = (io) => {
                 var sectionData = element.suspicionCount;
                 cntArr[idx] = sectionData;
             });
-            socket.emit('Issue_Count', cntArr);
+            socket.emit('Issue_Count', cntArr, corpName);
         });
 
 
@@ -1881,7 +1881,8 @@ module.exports = (io) => {
                         logArr.push(newLog);
                     });                
                 });
-                socket.emit('Monitoring_Log', logArr);
+                //socket.emit('Monitoring_Log', logArr, corpName);
+                io.sockets.in(socket.room+'true').emit('Monitoring_Log', logArr, corpName);
                 // [GameLog] 로그 추가
                 let today = new Date();   
                 let hours = today.getHours(); // 시
@@ -2082,7 +2083,7 @@ module.exports = (io) => {
             var lvCoolTime = config["ATTACK_" + (tacticIdx + 1)]["time"][attackLv];
 
             // 유니티에 쿨타임 시간(레벨별) 전송
-            socket.emit('CoolTime_LV', lvCoolTime);
+            socket.emit('CoolTime_LV', lvCoolTime, corpName);
 
             // 공격 중복 확인
             var overlap = false;
