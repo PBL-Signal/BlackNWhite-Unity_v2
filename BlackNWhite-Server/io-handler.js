@@ -1608,16 +1608,16 @@ module.exports = (io) => {
                 console.log("white team upgrade attack card");
                 roomTotalJson[0][companyName]["penetrationTestingLV"][categoryIndex] += 1;
             }
-            
-            var sectionAttackProgressArr = roomTotalJson[0][companyName].sections[section].attackProgress;
-            console.log("sectionAttackProgressArr : ", sectionAttackProgressArr);
 
             var alreadyAttackList = [];
             for(var i = 0; i < techniqueBeActivationList.length; i++){ 
+                var sectionAttackProgressArr = roomTotalJson[0][companyName].sections[section].attackProgress;
+                console.log("sectionAttackProgressArr : ", sectionAttackProgressArr);
+
                 if (techniqueActivation[categoryIndex][techniqueBeActivationList[i]] == 2) {
                     // 0 나중에 시나리오 인덱스로 변경할 것
-                    // sectionAttackProgressArr = sectionAttackProgressArr[senarioIndex].filter(function(progress){
-                        sectionAttackProgressArr = sectionAttackProgressArr[0].filter(function(progress){
+                    // sectionAttackProgressArr = sectionAttackProgressArr.filter(function(progress){
+                    sectionAttackProgressArr = sectionAttackProgressArr.filter(function(progress){
                         return progress.tactic != config.ATTACK_CATEGORY[categoryIndex] && progress.attackName != config.ATTACK_TECHNIQUE[categoryIndex][techniqueBeActivationList[i]];
                     });
                     console.log("sectionAttackProgressArr : ", sectionAttackProgressArr);
@@ -1830,7 +1830,7 @@ module.exports = (io) => {
                     console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
 
                     if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
-                        sectionDefenseProgressArr[i].push(newInfo);
+                        sectionDefenseProgressArr.push(newInfo);
                         console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
                         // 0은 나중에 시나리오 인덱스로 변경
                         DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
@@ -2493,7 +2493,7 @@ module.exports = (io) => {
                         attackProgress : [],
                         // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
                         attackSenarioProgress  : [ [] ],
-                        defenseProgress : [[], [], [], [], []],
+                        defenseProgress : [],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
@@ -2538,7 +2538,7 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
                         attackConn : [
-                            { 
+                            {
                                 'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
@@ -2564,7 +2564,7 @@ module.exports = (io) => {
                         suspicionCount : 0,
                         attackProgress : [{ tactic: 'Reconnaissance', attackName: 'Active Scanning', state: 2 }],
                         attackSenarioProgress  : [],                        
-                        defenseProgress : [[], [], [], [], []],
+                        defenseProgress : [],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
@@ -2620,7 +2620,7 @@ module.exports = (io) => {
                         suspicionCount : 0,
                         attackProgress : [{ tactic: 'Reconnaissance', attackName: 'Active Scanning', state: 2 }],
                         attackSenarioProgress  : [],
-                        defenseProgress : [[], [], [], [], []],
+                        defenseProgress : [],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
@@ -2919,7 +2919,7 @@ module.exports = (io) => {
     }
 
     // Defense 쿨타임
-    async function DefenseCooltime(socket, attackStateOrigin, corpName, sectionIdx, senarioIndex, tacticIndex, techniqueIndex, defenseLevel){
+    async function DefenseCooltime(socket, attackStateOrigin, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLevel){
         var defenseTime = setTimeout(async function(){
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
@@ -2928,7 +2928,7 @@ module.exports = (io) => {
             var defenseCntArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseCnt;
             var defenseLvArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseLv;
             
-            var attackInfo = sectionAttackProgressArr[senarioIndex].filter(function(progress){
+            var attackInfo = sectionAttackProgressArr.filter(function(progress){
                 return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
             })[0];
 
@@ -2953,11 +2953,11 @@ module.exports = (io) => {
                     if (attackStateOrigin == attackInfo.state) {
                         console.log("DefenseCooltime - success!!");
         
-                        sectionAttackProgressArr = sectionAttackProgressArr[senarioIndex].filter(function(progress){
+                        sectionAttackProgressArr = sectionAttackProgressArr.filter(function(progress){
                             return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
                         });
         
-                        sectionDefenseProgressArr = sectionDefenseProgressArr[senarioIndex].filter(function(progress){
+                        sectionDefenseProgressArr = sectionDefenseProgressArr.filter(function(progress){
                             return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
                         });
 
@@ -2981,11 +2981,11 @@ module.exports = (io) => {
                     } else {   // 방어 실패
                         console.log("DefenseCooltime - faile!!");
         
-                        sectionDefenseProgressArr = sectionDefenseProgressArr[senarioIndex].filter(function(progress){
+                        sectionDefenseProgressArr = sectionDefenseProgressArr.filter(function(progress){
                             return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[techniqueIndex];
                         });
         
-                        DefenseCooltime(socket, attackInfo.state, corpName, sectionIdx, senarioIndex, tacticIndex, techniqueIndex, defenseLevel);
+                        DefenseCooltime(socket, attackInfo.state, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLevel);
                     }
         
                     console.log("DefenseCooltime - sectionAttackProgressArr (after) : ", sectionAttackProgressArr);
