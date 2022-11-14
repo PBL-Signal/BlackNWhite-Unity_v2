@@ -2546,7 +2546,7 @@ module.exports = (io) => {
                         suspicionCount : 0,
                         attackProgress : [],
                         // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
-                        attackSenarioProgress  : [ [] ],
+                        attackSenarioProgress  : [[], [], [], [], []],
                         defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -2592,6 +2592,7 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
                         attackConn : [
+                            // scenario 1
                             { 
                                 'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
@@ -2606,6 +2607,85 @@ module.exports = (io) => {
                                 'Screen Capture' : {"Communication Through Removable Media": false},
                                 'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
                                 'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                            },
+                            // scenario 2 
+                            {
+                                "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
+                                "Drive-by Compromise" : {"Native API": false},
+                                "Native API" : {"Modify Registry": false},
+                                "Modify Registry" : {"Brute Force": false},
+                                "Brute Force" : {"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false,  "System Information Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false},
+                                "Browser Bookmark Discovery" : {"Clipboard Data": false},
+                                "File and Directory Discovery" : {"Data from Local System": false},
+                                "Network Share Discovery" : {"Data from Local System": false},
+                                "Process Discovery"  : {"Data from Local System": false},
+                                "System Information Discovery" : {"Clipboard Data": false},
+                                "System Network Configuration Discovery" : {"Data from Local System": false},
+                                "System Network Connections Discovery": {"Data from Local System": false},
+                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown/Reboot": false},
+                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot" : false},
+                            },
+
+                            // scenario 3
+                            {
+                                "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
+                                "Search Victim-Owned Websites" : {"Develop Capabilities": false},
+                                "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
+                                "Exploit Public-Facing Application" : {"Account Manipulation": false},
+                                "External Remote Services" : {"Account Manipulation": false, "Browser Extensions": false},
+                                "Account Manipulation" :  {"Process Injection": false},
+                                "Browser Extensions" :  {"Process Injection": false},
+                                "Process Injection" : {"Deobfuscate/Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate/Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
+                                "Masquerading" : { "Network Sniffing": false},
+                                "Modify Registry" : {"Query Registry": false},
+                                "Obfuscated Files or Information" : {"System Information Discovery": false, "System Network Configuration Discovery": false, "System Service Discovery": false},
+                                "Multi-Factor Authentication Interception" : {"File and Directory Discovery": false, "Process Discovery": false},
+                                "File and Directory Discovery" : {"Internal Spearphishing": false, "Data from Local System": false},
+                                "Network Sniffing": {"Internal Spearphishing": false}, 
+                                "Process Discovery" :{"Data from Local System": false},
+                                "Query Registry":{"Data from Local System": false}, 
+                                "System Information Discovery" : {"Remote Access Software": false},
+                                "System Network Configuration Discovery": {"Remote Access Software": false},
+                                "System Service Discovery" : {"Ingress Tool Transfer": false},
+                                "Internal Spearphishing": {"Adversary-in-the-Middle": false, "Data from Local System": false,"Exfiltration Over C2 Channel": false},
+                                "Adversary-in-the-Middle" : {"Remote Access Software": false}, 
+                                "Data from Local System": {"Ingress Tool Transfer": false}
+                            
+                            },
+
+                            // scenario 4
+                            {
+                                "Drive-by Compromise" : {"Native API": false},
+                                "Native API" : {"Modify Registry": false},
+                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
+                                "Browser Bookmark Discovery" :  {"Clipboard Data": false},
+                                "File and Directory Discovery":  {"Clipboard Data": false},
+                                "Network Share Discovery":  {"Data from Local System": false},
+                                "Process Discovery":  {"Data from Local System": false}, 
+                                "System Information Discovery":  {"Data from Local System": false},
+                                "System Network Connections Discovery":  {"Data from Local System": false},
+                                "System Owner/User Discovery":  {"Data from Local System": false},
+                                "Clipboard Data":  {"System Shutdown/Reboot": false },
+                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot": false }
+                            },
+
+                            // scenario 5
+                            {
+                                "Drive-by Compromise": {"Windows Management Instrumentation": false},
+                                "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
+                                "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
+                                "Scheduled Task/Job" : {"Deobfuscate/Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate/Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner/User Discovery" : false },
+                                "Modify Registry" : {"Process Discovery": false},
+                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false, "System Service Discovery": false },
+                                "Domain Trust Discovery" : {"Proxy": false},
+                                "Process Discovery" : {"Proxy": false},
+                                "Remote System Discovery" : {"Exploitation of Remote Services": false},
+                                "System Network Configuration Discovery": {"Proxy": false},
+                                "System Network Connections Discovery":{"Proxy": false},
+                                "System Owner/User Discovery":{"Proxy": false},
+                                "System Service Discovery": {"Proxy": false},
                             }
                         ]
                     }),
@@ -2616,9 +2696,10 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackProgress : [{ tactic: 'Reconnaissance', attackName: 'Active Scanning', state: 2 }],
-                        attackSenarioProgress  : [],                        
-                        defenseProgress : [],
+                        attackProgress : [],
+                        // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
+                        attackSenarioProgress  : [[], [], [], [], []],
+                        defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
@@ -2648,22 +2729,117 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
-                        defenseCnt : [], // 방어 횟수 ,
-                        attackConn : {
-                            'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
-                            'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
-                            'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
-                            'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
-                            'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                            'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                            'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
-                            'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
-                            'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
-                            'Indirect Command Execution' : {"Brute Force": false},
-                            'Screen Capture' : {"Communication Through Removable Media": false},
-                            'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
-                            'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                        defenseCnt : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
+                        attackConn : [
+                            // scenario 1
+                            { 
+                                'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
+                                'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
+                                'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
+                                'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
+                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
+                                'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                                'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
+                                'Indirect Command Execution' : {"Brute Force": false},
+                                'Screen Capture' : {"Communication Through Removable Media": false},
+                                'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
+                                'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                            },
+                            // scenario 2 
+                            {
+                                "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
+                                "Drive-by Compromise" : {"Native API": false},
+                                "Native API" : {"Modify Registry": false},
+                                "Modify Registry" : {"Brute Force": false},
+                                "Brute Force" : {"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false,  "System Information Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false},
+                                "Browser Bookmark Discovery" : {"Clipboard Data": false},
+                                "File and Directory Discovery" : {"Data from Local System": false},
+                                "Network Share Discovery" : {"Data from Local System": false},
+                                "Process Discovery"  : {"Data from Local System": false},
+                                "System Information Discovery" : {"Clipboard Data": false},
+                                "System Network Configuration Discovery" : {"Data from Local System": false},
+                                "System Network Connections Discovery": {"Data from Local System": false},
+                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown/Reboot": false},
+                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot" : false},
+                            },
+
+                            // scenario 3
+                            {
+                                "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
+                                "Search Victim-Owned Websites" : {"Develop Capabilities": false},
+                                "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
+                                "Exploit Public-Facing Application" : {"Account Manipulation": false},
+                                "External Remote Services" : {"Account Manipulation": false, "Browser Extensions": false},
+                                "Account Manipulation" :  {"Process Injection": false},
+                                "Browser Extensions" :  {"Process Injection": false},
+                                "Process Injection" : {"Deobfuscate/Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate/Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
+                                "Masquerading" : { "Network Sniffing": false},
+                                "Modify Registry" : {"Query Registry": false},
+                                "Obfuscated Files or Information" : {"System Information Discovery": false, "System Network Configuration Discovery": false, "System Service Discovery": false},
+                                "Multi-Factor Authentication Interception" : {"File and Directory Discovery": false, "Process Discovery": false},
+                                "File and Directory Discovery" : {"Internal Spearphishing": false, "Data from Local System": false},
+                                "Network Sniffing": {"Internal Spearphishing": false}, 
+                                "Process Discovery" :{"Data from Local System": false},
+                                "Query Registry":{"Data from Local System": false}, 
+                                "System Information Discovery" : {"Remote Access Software": false},
+                                "System Network Configuration Discovery": {"Remote Access Software": false},
+                                "System Service Discovery" : {"Ingress Tool Transfer": false},
+                                "Internal Spearphishing": {"Adversary-in-the-Middle": false, "Data from Local System": false,"Exfiltration Over C2 Channel": false},
+                                "Adversary-in-the-Middle" : {"Remote Access Software": false}, 
+                                "Data from Local System": {"Ingress Tool Transfer": false}
+                            
+                            },
+
+                            // scenario 4
+                            {
+                                "Drive-by Compromise" : {"Native API": false},
+                                "Native API" : {"Modify Registry": false},
+                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
+                                "Browser Bookmark Discovery" :  {"Clipboard Data": false},
+                                "File and Directory Discovery":  {"Clipboard Data": false},
+                                "Network Share Discovery":  {"Data from Local System": false},
+                                "Process Discovery":  {"Data from Local System": false}, 
+                                "System Information Discovery":  {"Data from Local System": false},
+                                "System Network Connections Discovery":  {"Data from Local System": false},
+                                "System Owner/User Discovery":  {"Data from Local System": false},
+                                "Clipboard Data":  {"System Shutdown/Reboot": false },
+                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot": false }
+                            },
+
+                            // scenario 5
+                            {
+                                "Drive-by Compromise": {"Windows Management Instrumentation": false},
+                                "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
+                                "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
+                                "Scheduled Task/Job" : {"Deobfuscate/Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate/Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner/User Discovery" : false },
+                                "Modify Registry" : {"Process Discovery": false},
+                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false, "System Service Discovery": false },
+                                "Domain Trust Discovery" : {"Proxy": false},
+                                "Process Discovery" : {"Proxy": false},
+                                "Remote System Discovery" : {"Exploitation of Remote Services": false},
+                                "System Network Configuration Discovery": {"Proxy": false},
+                                "System Network Connections Discovery":{"Proxy": false},
+                                "System Owner/User Discovery":{"Proxy": false},
+                                "System Service Discovery": {"Proxy": false},
                             }
+                        ]
                     }),
     
                     new Section({
@@ -2672,9 +2848,10 @@ module.exports = (io) => {
                         destroyStatus : false ,
                         level  : 1,
                         suspicionCount : 0,
-                        attackProgress : [{ tactic: 'Reconnaissance', attackName: 'Active Scanning', state: 2 }],
-                        attackSenarioProgress  : [],
-                        defenseProgress : [],
+                        attackProgress : [],
+                        // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
+                        attackSenarioProgress  : [[], [], [], [], []],
+                        defenseProgress : [[], [], [], [], []],
                         beActivated : [],
                         defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0],
@@ -2704,22 +2881,117 @@ module.exports = (io) => {
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0],
                                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
-                        defenseCnt : [], // 방어 횟수
-                        attackConn : {
-                            'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
-                            'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
-                            'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
-                            'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
-                            'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                            'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                            'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
-                            'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
-                            'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
-                            'Indirect Command Execution' : {"Brute Force": false},
-                            'Screen Capture' : {"Communication Through Removable Media": false},
-                            'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
-                            'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
-                            } 
+                        defenseCnt : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
+                        attackConn : [
+                            // scenario 1
+                            { 
+                                'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
+                                'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
+                                'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
+                                'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
+                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
+                                'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                                'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
+                                'Indirect Command Execution' : {"Brute Force": false},
+                                'Screen Capture' : {"Communication Through Removable Media": false},
+                                'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
+                                'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                            },
+                            // scenario 2 
+                            {
+                                "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
+                                "Drive-by Compromise" : {"Native API": false},
+                                "Native API" : {"Modify Registry": false},
+                                "Modify Registry" : {"Brute Force": false},
+                                "Brute Force" : {"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false,  "System Information Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false},
+                                "Browser Bookmark Discovery" : {"Clipboard Data": false},
+                                "File and Directory Discovery" : {"Data from Local System": false},
+                                "Network Share Discovery" : {"Data from Local System": false},
+                                "Process Discovery"  : {"Data from Local System": false},
+                                "System Information Discovery" : {"Clipboard Data": false},
+                                "System Network Configuration Discovery" : {"Data from Local System": false},
+                                "System Network Connections Discovery": {"Data from Local System": false},
+                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown/Reboot": false},
+                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot" : false},
+                            },
+
+                            // scenario 3
+                            {
+                                "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
+                                "Search Victim-Owned Websites" : {"Develop Capabilities": false},
+                                "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
+                                "Exploit Public-Facing Application" : {"Account Manipulation": false},
+                                "External Remote Services" : {"Account Manipulation": false, "Browser Extensions": false},
+                                "Account Manipulation" :  {"Process Injection": false},
+                                "Browser Extensions" :  {"Process Injection": false},
+                                "Process Injection" : {"Deobfuscate/Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate/Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
+                                "Masquerading" : { "Network Sniffing": false},
+                                "Modify Registry" : {"Query Registry": false},
+                                "Obfuscated Files or Information" : {"System Information Discovery": false, "System Network Configuration Discovery": false, "System Service Discovery": false},
+                                "Multi-Factor Authentication Interception" : {"File and Directory Discovery": false, "Process Discovery": false},
+                                "File and Directory Discovery" : {"Internal Spearphishing": false, "Data from Local System": false},
+                                "Network Sniffing": {"Internal Spearphishing": false}, 
+                                "Process Discovery" :{"Data from Local System": false},
+                                "Query Registry":{"Data from Local System": false}, 
+                                "System Information Discovery" : {"Remote Access Software": false},
+                                "System Network Configuration Discovery": {"Remote Access Software": false},
+                                "System Service Discovery" : {"Ingress Tool Transfer": false},
+                                "Internal Spearphishing": {"Adversary-in-the-Middle": false, "Data from Local System": false,"Exfiltration Over C2 Channel": false},
+                                "Adversary-in-the-Middle" : {"Remote Access Software": false}, 
+                                "Data from Local System": {"Ingress Tool Transfer": false}
+                            
+                            },
+
+                            // scenario 4
+                            {
+                                "Drive-by Compromise" : {"Native API": false},
+                                "Native API" : {"Modify Registry": false},
+                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
+                                "Browser Bookmark Discovery" :  {"Clipboard Data": false},
+                                "File and Directory Discovery":  {"Clipboard Data": false},
+                                "Network Share Discovery":  {"Data from Local System": false},
+                                "Process Discovery":  {"Data from Local System": false}, 
+                                "System Information Discovery":  {"Data from Local System": false},
+                                "System Network Connections Discovery":  {"Data from Local System": false},
+                                "System Owner/User Discovery":  {"Data from Local System": false},
+                                "Clipboard Data":  {"System Shutdown/Reboot": false },
+                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot": false }
+                            },
+
+                            // scenario 5
+                            {
+                                "Drive-by Compromise": {"Windows Management Instrumentation": false},
+                                "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
+                                "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
+                                "Scheduled Task/Job" : {"Deobfuscate/Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate/Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner/User Discovery" : false },
+                                "Modify Registry" : {"Process Discovery": false},
+                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false, "System Service Discovery": false },
+                                "Domain Trust Discovery" : {"Proxy": false},
+                                "Process Discovery" : {"Proxy": false},
+                                "Remote System Discovery" : {"Exploitation of Remote Services": false},
+                                "System Network Configuration Discovery": {"Proxy": false},
+                                "System Network Connections Discovery":{"Proxy": false},
+                                "System Owner/User Discovery":{"Proxy": false},
+                                "System Service Discovery": {"Proxy": false},
+                            }
+                        ]
                     }),
                 ]
             });
