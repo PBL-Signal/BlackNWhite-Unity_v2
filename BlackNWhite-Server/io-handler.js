@@ -1457,9 +1457,10 @@ module.exports = (io) => {
         });
 
         // Load Matrix Tactic
-        socket.on('Load Tactic level', async(companyName) => {
+        socket.on('Load Tactic level', async(companyName, section) => {
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
-            console.log("load tactic level : ", companyName);
+            console.log("load tactic level - companyName : ", companyName);
+            console.log("load tactic level - section : ", section);
 
             let returnValue;
             if (socket.team == true) {
@@ -1468,10 +1469,13 @@ module.exports = (io) => {
                 returnValue = roomTotalJson[0][companyName]["attackLV"];
             }
 
+            var attackable = roomTotalJson[0][companyName].sections[section]["attackable"];
+            console.log("attackable : ", attackable);
+
             console.log("laod tactic level return : ", returnValue);
 
-            socket.to(socket.room + socket.team).emit("Get Tactic Level", companyName, returnValue);
-            socket.emit("Get Tactic Level", companyName, returnValue);
+            socket.to(socket.room + socket.team).emit("Get Tactic Level", companyName, attackable, returnValue);
+            socket.emit("Get Tactic Level", companyName, attackable, returnValue);
         });
 
         // Load Matrix Technique
@@ -1539,8 +1543,10 @@ module.exports = (io) => {
 
                     console.log("black team tactic upgrade : ", roomTotalJson[0][companyName]["attackLV"]);
 
-                    socket.to(socket.room + socket.team).emit("Get Tactic Level", companyName, roomTotalJson[0][companyName]["attackLV"]);
-                    socket.emit("Get Tactic Level", companyName, roomTotalJson[0][companyName]["attackLV"]);
+                    var attackable = roomTotalJson[0][companyName].sections[section]["attackable"];
+
+                    socket.to(socket.room + socket.team).emit("Get Tactic Level", companyName, attackable, roomTotalJson[0][companyName]["attackLV"]);
+                    socket.emit("Get Tactic Level", companyName, attackable, roomTotalJson[0][companyName]["attackLV"]);
                 }
 
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
@@ -2079,8 +2085,22 @@ module.exports = (io) => {
             var attackLv = roomTotalJson[0][corpName].attackLV[tacticIdx];
             var suspicionCount = roomTotalJson[0][corpName].sections[sectionIdx].suspicionCount;
             var areaLv = roomTotalJson[0][corpName].sections[sectionIdx].level;
+            var currentPita = roomTotalJson[0].blackTeam.total_pita;
 
-            var lvCoolTime = config["ATTACK_" + (tacticIdx + 1)]["time"][attackLv];
+            if (attackLv == 0) {
+                socket.emit('Failed to success level');
+                return;
+            }
+
+            var lvPita = config["ATTACK_" + (tacticIdx + 1)]["pita"][attackLv - 1];
+            if (currentPita - lvPita < 0) {
+                socket.emit('Short of Money');
+                return;
+            }
+
+            roomTotalJson[0].blackTeam.total_pita = currentPita - lvPita;
+
+            var lvCoolTime = config["ATTACK_" + (tacticIdx + 1)]["time"][attackLv - 1];
 
             // 유니티에 쿨타임 시간(레벨별) 전송
             socket.emit('CoolTime_LV', lvCoolTime, corpName);
@@ -2691,7 +2711,7 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        attackable : true,
+                        attackable : false,
                         defensible : true,
                         destroyStatus : false ,
                         level  : 1,
@@ -2843,7 +2863,7 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        attackable : true,
+                        attackable : false,
                         defensible : true,
                         destroyStatus : false ,
                         level  : 1,
