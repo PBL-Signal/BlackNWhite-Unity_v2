@@ -1361,6 +1361,57 @@ module.exports = (io) => {
             socket.emit('SendConnectedAtt', connectedAttJson);
         });
 
+
+         // [화이트팀] 해당 선택한 시나리오의 힌트북 가져옴 
+         socket.on('GetScenario',  async function(data) {
+            console.log("[On] GetScenario ", data.scenario);
+
+            var scenarioLv = 0;
+            var scenarioNum = data.scenario + 1;
+        
+            // 보낼 힌트 스키마
+            var scenarioHint = { 
+                selectScenario : data.scenario,
+            };
+
+            var attackHint = []; 
+            var progressAtt = [];
+
+            // lv2: 각 단계 공격 개수
+            for(let i = 0; i <= 13; i++){
+                attackHint[i] =  Object.values(config["SCENARIO" +scenarioNum].attacks[i]).length;
+            }
+            scenarioHint['attacksCnt'] = attackHint;
+    
+            // lv4: 모든 공격, 화살표 공개
+            scenarioHint['attacks']=  config["SCENARIO" +scenarioNum].attacks;
+            scenarioHint['attackConn'] = config["SCENARIO" +scenarioNum].attackConn;
+    
+            // lv5: 메인공격 공개
+            scenarioHint['mainAttack'] = config["SCENARIO" +scenarioNum].mainAttack;
+               
+            // 힌트 보내기
+            let scenarioHintJson = JSON.stringify(scenarioHint);
+            console.log('scenarioHintJson', scenarioHintJson);
+
+            socket.emit('SendScenario', scenarioHintJson);
+        });
+
+         // [화이트팀] 선택한 공격에 연결된 다음 공격 정보 가져오기
+         socket.on('GetConnectedAttAll',  async function(data) {
+            console.log("[On] GetConnectedAttAll ", data.scenario, data.attack);
+
+            var scenarioNum = data.scenario + 1;
+
+            // 공격 정보 뿌려주기
+            var connectedAttHint = {};
+            connectedAttHint['attack'] = data.attack;
+            connectedAttHint['connection'] = config["SCENARIO" +scenarioNum].attackConnDetail[data.attack];
+            let connectedAttJson = JSON.stringify(connectedAttHint);
+            console.log("!-- connectedAttJson : ", connectedAttJson);
+            socket.emit('SendConnectedAttAll', connectedAttJson);
+        });
+
     
         ////////////////////////////////////////////////////////////////////////////////////
         // 회사 선택 후 사용자들에게 위치 알리기
