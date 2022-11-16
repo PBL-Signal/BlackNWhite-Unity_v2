@@ -2665,6 +2665,7 @@ module.exports = (io) => {
                         attackConn : [
                             // scenario 1
                             { 
+                                'startAttack' : {'Gather Victim Network Information' : false},
                                 'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
@@ -2681,6 +2682,7 @@ module.exports = (io) => {
                             },
                             // scenario 2 
                             {
+                                'startAttack' : {'Obtain Capabilities' : false},
                                 "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
@@ -2699,6 +2701,7 @@ module.exports = (io) => {
 
                             // scenario 3
                             {
+                                "startAttack" : {"Gather Victim Org Information" : false, "Search Victim-Owned Websites" : false},
                                 "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
                                 "Search Victim-Owned Websites" : {"Develop Capabilities": false},
                                 "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
@@ -2727,6 +2730,7 @@ module.exports = (io) => {
 
                             // scenario 4
                             {
+                                "startAttack" : {"Drive-by Compromise" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
                                 "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
@@ -2743,6 +2747,7 @@ module.exports = (io) => {
 
                             // scenario 5
                             {
+                                "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
                                 "Drive-by Compromise": {"Windows Management Instrumentation": false},
                                 "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
                                 "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
@@ -2817,6 +2822,7 @@ module.exports = (io) => {
                         attackConn : [
                             // scenario 1
                             { 
+                                'startAttack' : {'Gather Victim Network Information' : false},
                                 'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
@@ -2833,6 +2839,7 @@ module.exports = (io) => {
                             },
                             // scenario 2 
                             {
+                                'startAttack' : {'Obtain Capabilities' : false},
                                 "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
@@ -2851,6 +2858,7 @@ module.exports = (io) => {
 
                             // scenario 3
                             {
+                                "startAttack" : {"Gather Victim Org Information" : false, "Search Victim-Owned Websites" : false},
                                 "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
                                 "Search Victim-Owned Websites" : {"Develop Capabilities": false},
                                 "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
@@ -2879,6 +2887,7 @@ module.exports = (io) => {
 
                             // scenario 4
                             {
+                                "startAttack" : {"Drive-by Compromise" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
                                 "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
@@ -2895,6 +2904,7 @@ module.exports = (io) => {
 
                             // scenario 5
                             {
+                                "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
                                 "Drive-by Compromise": {"Windows Management Instrumentation": false},
                                 "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
                                 "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
@@ -2969,6 +2979,7 @@ module.exports = (io) => {
                         attackConn : [
                             // scenario 1
                             { 
+                                'startAttack' : {'Gather Victim Network Information' : false},
                                 'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
@@ -2985,6 +2996,7 @@ module.exports = (io) => {
                             },
                             // scenario 2 
                             {
+                                'startAttack' : {'Obtain Capabilities' : false},
                                 "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
@@ -3003,6 +3015,7 @@ module.exports = (io) => {
 
                             // scenario 3
                             {
+                                "startAttack" : {"Gather Victim Org Information" : false, "Search Victim-Owned Websites" : false},
                                 "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
                                 "Search Victim-Owned Websites" : {"Develop Capabilities": false},
                                 "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
@@ -3031,6 +3044,7 @@ module.exports = (io) => {
 
                             // scenario 4
                             {
+                                "startAttack" : {"Drive-by Compromise" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
                                 "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
@@ -3047,6 +3061,7 @@ module.exports = (io) => {
 
                             // scenario 5
                             {
+                                "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
                                 "Drive-by Compromise": {"Windows Management Instrumentation": false},
                                 "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
                                 "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
@@ -3136,7 +3151,7 @@ module.exports = (io) => {
                 io.sockets.in(socket.room+'false').emit('addLog', logArr);
 
                 // 시나리오 포함 여부 확인 함수 호출
-                //CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName); 
+                CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName); 
 
                 // if(attackProgressArr[attackIdx].state == 1) {
                 //     attackProgressArr[attackIdx].state = 2;
@@ -3146,8 +3161,6 @@ module.exports = (io) => {
                 //     var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
                 //     console.log("test: ", sectionAttackProgressArr2);
                 // }
-    
-                
 
             // 공격 실패 (by.성공률)
             } else{
@@ -3184,12 +3197,12 @@ module.exports = (io) => {
         var attackProgress = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
         var attackConn = roomTotalJson[0][corpName].sections[sectionIdx].attackConn;
         
-        // var idx = 1;
-
         // startAttack인지 확인
         for (var i = 0; i < attackConn.length; i++) {
             var scenarioName = "SCENARIO" + (i + 1);
             var startAttackArr = (Object.values(config[scenarioName].startAttack));
+            console.log("startAttackArr : ", startAttackArr);
+            console.log("attackName : ", attackName);
 
             if(startAttackArr.includes(attackName)) {
                 console.log("start attack!!");
