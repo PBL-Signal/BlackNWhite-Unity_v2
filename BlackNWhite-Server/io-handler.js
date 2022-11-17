@@ -2074,7 +2074,7 @@ module.exports = (io) => {
 
         // [Result] 최종 결과 보내기
         socket.on('Get_Final_RoomTotal', async() => {
-            io.sockets.in(socket.room).emit('Timer END'); // 타이머 종료
+            //io.sockets.in(socket.room).emit('Timer END'); // 타이머 종료
             //socket.emit('Result_PAGE'); // 결과 페이지로 넘어가면 타이머, 로그 안보이게 하기
 
             // 양팀 남은 피타, 획득 호두, 승리팀
@@ -2106,7 +2106,8 @@ module.exports = (io) => {
                 }
             }
 
-            socket.emit('playerInfo', blackUsersInfo, whiteUsersInfo, JSON.stringify(finalRoomTotal)); // 플리이어 정보(닉네임, 프로필 색) 배열, 양팀 피타, 호두, 승리팀 정보 전송
+            io.sockets.in(socket.room).emit('playerInfo', blackUsersInfo, whiteUsersInfo, JSON.stringify(finalRoomTotal));
+            // socket.emit('playerInfo', blackUsersInfo, whiteUsersInfo, JSON.stringify(finalRoomTotal)); // 플리이어 정보(닉네임, 프로필 색) 배열, 양팀 피타, 호두, 승리팀 정보 전송
         });
 
         // [Result]
