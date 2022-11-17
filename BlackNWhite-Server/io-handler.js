@@ -1793,6 +1793,13 @@ module.exports = (io) => {
             });
         })
 
+        socket.on("Is Abandon Company", async(companyName) => {
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            console.log("Is Abandon Company : ", roomTotalJson[0][companyName].abandonStatus);
+            if (roomTotalJson[0][companyName].abandonStatus) {
+                socket.emit('Abandon Company', companyName);
+            }
+        })
 
 // ===================================================================================================================
         // [Security Monitoring] 영역 클릭 시 레벨 보이기
@@ -2614,10 +2621,10 @@ module.exports = (io) => {
                     new Section({
                         attackable : true,
                         defensible : true,
-                        destroyStatus : false ,
+                        destroyStatus : true ,
                         level  : 1,
                         suspicionCount : 1,
-                        attackProgress : [{ tactic: 'Reconnaissance', attackName: 'Active Scanning', state: 2 }, { tactic: 'Reconnaissance', attackName: 'Gather Victim Network Information', state: 2 }, { tactic: 'Privilege Escalation', attackName: 'Scheduled Task/Job', state: 2 }, { tactic: 'Execution', attackName: 'Software Deployment Tools', state: 2 }],
+                        attackProgress : [],
                         // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
                         attackSenarioProgress  : [[], [], [], [], []],
                         defenseProgress : [[], [], [], [], []],
@@ -2769,9 +2776,9 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        attackable : false,
+                        attackable : true,
                         defensible : true,
-                        destroyStatus : false ,
+                        destroyStatus : true ,
                         level  : 1,
                         suspicionCount : 0,
                         attackProgress : [],
@@ -2926,7 +2933,7 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        attackable : false,
+                        attackable : true,
                         defensible : true,
                         destroyStatus : false ,
                         level  : 1,
@@ -3213,6 +3220,7 @@ module.exports = (io) => {
                 var newInfo = { tactic: tacticName, attackName: attackName }; 
                 attackSenarioProgressArr[i].push(newInfo);
                 attackConn[i]["startAttack"][attackName] = true;
+                socket.emit('Attack Success');
                 console.log("attackConn : ", attackConn);
             } else {
                 console.log("not start attack!!");
@@ -3224,30 +3232,58 @@ module.exports = (io) => {
                             console.log("키 값이 true attack!!");
                             var newInfo = { tactic: tacticName, attackName: attackName }; 
                             attackSenarioProgressArr[i].push(newInfo);
+                            socket.emit('Attack Success');
                         } else {
                             console.log("키 값이 false attack!!");
                             // 나중에 tactic도 같이 필터링해줄 수 있는 방법 찾아야 됨
                             var attackInfo = attackProgress.filter(function(progress){
                                 return progress.attackName == attackName && progress.tactic == tacticName;
                             })[0];
+
+                            console.log("attackProgress : ", attackProgress);
+                            console.log("attackInfo : ", attackInfo);
+                            console.log("attackName : ", attackName);
+                            console.log("tacticName : ", tacticName);
                             
                             if (typeof attackInfo != "undefined" && attackInfo.state == 2) {
                                 var parents = config[scenarioName].attackConnParent[key];
+                                console.log("parents : ", parents);
 
-                                if (parents > 0 ){ 
-                                    for (parent in parents) {
-                                        if (attackConn[i][parent][key] == true) {
+                                if (typeof parents != "undefined" && parents.length > 0){ 
+                                    for (var pIdx = 0; pIdx < parents.length; pIdx++) {
+                                        console.log("parents[pIdx] : ", parents[pIdx]);
+                                        console.log("key : ", key);
+                                        console.log("i : ", i);
+                                        console.log("pIdx : ", pIdx);
+                                        console.log("attackConn[i][parents[pIdx]][key] : ", attackConn[i][parents[pIdx]][key]);
+                                        if (attackConn[i][parents[pIdx]][key] == true) {
                                             var newInfo = { tactic: tacticName, attackName: attackName }; 
                                             attackSenarioProgressArr[i].push(newInfo);
                                             attackConn[i][key][attackName] = true;
+                                            socket.emit('Attack Success');
                                             console.log("attackConn : ", attackConn);
-    
+
+                                            var mainAttackArr = (Object.values(config["SCENARIO" + (i+1)].mainAttack));
+                                            console.log("mainAttackArr : ", mainAttackArr);
+                                            console.log("mainAttackArr[mainAttackArr.length -1] : ", mainAttackArr[mainAttackArr.length -1]);
+                                            if (mainAttackArr[mainAttackArr.length -1] == attackName && sectionIdx == 2) {
+                                                console.log("abandonStatus : false to true : ", attackName);
+                                                roomTotalJson[0][corpName].abandonStatus = true;
+                                                io.sockets.in(socket.room).emit("Abandon Company", corpName);
+                                                AllAbandon(socket, roomTotalJson);
+                                            } else if (mainAttackArr[-1] == attackName) {
+                                                roomTotalJson[0][corpName].sections[sectionIdx].destroyStatus = true;
+                                                roomTotalJson[0][corpName].sections[sectionIdx+1].attackable = true;
+                                            }
+
+                                            break;
                                         }
                                     }
                                 } else if (startAttackArr.includes(key)) {
                                     var newInfo = { tactic: tacticName, attackName: attackName }; 
                                     attackSenarioProgressArr[i].push(newInfo);
                                     attackConn[i][key][attackName] = true;
+                                    socket.emit('Attack Success');
                                     console.log("attackConn : ", attackConn);
                                 }
                             }
@@ -3258,6 +3294,8 @@ module.exports = (io) => {
         
             // console.log("attackConn : ", attackConn);
         }
+
+        roomTotalJson[0][corpName].sections[sectionIdx].attackSenarioProgress = attackSenarioProgressArr;
 
         await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
@@ -3280,10 +3318,6 @@ module.exports = (io) => {
             console.log("techniqueIndex : ", techniqueIndex);
             
             var attackInfo = sectionAttackProgressArr.filter(function(progress){
-                console.log("progress.tactic : ", progress.tactic);
-                console.log("config.ATTACK_CATEGORY[tacticIndex] : ", config.ATTACK_CATEGORY[tacticIndex]);
-                console.log("progress.attackName : ", progress.attackName);
-                console.log("config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex] : ", config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex]);
                 return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
             })[0];
 
@@ -3374,6 +3408,12 @@ module.exports = (io) => {
         // 자동 대응 수행
         async function automaticDefense(socket, companyName, section, tacticIndex, techniqueIndex) {
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            var sectionAttackProgressArr = roomTotalJson[0][companyName].sections[section].attackProgress;
+
+            var attackInfo = sectionAttackProgressArr.filter(function(progress){
+                return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
+            })[0];
+            
             console.log("automaticDefense - companyName : ", companyName);
             console.log("automaticDefense - section : ", section);
             console.log("automaticDefense - tacticIndex : ", tacticIndex);
@@ -3383,9 +3423,9 @@ module.exports = (io) => {
             let pitaNum = 0;
             if (socket.team == true) {
                 console.log("white team upgrade attack card");
-                cardLv = roomTotalJson[0][companyName]["penetrationTestingLV"][attackIndex];
+                cardLv = roomTotalJson[0][companyName]["penetrationTestingLV"][tacticIndex];
                 if (cardLv < 5) {
-                    pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["DEFENSE_" + (attackIndex + 1)]['pita'][cardLv];
+                    pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["DEFENSE_" + (tacticIndex + 1)]['pita'][cardLv];
                     roomTotalJson[0]['whiteTeam']['total_pita'] = pitaNum;
 
                     console.log("[!!!!!] pita num : ", pitaNum);
@@ -3398,13 +3438,14 @@ module.exports = (io) => {
 
                 let techniqueBeActivationList = roomTotalJson[0][companyName]["sections"][section]["beActivated"];
                 techniqueBeActivationList.length = 0;
+                
+                let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["defenseActive"];
+                let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["defenseLv"];
 
                 // white team -> 공격을 선택할 수 있도록 함
-                // balck team -> tactic 레벨 바로 업그레이드
-                if (socket.team == true) {
-                    console.log("Get Select Technique Num : ", config.ATTACK_UPGRADE_NUM[cardLv]);
-                    socket.emit("Get Select Technique Num", companyName, attackIndex, config.ATTACK_UPGRADE_NUM[cardLv], 0);
-                }
+                DefenseCooltime(socket, attackInfo.state, companyName, section, tacticIndex, techniqueIndex, cardLv);
+                // socket.emit('Start Defense', companyName, section, tacticIndex, techniqueIndex, config["DEFENSE_" + (categoryIndex + 1)]["time"][techniqueLevel[categoryIndex][techniqueBeActivationList[i]]]);
+                socket.emit('Start Defense', companyName, section, tacticIndex, techniqueIndex, config["DEFENSE_1"]["time"][techniqueLevel[categoryIndex][techniqueBeActivationList[i]]]);
 
                 await jsonStore.updatejson(roomTotalJson[0], socket.room);
                 roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
@@ -3421,10 +3462,6 @@ module.exports = (io) => {
                     socket.emit("Already Max Level");
                 }
             }
-
-
-            DefenseCooltime(socket, alreadyAttackList[i].state, companyName, section, alreadyAttackList[i].category, alreadyAttackList[i].technique, alreadyAttackList[i].level);
-            socket.emit('Start Defense', companyName, section, alreadyAttackList[i].category, alreadyAttackList[i].technique, alreadyAttackList[i].cooltime);
 
             await jsonStore.updatejson(roomTotalJson[0], socket.room);
             roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
