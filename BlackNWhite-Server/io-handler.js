@@ -3484,6 +3484,7 @@ module.exports = (io) => {
             console.log("#---------- 게임 종료됨(AllAbandon)----------#");
             clearInterval(timerId);
             clearInterval(pitaTimerId);
+            io.sockets.in(socket.room).emit('Timer END'); 
             io.sockets.in(socket.room).emit('Load_ResultPage');
             socket.on('Finish_Load_ResultPage', async()=> {
                 // 남은 피타
