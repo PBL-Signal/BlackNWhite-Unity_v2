@@ -1516,11 +1516,12 @@ module.exports = (io) => {
             let returnValue;
             if (socket.team == true) {
                 returnValue = roomTotalJson[0][companyName]["penetrationTestingLV"];
+                var attackable = roomTotalJson[0][companyName].sections[section]["defensible"];
             } else {
                 returnValue = roomTotalJson[0][companyName]["attackLV"];
+                var attackable = roomTotalJson[0][companyName].sections[section]["attackable"];
             }
 
-            var attackable = roomTotalJson[0][companyName].sections[section]["attackable"];
             console.log("attackable : ", attackable);
 
             console.log("laod tactic level return : ", returnValue);
@@ -1698,11 +1699,11 @@ module.exports = (io) => {
                 if (techniqueActivation[categoryIndex][techniqueBeActivationList[i]] == 2) {
                     // 0 나중에 시나리오 인덱스로 변경할 것
                     // sectionAttackProgressArr = sectionAttackProgressArr.filter(function(progress){
-                    sectionAttackProgressArr = sectionAttackProgressArr.filter(function(progress){
-                        return progress.tactic != config.ATTACK_CATEGORY[categoryIndex] && progress.attackName != config.ATTACK_TECHNIQUE[categoryIndex][techniqueBeActivationList[i]];
-                    });
+                    // sectionAttackProgressArr = sectionAttackProgressArr.filter(function(progress){
+                    //     return progress.tactic == config.ATTACK_CATEGORY[categoryIndex] && progress.attackName == config.ATTACK_TECHNIQUE[categoryIndex][techniqueBeActivationList[i]];
+                    // });
                     console.log("sectionAttackProgressArr : ", sectionAttackProgressArr);
-                    console.log("sectionAttackProgressArr[0].state : ", sectionAttackProgressArr[0].state);
+                    console.log("sectionAttackProgressArr.state : ", sectionAttackProgressArr.state);
 
                     var attackJson = {category : categoryIndex, technique : techniqueBeActivationList[i], cooltime : config["DEFENSE_" + (categoryIndex + 1)]["time"][techniqueLevel[categoryIndex][techniqueBeActivationList[i]]],
                                         state : sectionAttackProgressArr[0].state, level : techniqueLevel[categoryIndex][techniqueBeActivationList[i]]};
@@ -1720,14 +1721,13 @@ module.exports = (io) => {
 
             // 여러 공격도 처리될 수 있도록 하기
             for (var i = 0; i < alreadyAttackList.length; i++) {
-                DefenseCooltime(socket, alreadyAttackList[i].state, companyName, section, 0, alreadyAttackList[i].category, alreadyAttackList[i].technique, alreadyAttackList[i].level);
+                DefenseCooltime(socket, alreadyAttackList[i].state, companyName, section, alreadyAttackList[i].category, alreadyAttackList[i].technique, alreadyAttackList[i].level);
                 socket.emit('Start Defense', companyName, section, alreadyAttackList[i].category, alreadyAttackList[i].technique, alreadyAttackList[i].cooltime);
             }
 
             await jsonStore.updatejson(roomTotalJson[0], socket.room);
             roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
         });
-
 
 
         // 회사 몰락 여부 확인
@@ -1793,6 +1793,13 @@ module.exports = (io) => {
             });
         })
 
+        socket.on("Is Abandon Company", async(companyName) => {
+            const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            console.log("Is Abandon Company : ", roomTotalJson[0][companyName].abandonStatus);
+            if (roomTotalJson[0][companyName].abandonStatus) {
+                socket.emit('Abandon Company', companyName);
+            }
+        })
 
 // ===================================================================================================================
         // [Security Monitoring] 영역 클릭 시 레벨 보이기
@@ -1966,21 +1973,22 @@ module.exports = (io) => {
                         var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackElement.attackName);
                         console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
 
-                    if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
-                        sectionDefenseProgressArr[i].push(newInfo);
-                        console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
-                        // 0은 나중에 시나리오 인덱스로 변경
-                        DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, 0, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
-                        socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
-                    } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
-                        sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
-                        let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
-                        socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
-                        console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
-                    }
-                    await jsonStore.updatejson(roomTotalJson[0], socket.room);
+                        if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
+                            var newInfo = { tactic: attackElement.tactic, attackName: attackElement.attackName, state: false }; 
+                            sectionDefenseProgressArr[tacticIndex].push(newInfo);
+                            console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
+                            // 0은 나중에 시나리오 인덱스로 변경
+                            DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
+                            socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+                        } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
+                            sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
+                            let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
+                            socket.emit("Get Technique", corpName, sectionDefenseActivationArr, techniqueLevel);
+                            console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
+                        }
 
-                    });                
+                        await jsonStore.updatejson(roomTotalJson[0], socket.room);
+                    });
                 });
 
             }
@@ -2201,6 +2209,7 @@ module.exports = (io) => {
 
             }
         });
+
 // ###################################################################################################################
         
         socket.on('disconnect', async function() {
@@ -2613,10 +2622,10 @@ module.exports = (io) => {
                     new Section({
                         attackable : true,
                         defensible : true,
-                        destroyStatus : false ,
+                        destroyStatus : true ,
                         level  : 1,
                         suspicionCount : 1,
-                        attackProgress : [{ tactic: 'Reconnaissance', attackName: 'Active Scanning', state: 2 }, { tactic: 'Reconnaissance', attackName: 'Gather Victim Network Information', state: 2 }, { tactic: 'Privilege Escalation', attackName: 'Scheduled Task/Job', state: 2 }, { tactic: 'Execution', attackName: 'Software Deployment Tools', state: 2 }],
+                        attackProgress : [],
                         // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
                         attackSenarioProgress  : [[], [], [], [], []],
                         defenseProgress : [[], [], [], [], []],
@@ -2666,6 +2675,7 @@ module.exports = (io) => {
                         attackConn : [
                             // scenario 1
                             { 
+                                'startAttack' : {'Gather Victim Network Information' : false},
                                 'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
@@ -2682,6 +2692,7 @@ module.exports = (io) => {
                             },
                             // scenario 2 
                             {
+                                'startAttack' : {'Obtain Capabilities' : false},
                                 "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
@@ -2700,6 +2711,7 @@ module.exports = (io) => {
 
                             // scenario 3
                             {
+                                "startAttack" : {"Gather Victim Org Information" : false, "Search Victim-Owned Websites" : false},
                                 "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
                                 "Search Victim-Owned Websites" : {"Develop Capabilities": false},
                                 "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
@@ -2728,6 +2740,7 @@ module.exports = (io) => {
 
                             // scenario 4
                             {
+                                "startAttack" : {"Drive-by Compromise" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
                                 "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
@@ -2744,6 +2757,7 @@ module.exports = (io) => {
 
                             // scenario 5
                             {
+                                "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
                                 "Drive-by Compromise": {"Windows Management Instrumentation": false},
                                 "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
                                 "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
@@ -2763,7 +2777,164 @@ module.exports = (io) => {
                     }),
     
                     new Section({
-                        attackable : false,
+                        attackable : true,
+                        defensible : true,
+                        destroyStatus : true ,
+                        level  : 1,
+                        suspicionCount : 0,
+                        attackProgress : [],
+                        // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
+                        attackSenarioProgress  : [[], [], [], [], []],
+                        defenseProgress : [[], [], [], [], []],
+                        beActivated : [],
+                        defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 활성화된 방어
+                        defenseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
+                        defenseCnt : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
+                        attackConn : [
+                            // scenario 1
+                            { 
+                                'startAttack' : {'Gather Victim Network Information' : false},
+                                'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
+                                'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
+                                'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
+                                'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
+                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
+                                'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                                'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
+                                'Indirect Command Execution' : {"Brute Force": false},
+                                'Screen Capture' : {"Communication Through Removable Media": false},
+                                'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
+                                'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
+                            },
+                            // scenario 2 
+                            {
+                                'startAttack' : {'Obtain Capabilities' : false},
+                                "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
+                                "Drive-by Compromise" : {"Native API": false},
+                                "Native API" : {"Modify Registry": false},
+                                "Modify Registry" : {"Brute Force": false},
+                                "Brute Force" : {"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false,  "System Information Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false},
+                                "Browser Bookmark Discovery" : {"Clipboard Data": false},
+                                "File and Directory Discovery" : {"Data from Local System": false},
+                                "Network Share Discovery" : {"Data from Local System": false},
+                                "Process Discovery"  : {"Data from Local System": false},
+                                "System Information Discovery" : {"Clipboard Data": false},
+                                "System Network Configuration Discovery" : {"Data from Local System": false},
+                                "System Network Connections Discovery": {"Data from Local System": false},
+                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown/Reboot": false},
+                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot" : false},
+                            },
+
+                            // scenario 3
+                            {
+                                "startAttack" : {"Gather Victim Org Information" : false, "Search Victim-Owned Websites" : false},
+                                "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
+                                "Search Victim-Owned Websites" : {"Develop Capabilities": false},
+                                "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
+                                "Exploit Public-Facing Application" : {"Account Manipulation": false},
+                                "External Remote Services" : {"Account Manipulation": false, "Browser Extensions": false},
+                                "Account Manipulation" :  {"Process Injection": false},
+                                "Browser Extensions" :  {"Process Injection": false},
+                                "Process Injection" : {"Deobfuscate/Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate/Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
+                                "Masquerading" : { "Network Sniffing": false},
+                                "Modify Registry" : {"Query Registry": false},
+                                "Obfuscated Files or Information" : {"System Information Discovery": false, "System Network Configuration Discovery": false, "System Service Discovery": false},
+                                "Multi-Factor Authentication Interception" : {"File and Directory Discovery": false, "Process Discovery": false},
+                                "File and Directory Discovery" : {"Internal Spearphishing": false, "Data from Local System": false},
+                                "Network Sniffing": {"Internal Spearphishing": false}, 
+                                "Process Discovery" :{"Data from Local System": false},
+                                "Query Registry":{"Data from Local System": false}, 
+                                "System Information Discovery" : {"Remote Access Software": false},
+                                "System Network Configuration Discovery": {"Remote Access Software": false},
+                                "System Service Discovery" : {"Ingress Tool Transfer": false},
+                                "Internal Spearphishing": {"Adversary-in-the-Middle": false, "Data from Local System": false,"Exfiltration Over C2 Channel": false},
+                                "Adversary-in-the-Middle" : {"Remote Access Software": false}, 
+                                "Data from Local System": {"Ingress Tool Transfer": false}
+                            
+                            },
+
+                            // scenario 4
+                            {
+                                "startAttack" : {"Drive-by Compromise" : false},
+                                "Drive-by Compromise" : {"Native API": false},
+                                "Native API" : {"Modify Registry": false},
+                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
+                                "Browser Bookmark Discovery" :  {"Clipboard Data": false},
+                                "File and Directory Discovery":  {"Clipboard Data": false},
+                                "Network Share Discovery":  {"Data from Local System": false},
+                                "Process Discovery":  {"Data from Local System": false}, 
+                                "System Information Discovery":  {"Data from Local System": false},
+                                "System Network Connections Discovery":  {"Data from Local System": false},
+                                "System Owner/User Discovery":  {"Data from Local System": false},
+                                "Clipboard Data":  {"System Shutdown/Reboot": false },
+                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot": false }
+                            },
+
+                            // scenario 5
+                            {
+                                "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
+                                "Drive-by Compromise": {"Windows Management Instrumentation": false},
+                                "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
+                                "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
+                                "Scheduled Task/Job" : {"Deobfuscate/Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate/Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner/User Discovery" : false },
+                                "Modify Registry" : {"Process Discovery": false},
+                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false, "System Service Discovery": false },
+                                "Domain Trust Discovery" : {"Proxy": false},
+                                "Process Discovery" : {"Proxy": false},
+                                "Remote System Discovery" : {"Exploitation of Remote Services": false},
+                                "System Network Configuration Discovery": {"Proxy": false},
+                                "System Network Connections Discovery":{"Proxy": false},
+                                "System Owner/User Discovery":{"Proxy": false},
+                                "System Service Discovery": {"Proxy": false},
+                            }
+                        ]
+                    }),
+    
+                    new Section({
+                        attackable : true,
                         defensible : true,
                         destroyStatus : false ,
                         level  : 1,
@@ -2818,6 +2989,7 @@ module.exports = (io) => {
                         attackConn : [
                             // scenario 1
                             { 
+                                'startAttack' : {'Gather Victim Network Information' : false},
                                 'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
@@ -2834,6 +3006,7 @@ module.exports = (io) => {
                             },
                             // scenario 2 
                             {
+                                'startAttack' : {'Obtain Capabilities' : false},
                                 "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
@@ -2852,6 +3025,7 @@ module.exports = (io) => {
 
                             // scenario 3
                             {
+                                "startAttack" : {"Gather Victim Org Information" : false, "Search Victim-Owned Websites" : false},
                                 "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
                                 "Search Victim-Owned Websites" : {"Develop Capabilities": false},
                                 "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
@@ -2880,6 +3054,7 @@ module.exports = (io) => {
 
                             // scenario 4
                             {
+                                "startAttack" : {"Drive-by Compromise" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
                                 "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
@@ -2896,158 +3071,7 @@ module.exports = (io) => {
 
                             // scenario 5
                             {
-                                "Drive-by Compromise": {"Windows Management Instrumentation": false},
-                                "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
-                                "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
-                                "Scheduled Task/Job" : {"Deobfuscate/Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
-                                "Deobfuscate/Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner/User Discovery" : false },
-                                "Modify Registry" : {"Process Discovery": false},
-                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false, "System Service Discovery": false },
-                                "Domain Trust Discovery" : {"Proxy": false},
-                                "Process Discovery" : {"Proxy": false},
-                                "Remote System Discovery" : {"Exploitation of Remote Services": false},
-                                "System Network Configuration Discovery": {"Proxy": false},
-                                "System Network Connections Discovery":{"Proxy": false},
-                                "System Owner/User Discovery":{"Proxy": false},
-                                "System Service Discovery": {"Proxy": false},
-                            }
-                        ]
-                    }),
-    
-                    new Section({
-                        attackable : false,
-                        defensible : true,
-                        destroyStatus : false ,
-                        level  : 1,
-                        suspicionCount : 0,
-                        attackProgress : [],
-                        // attackSenarioProgress  : [ ['Gather Victim Network Information', 'Exploit Public-Facing Application', 'Phishing'] ],
-                        attackSenarioProgress  : [[], [], [], [], []],
-                        defenseProgress : [[], [], [], [], []],
-                        beActivated : [],
-                        defenseActive: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 활성화된 방어
-                        defenseLv : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 레벨 
-                        defenseCnt : [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-                                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], // 방어 횟수 
-                        attackConn : [
-                            // scenario 1
-                            { 
-                                'Gather Victim Network Information': {"Exploit Public-Facing Application" : false, "Phishing" : false, "Valid Accounts" : false},
-                                'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
-                                'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
-                                'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
-                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                                'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
-                                'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
-                                'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
-                                'Indirect Command Execution' : {"Brute Force": false},
-                                'Screen Capture' : {"Communication Through Removable Media": false},
-                                'Exfiltration Over Alternative Protocol' : {"Data Encrypted for Impact": false},
-                                'Exfiltration Over Web Service' : {"Data Encrypted for Impact": false}
-                            },
-                            // scenario 2 
-                            {
-                                "Obtain Capabilities" : {"Drive-by Compromise" : false, "Native API" : false},
-                                "Drive-by Compromise" : {"Native API": false},
-                                "Native API" : {"Modify Registry": false},
-                                "Modify Registry" : {"Brute Force": false},
-                                "Brute Force" : {"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false,  "System Information Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false},
-                                "Browser Bookmark Discovery" : {"Clipboard Data": false},
-                                "File and Directory Discovery" : {"Data from Local System": false},
-                                "Network Share Discovery" : {"Data from Local System": false},
-                                "Process Discovery"  : {"Data from Local System": false},
-                                "System Information Discovery" : {"Clipboard Data": false},
-                                "System Network Configuration Discovery" : {"Data from Local System": false},
-                                "System Network Connections Discovery": {"Data from Local System": false},
-                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown/Reboot": false},
-                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot" : false},
-                            },
-
-                            // scenario 3
-                            {
-                                "Gather Victim Org Information" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
-                                "Search Victim-Owned Websites" : {"Develop Capabilities": false},
-                                "Develop Capabilities" : {"Exploit Public-Facing Application": false, "External Remote Services" : false},
-                                "Exploit Public-Facing Application" : {"Account Manipulation": false},
-                                "External Remote Services" : {"Account Manipulation": false, "Browser Extensions": false},
-                                "Account Manipulation" :  {"Process Injection": false},
-                                "Browser Extensions" :  {"Process Injection": false},
-                                "Process Injection" : {"Deobfuscate/Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
-                                "Deobfuscate/Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
-                                "Masquerading" : { "Network Sniffing": false},
-                                "Modify Registry" : {"Query Registry": false},
-                                "Obfuscated Files or Information" : {"System Information Discovery": false, "System Network Configuration Discovery": false, "System Service Discovery": false},
-                                "Multi-Factor Authentication Interception" : {"File and Directory Discovery": false, "Process Discovery": false},
-                                "File and Directory Discovery" : {"Internal Spearphishing": false, "Data from Local System": false},
-                                "Network Sniffing": {"Internal Spearphishing": false}, 
-                                "Process Discovery" :{"Data from Local System": false},
-                                "Query Registry":{"Data from Local System": false}, 
-                                "System Information Discovery" : {"Remote Access Software": false},
-                                "System Network Configuration Discovery": {"Remote Access Software": false},
-                                "System Service Discovery" : {"Ingress Tool Transfer": false},
-                                "Internal Spearphishing": {"Adversary-in-the-Middle": false, "Data from Local System": false,"Exfiltration Over C2 Channel": false},
-                                "Adversary-in-the-Middle" : {"Remote Access Software": false}, 
-                                "Data from Local System": {"Ingress Tool Transfer": false}
-                            
-                            },
-
-                            // scenario 4
-                            {
-                                "Drive-by Compromise" : {"Native API": false},
-                                "Native API" : {"Modify Registry": false},
-                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
-                                "Browser Bookmark Discovery" :  {"Clipboard Data": false},
-                                "File and Directory Discovery":  {"Clipboard Data": false},
-                                "Network Share Discovery":  {"Data from Local System": false},
-                                "Process Discovery":  {"Data from Local System": false}, 
-                                "System Information Discovery":  {"Data from Local System": false},
-                                "System Network Connections Discovery":  {"Data from Local System": false},
-                                "System Owner/User Discovery":  {"Data from Local System": false},
-                                "Clipboard Data":  {"System Shutdown/Reboot": false },
-                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot": false }
-                            },
-
-                            // scenario 5
-                            {
+                                "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
                                 "Drive-by Compromise": {"Windows Management Instrumentation": false},
                                 "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
                                 "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
@@ -3116,13 +3140,15 @@ module.exports = (io) => {
                 attackProgressArr.filter( async (element) => {
                     if(element.attackName == attackName && element.state == 1) {
                         element.state = 2;
-                        await jsonStore.updatejson(roomTotalJson[0], socket.room);
-    
-                        const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
-                        var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
-                        console.log("state2 test: ", sectionAttackProgressArr2);
                     }
                 })
+
+                roomTotalJson[0][corpName].sections[sectionIdx].attackProgress = attackProgressArr;
+                await jsonStore.updatejson(roomTotalJson[0], socket.room);
+    
+                const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
+                var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
+                console.log("state2 test: ", sectionAttackProgressArr2);
 
                 // [GameLog] 로그 추가
                 let today = new Date();   
@@ -3137,7 +3163,7 @@ module.exports = (io) => {
                 io.sockets.in(socket.room+'false').emit('addLog', logArr);
 
                 // 시나리오 포함 여부 확인 함수 호출
-                //CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName); 
+                CheckScenarioAttack(socket, corpName, sectionIdx, tacticName, attackName); 
 
                 // if(attackProgressArr[attackIdx].state == 1) {
                 //     attackProgressArr[attackIdx].state = 2;
@@ -3147,8 +3173,6 @@ module.exports = (io) => {
                 //     var sectionAttackProgressArr2 = roomTotalJson2[0]["companyA"].sections[0].attackProgress;
                 //     console.log("test: ", sectionAttackProgressArr2);
                 // }
-    
-                
 
             // 공격 실패 (by.성공률)
             } else{
@@ -3185,130 +3209,95 @@ module.exports = (io) => {
         var attackProgress = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
         var attackConn = roomTotalJson[0][corpName].sections[sectionIdx].attackConn;
         
-        // var idx = 1;
-
         // startAttack인지 확인
         for (var i = 0; i < attackConn.length; i++) {
             var scenarioName = "SCENARIO" + (i + 1);
             var startAttackArr = (Object.values(config[scenarioName].startAttack));
+            console.log("startAttackArr : ", startAttackArr);
+            console.log("attackName : ", attackName);
 
             if(startAttackArr.includes(attackName)) {
                 console.log("start attack!!");
                 var newInfo = { tactic: tacticName, attackName: attackName }; 
-                attackSenarioProgressArr.push(newInfo);
+                attackSenarioProgressArr[i].push(newInfo);
+                attackConn[i]["startAttack"][attackName] = true;
+                socket.emit('Attack Success');
+                console.log("attackConn : ", attackConn);
             } else {
                 console.log("not start attack!!");
                 for(key in attackConn[i]) {
-                    var attackConnArr = (Object.values(attackConn[i][key]));
-                    if (attackConnArr.hasOwnProperty(attackName)) {
-                        console.log("키 존재 attack!!");
+                    var attackConnArr = (Object.keys(attackConn[i][key]));
+                    if (attackConnArr.includes(attackName)) {
+                        console.log("키 존재 attack!! : ", attackName);
                         if (attackConnArr[attackName] == true) {
                             console.log("키 값이 true attack!!");
                             var newInfo = { tactic: tacticName, attackName: attackName }; 
-                            attackSenarioProgressArr.push(newInfo);
+                            attackSenarioProgressArr[i].push(newInfo);
+                            socket.emit('Attack Success');
                         } else {
                             console.log("키 값이 false attack!!");
                             // 나중에 tactic도 같이 필터링해줄 수 있는 방법 찾아야 됨
                             var attackInfo = attackProgress.filter(function(progress){
-                                return progress.attackName == key;
+                                return progress.attackName == attackName && progress.tactic == tacticName;
                             })[0];
-                            console.log("attackInfo attack!! : ". attackInfo);
+
+                            console.log("attackProgress : ", attackProgress);
+                            console.log("attackInfo : ", attackInfo);
+                            console.log("attackName : ", attackName);
+                            console.log("tacticName : ", tacticName);
                             
                             if (typeof attackInfo != "undefined" && attackInfo.state == 2) {
-                                var newInfo = { tactic: tacticName, attackName: attackName }; 
-                                attackSenarioProgressArr.push(newInfo);
-                                attackConnArr[attackName] = true;
-                                console.log("attackSenarioProgressArr : ", attackSenarioProgressArr);
+                                var parents = config[scenarioName].attackConnParent[key];
+                                console.log("parents : ", parents);
+
+                                if (typeof parents != "undefined" && parents.length > 0){ 
+                                    for (var pIdx = 0; pIdx < parents.length; pIdx++) {
+                                        console.log("parents[pIdx] : ", parents[pIdx]);
+                                        console.log("key : ", key);
+                                        console.log("i : ", i);
+                                        console.log("pIdx : ", pIdx);
+                                        console.log("attackConn[i][parents[pIdx]][key] : ", attackConn[i][parents[pIdx]][key]);
+                                        if (attackConn[i][parents[pIdx]][key] == true) {
+                                            var newInfo = { tactic: tacticName, attackName: attackName }; 
+                                            attackSenarioProgressArr[i].push(newInfo);
+                                            attackConn[i][key][attackName] = true;
+                                            socket.emit('Attack Success');
+                                            console.log("attackConn : ", attackConn);
+
+                                            var mainAttackArr = (Object.values(config["SCENARIO" + (i+1)].mainAttack));
+                                            console.log("mainAttackArr : ", mainAttackArr);
+                                            console.log("mainAttackArr[mainAttackArr.length -1] : ", mainAttackArr[mainAttackArr.length -1]);
+                                            if (mainAttackArr[mainAttackArr.length -1] == attackName && sectionIdx == 2) {
+                                                console.log("abandonStatus : false to true : ", attackName);
+                                                roomTotalJson[0][corpName].abandonStatus = true;
+                                                io.sockets.in(socket.room).emit("Abandon Company", corpName);
+                                                AllAbandon(socket, roomTotalJson);
+                                            } else if (mainAttackArr[-1] == attackName) {
+                                                roomTotalJson[0][corpName].sections[sectionIdx].destroyStatus = true;
+                                                roomTotalJson[0][corpName].sections[sectionIdx+1].attackable = true;
+                                            }
+
+                                            break;
+                                        }
+                                    }
+                                } else if (startAttackArr.includes(key)) {
+                                    var newInfo = { tactic: tacticName, attackName: attackName }; 
+                                    attackSenarioProgressArr[i].push(newInfo);
+                                    attackConn[i][key][attackName] = true;
+                                    socket.emit('Attack Success');
+                                    console.log("attackConn : ", attackConn);
+                                }
                             }
                         }
                     }
                 }
             }
         
-            console.log("attackConn : ", attackConn);
+            // console.log("attackConn : ", attackConn);
         }
-        
 
+        roomTotalJson[0][corpName].sections[sectionIdx].attackSenarioProgress = attackSenarioProgressArr;
 
-
-        // attackSenarioProgressArr.forEach(element => {
-        //     console.log("element : ", element);
-        //     var scenarioName = "SCENARIO" + idx;
-        //     // 진행된 공격이 없는 경우 -> startkAttack인지 확인 -> 공격 리스트에 바로 추가
-        //     if(element.length <= 0){
-        //         var startAttackArr = (Object.values(config[scenarioName].startAttack));
-
-        //         // startAttack인지 확인
-        //         if(startAttackArr.includes(attackName)) {
-        //             // 시나리오 반복문
-                    
-        //         } else if(attacksArr.includes(attackName)) {
-        //             // 시나리오 반복문
-        //             for (var i = 0; i < attackConn.length; i++) {
-        //                 for(key in attackConn[i]) {
-        //                     if (attackConn[i][key].hasOwnProperty(attackName)) {
-        //                         if (attackConn[i][key][attackName] == true) {
-        //                             var newInfo = { tactic: tacticName, attackName: attackName }; 
-        //                             element.push(newInfo);
-        //                         } else {
-        //                             var attackInfo = attackProgress[i].filter(function(progress){
-        //                                 return progress.tactic == tacticName && progress.attackName == key;
-        //                             })[0];
-                                    
-        //                             if (typeof attackInfo != "undefined" && attackInfo.state == 2) {
-        //                                 var newInfo = { tactic: tacticName, attackName: attackName }; 
-        //                                 element.push(newInfo);
-        //                                 attackConn[i][key][attackName] = true;
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //             }
-
-        //             console.log("attackConn : ", attackConn);
-
-        //         }
-
-        //     // 진행된 공격이 있는 경우 -> 마지막 공격부터 conn을 확인 -> 해당되는 경우 공격 리스트에 추가 
-        //     } else {
-        //         for(var k=element.length - 1; k>=0; k--){
-        //             var checkLastAttack = element[k];
-
-        //             var attacksArr;
-        //             if(config[scenarioName].attackConn[checkLastAttack] == null) { // attackConn 확인
-        //                 console.log("시나리오에 해당되는 공격 아님 또는 메인 공격임");
-        //             } else {
-        //                 attacksArr = Object.values(config[scenarioName].attackConn[checkLastAttack]);
-        //                 if(attacksArr.includes(attackName)){ // attackConn의 value에 특정 공격에 포함된 경우 공격 리스트에 추가 & 사전대응 시작
-        //                     // 시나리오 반복문
-        //                     for (var i = 0; i < attackConn.length; i++) {
-        //                         for(key in attackConn[i]) {
-        //                             if (attackConn[i][key].hasOwnProperty(attackName)) {
-        //                                 if (attackConn[i][key][attackName] == true) {
-        //                                     var newInfo = { tactic: tacticName, attackName: attackName }; 
-        //                                     element.push(newInfo);
-        //                                 } else {
-        //                                     var attackInfo = attackProgress[i].filter(function(progress){
-        //                                         return progress.tactic == tacticName && progress.attackName == key;
-        //                                     })[0];
-                                            
-        //                                     if (typeof attackInfo != "undefined" && attackInfo.state == 2) {
-        //                                         var newInfo = { tactic: tacticName, attackName: attackName }; 
-        //                                         element.push(newInfo);
-        //                                         attackConn[i][key][attackName] = true;
-        //                                     }
-        //                                 }
-        //                             }
-        //                         }
-        //                     }
-        
-        //                     console.log("attackConn : ", attackConn);
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     idx++;
-        // });
         await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
         const roomTotalJson2 = JSON.parse(await jsonStore.getjson(socket.room));
@@ -3325,10 +3314,15 @@ module.exports = (io) => {
             var sectionAttackProgressArr = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress;
             var defenseCntArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseCnt;
             var defenseLvArr = roomTotalJson[0][corpName].sections[sectionIdx].defenseLv;
+
+            console.log("tacticIndex : ", tacticIndex);
+            console.log("techniqueIndex : ", techniqueIndex);
             
             var attackInfo = sectionAttackProgressArr.filter(function(progress){
                 return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
             })[0];
+
+            console.log("attackInfo : ", attackInfo);
 
             if (typeof attackInfo != "undefined") {
                 let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel] * 0.01;
@@ -3366,7 +3360,7 @@ module.exports = (io) => {
                         }
 
                         // [GameLog] 로그 추가
-                        let today = new Date();   
+                        let today = new Date();
                         let hours = today.getHours(); // 시
                         let minutes = today.getMinutes();  // 분
                         let seconds = today.getSeconds();  // 초
@@ -3378,22 +3372,30 @@ module.exports = (io) => {
                         
                     } else {   // 방어 실패
                         console.log("DefenseCooltime - faile!!");
+                        socket.emit('Failed to defense');
+                        automaticDefense(socket, corpName, sectionIdx, tacticIndex, techniqueIndex);
+                        return;
         
-                        sectionDefenseProgressArr = sectionDefenseProgressArr.filter(function(progress){
-                            return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[techniqueIndex];
-                        });
+                        // sectionDefenseProgressArr = sectionDefenseProgressArr.filter(function(progress){
+                        //     return progress.tactic != config.ATTACK_CATEGORY[tacticIndex] && progress.attackName != config.ATTACK_TECHNIQUE[techniqueIndex];
+                        // });
         
-                        DefenseCooltime(socket, attackInfo.state, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLevel);
+                        // DefenseCooltime(socket, attackInfo.state, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLevel);
                     }
         
                     console.log("DefenseCooltime - sectionAttackProgressArr (after) : ", sectionAttackProgressArr);
-                    console.log("DefenseCooltime - sectionDefenseProgressArr (after) : ", sectionDefenseProgressArr);
+                    roomTotalJson[0][corpName].sections[sectionIdx].attackProgress = sectionAttackProgressArr;
+                    roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress = sectionDefenseProgressArr;
+                    console.log("DefenseCooltime - roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress (after) : ", roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress);
         
                     await jsonStore.updatejson(roomTotalJson[0], socket.room);
 
                 } else { // 공격 실패 (성공률로 인해)
                     console.log("Failed due to success rate!!")
                     socket.emit('Failed to success rate');
+                    automaticDefense(socket, corpName, sectionIdx, tacticIndex, techniqueIndex);
+                    return;
+                    // DefenseCooltime(socket, attackInfo.state, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLevel);
                 }
             }
 
@@ -3401,6 +3403,70 @@ module.exports = (io) => {
             
         }, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLevel] * 1000);
     }
+
+    
+
+        // 자동 대응 수행
+        async function automaticDefense(socket, companyName, section, tacticIndex, techniqueIndex) {
+            let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+            var sectionAttackProgressArr = roomTotalJson[0][companyName].sections[section].attackProgress;
+
+            var attackInfo = sectionAttackProgressArr.filter(function(progress){
+                return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
+            })[0];
+            
+            console.log("automaticDefense - companyName : ", companyName);
+            console.log("automaticDefense - section : ", section);
+            console.log("automaticDefense - tacticIndex : ", tacticIndex);
+            console.log("automaticDefense - techniqueIndex : ", techniqueIndex);
+
+            let cardLv;
+            let pitaNum = 0;
+            if (socket.team == true) {
+                console.log("white team upgrade attack card");
+                cardLv = roomTotalJson[0][companyName]["penetrationTestingLV"][tacticIndex];
+                if (cardLv < 5) {
+                    pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["DEFENSE_" + (tacticIndex + 1)]['pita'][cardLv];
+                    roomTotalJson[0]['whiteTeam']['total_pita'] = pitaNum;
+
+                    console.log("[!!!!!] pita num : ", pitaNum);
+                }
+            }
+
+            if (pitaNum >= 0 && cardLv < 5) {
+                socket.to(socket.room + socket.team).emit('Update Pita', pitaNum);
+                socket.emit('Update Pita', pitaNum);
+
+                let techniqueBeActivationList = roomTotalJson[0][companyName]["sections"][section]["beActivated"];
+                techniqueBeActivationList.length = 0;
+                
+                let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["defenseActive"];
+                let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["defenseLv"];
+
+                // white team -> 공격을 선택할 수 있도록 함
+                DefenseCooltime(socket, attackInfo.state, companyName, section, tacticIndex, techniqueIndex, cardLv);
+                // socket.emit('Start Defense', companyName, section, tacticIndex, techniqueIndex, config["DEFENSE_" + (categoryIndex + 1)]["time"][techniqueLevel[categoryIndex][techniqueBeActivationList[i]]]);
+                socket.emit('Start Defense', companyName, section, tacticIndex, techniqueIndex, config["DEFENSE_1"]["time"][techniqueLevel[categoryIndex][techniqueBeActivationList[i]]]);
+
+                await jsonStore.updatejson(roomTotalJson[0], socket.room);
+                roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+
+            } else {
+                console.log("Something Problem!!!")
+                console.log("pitanum : ", pitaNum)
+                console.log("cardLv : ", cardLv)
+                if (pitaNum < 0){
+                    console.log("업그레이드 실패!! >> pita 부족");
+                    socket.emit("Short of Money");
+                } else if (cardLv >= 5){
+                    console.log("업그레이드 실패!! >> 만랩 달성");
+                    socket.emit("Already Max Level");
+                }
+            }
+
+            await jsonStore.updatejson(roomTotalJson[0], socket.room);
+            roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+        }
 
 
     // 모든 회사가 몰락인지 확인, 몰락이면 게임 종료
