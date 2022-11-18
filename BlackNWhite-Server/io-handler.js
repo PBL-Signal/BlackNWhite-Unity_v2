@@ -1797,7 +1797,7 @@ module.exports = (io) => {
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             console.log("Is Abandon Company : ", roomTotalJson[0][companyName].abandonStatus);
             if (roomTotalJson[0][companyName].abandonStatus) {
-                socket.emit('Abandon Company', companyName);
+                socket.to(socket.room).emit('Abandon Company', companyName);
             }
         })
 
