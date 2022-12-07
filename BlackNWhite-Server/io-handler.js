@@ -41,7 +41,7 @@ const User = require("./schemas/roomTotal/User");
 const RoomInfo = require("./schemas/roomTotal/RoomInfo");
 
 // MongoDB관련
-const func = require('./server_functions/db_func');
+// const func = require('./server_functions/db_func');
 const {lobbyLogger, gameLogger, chattingLogger} = require('./logConfig'); 
 
 const os = require( 'os' );
@@ -1197,6 +1197,8 @@ module.exports = (io) => {
 
             io.sockets.in(socket.room+'false').emit('Update Pita', roomTotalJson[0].blackTeam.total_pita );
             socket.emit('ResultBuyScenario', true);
+            console.log("[scenarioLvList]"+ scenarioLvList);
+            console.log("[scenarioLvList] 원소 타입"+ typeof(scenarioLvList[0]) + typeof(scenarioLvList[1]));
             io.sockets.in(socket.room).emit('BroadScenarioLv', scenarioLvList);
             console.log("구입 성공 ! " + scenarioLvList);
         });
@@ -1229,14 +1231,14 @@ module.exports = (io) => {
 
                 // 단계 1. 현재 진행 중인 공격 뽑기 (attackSenarioProgress스키마)
                 var sectionAttProgSenario = roomTotalJson[0][data.company].sections[data.section].attackSenarioProgress[data.scenario];
-                console.log("sectionAttProgSenario :", sectionAttProgSenario);
+                console.log("현재 진행된 공격 목록 sectionAttProgSenario :", sectionAttProgSenario);
                 sectionAttProgSenario.forEach((value, index, array) => {
                     console.log(`${index} :  ${value.attackName}`); 
-                    if(value.state==2){
+                    // if(value.state==2){
                         var attIdx = config.ATTACK_CATEGORY_DICT[value.tactic];
                     //    progressAtt[attIdx] = [value.attackName]; // 중복 들어가면 어쩌지
                         progressAtt.push    ({'attIdx' : attIdx, 'attack' : value.attackName});
-                    }
+                    // }
                 });
 
                 sectScenarioHint['progressAtt'] = progressAtt;
@@ -3551,7 +3553,7 @@ module.exports = (io) => {
     // 게임 정보 저장 (mongoDB)
     var gameTotalJson = JSON.parse(await jsonStore.getjson(roomPin));
     var gameTotalScm = new RoomTotalSchema(gameTotalJson[0]);
-    func.InsertGameRoomTotal(gameTotalScm);
+    // func.InsertGameRoomTotal(gameTotalScm);
 
 
     // 룸 정보 저장 (mongoDB)
@@ -3589,7 +3591,7 @@ module.exports = (io) => {
         Users :roomMembersDict, 
         Info : roomInfoScm
     });
-    func.InsertRoomInfoTotal(roomTotalScm);
+    // func.InsertRoomInfoTotal(roomTotalScm);
 
     // 게임 정보 삭제 (redis)
     await jsonStore.deletejson(roomPin);

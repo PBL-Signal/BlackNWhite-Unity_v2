@@ -1,54 +1,54 @@
-const mongoose = require('mongoose');
-const express = require("express");
+// const mongoose = require('mongoose');
+// const express = require("express");
 
-const RoomTotalSchema = require("../schemas/roomTotal/RoomTotalSchema");
-const RoomInfoTotal = require("../schemas/roomTotal/RoomInfoTotal");
+// const RoomTotalSchema = require("../schemas/roomTotal/RoomTotalSchema");
+// const RoomInfoTotal = require("../schemas/roomTotal/RoomInfoTotal");
 
 
-//===== Mongo DB ====
-//MongoDB 연결
-mongoose.connect('mongodb://localhost:27017/blacknWhite'); // 포트번호 뒤에 nodejs는 사용할 DB 이름 (현재는 nodejs DB를 사용)
-var db = mongoose.connection;
+// //===== Mongo DB ====
+// //MongoDB 연결
+// mongoose.connect('mongodb://localhost:27017/blacknWhite'); // 포트번호 뒤에 nodejs는 사용할 DB 이름 (현재는 nodejs DB를 사용)
+// var db = mongoose.connection;
 
-// 연결 실패
-db.on('error', function(){
-    console.log('Connection Failed!');
-});
-// 연결 성공
-db.once('open', function() {
-    console.log('DB Connected!');
-});
+// // 연결 실패
+// db.on('error', function(){
+//     console.log('Connection Failed!');
+// });
+// // 연결 성공
+// db.once('open', function() {
+//     console.log('DB Connected!');
+// });
 
-// //==============================================================================
-func = express();
+// // //==============================================================================
+// func = express();
 
-func.InsertGameRoomTotal = function(gameData){
-    console.log('InsertGameRoomTotal 함수 호출');
+// func.InsertGameRoomTotal = function(gameData){
+//     console.log('InsertGameRoomTotal 함수 호출');
 
-    var newRoom = new RoomTotalSchema(gameData);
-    newRoom.save(function(error, data){
-        if(error){
-            console.log(error);
-        }else{
-            console.log('New Game Data Saved!');
-        }
-    });
-}
+//     var newRoom = new RoomTotalSchema(gameData);
+//     newRoom.save(function(error, data){
+//         if(error){
+//             console.log(error);
+//         }else{
+//             console.log('New Game Data Saved!');
+//         }
+//     });
+// }
 
-func.InsertRoomInfoTotal = function(roomData){
-    console.log('InsertRoomInfoTotal 함수 호출');
+// func.InsertRoomInfoTotal = function(roomData){
+//     console.log('InsertRoomInfoTotal 함수 호출');
 
-    var newRoom = new RoomInfoTotal(roomData);
-    newRoom.save(function(error, data){
-        if(error){
-            console.log(error);
-        }else{
-            console.log('New Room Data Saved!');
-        }
-    });
-}
+//     var newRoom = new RoomInfoTotal(roomData);
+//     newRoom.save(function(error, data){
+//         if(error){
+//             console.log(error);
+//         }else{
+//             console.log('New Room Data Saved!');
+//         }
+//     });
+// }
 
-module.exports = func;
+// module.exports = func;
 
 
 
