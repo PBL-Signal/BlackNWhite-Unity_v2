@@ -1,5 +1,5 @@
 const { createLogger, format, transports } = require('winston');
-require('winston-mongodb');
+// require('winston-mongodb');
 
 const winston = require('winston');
 
@@ -50,16 +50,16 @@ const lobbyLogger = createLogger({ //
             filename: 'logs/lobby.log',
         }),
 
-        // MongoDB transport
-        new transports.MongoDB({
-            levels: config.levels,
-            db : 'mongodb://localhost:27017/logs',
-            options: {
-                useUnifiedTopology: true
-            },
-            storeHost: true, //server 이름 저장 (ex. DESKTOP_@##@#2)
-            collection: 'lobby_logs',
-        })
+        // // MongoDB transport
+        // new transports.MongoDB({
+        //     levels: config.levels,
+        //     db : 'mongodb://localhost:27017/logs',
+        //     options: {
+        //         useUnifiedTopology: true
+        //     },
+        //     storeHost: true, //server 이름 저장 (ex. DESKTOP_@##@#2)
+        //     collection: 'lobby_logs',
+        // })
     ]
 });
 
@@ -84,16 +84,16 @@ const gameLogger = createLogger({ //
         filename: 'logs/gameServer.log',
         }),
         
-        // MongoDB transport
-        new transports.MongoDB({
-            levels: config.levels,
-            db : 'mongodb://localhost:27017/logs',
-            options: {
-                useUnifiedTopology: true
-            },
-            storeHost: true, //server 이름 저장 (ex. DESKTOP_@##@#2)
-            collection: 'gameServer_logs',
-        })
+        // // MongoDB transport
+        // new transports.MongoDB({
+        //     levels: config.levels,
+        //     db : 'mongodb://localhost:27017/logs',
+        //     options: {
+        //         useUnifiedTopology: true
+        //     },
+        //     storeHost: true, //server 이름 저장 (ex. DESKTOP_@##@#2)
+        //     collection: 'gameServer_logs',
+        // })
     ]
 });
     
@@ -117,16 +117,16 @@ const chattingLogger = createLogger({ //
         filename: 'logs/chattingServer.log',
         }),
         
-        // MongoDB transport
-        new transports.MongoDB({
-            levels: config.levels,
-            db : 'mongodb://localhost:27017/logs',
-            options: {
-                useUnifiedTopology: true
-            },
-            storeHost: true, //server 이름 저장 (ex. DESKTOP_@##@#2)
-            collection: 'chattingServer_logs',
-        })
+        // // MongoDB transport
+        // new transports.MongoDB({
+        //     levels: config.levels,
+        //     db : 'mongodb://localhost:27017/logs',
+        //     options: {
+        //         useUnifiedTopology: true
+        //     },
+        //     storeHost: true, //server 이름 저장 (ex. DESKTOP_@##@#2)
+        //     collection: 'chattingServer_logs',
+        // })
     ]
 });
 

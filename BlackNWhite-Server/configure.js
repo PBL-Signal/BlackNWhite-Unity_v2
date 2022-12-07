@@ -56,7 +56,7 @@ module.exports = {
     MONITORING_13 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Exfiltration"},
     MONITORING_14 : { pita : [5, 6, 7, 8, 9], time : [9, 7, 6, 5, 4], name : "Impact"},
     
-    GAME_TIME : 30, // 현재 단위 분, 추후 수정
+    GAME_TIME : 600, // 10분
     MAX_LEVEL : 5,
     BLACK_MIN_LEVEL : 0,
     WHITE_MIN_LEVEL : 1,
