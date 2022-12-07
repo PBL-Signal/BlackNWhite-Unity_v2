@@ -1587,8 +1587,9 @@ module.exports = (io) => {
                 // white team -> 공격을 선택할 수 있도록 함
                 // balck team -> tactic 레벨 바로 업그레이드
                 if (socket.team == true) {
+                    let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["defenseActive"];
                     console.log("Get Select Technique Num : ", config.ATTACK_UPGRADE_NUM[cardLv]);
-                    socket.emit("Get Select Technique Num", companyName, attackIndex, config.ATTACK_UPGRADE_NUM[cardLv], 0);
+                    socket.emit("Get Select Technique Num", companyName, attackIndex, techniqueActivation, config.ATTACK_UPGRADE_NUM[cardLv], 0);
                 } else {
                     console.log("black team upgrade attack card");
                     roomTotalJson[0][companyName]["attackLV"][attackIndex] += 1;
@@ -1665,7 +1666,9 @@ module.exports = (io) => {
                 console.log("cardLv : ", cardLv);
                 console.log("config.ATTACK_UPGRADE_NUM[cardLv] : ", config.ATTACK_UPGRADE_NUM[cardLv]);
                 console.log("techniqueBeActivationList.length : ", techniqueBeActivationList.length);
-                socket.emit("Get Select Technique Num", companyName, categoryIndex, config.ATTACK_UPGRADE_NUM[cardLv], techniqueBeActivationList.length);
+                
+                let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["defenseActive"];
+                socket.emit("Get Select Technique Num", companyName, categoryIndex, techniqueActivation, config.ATTACK_UPGRADE_NUM[cardLv], techniqueBeActivationList.length);
             }
 
             await jsonStore.updatejson(roomTotalJson[0], socket.room);
@@ -1681,6 +1684,7 @@ module.exports = (io) => {
 
             // 선택 완료
             let tacticLevel = roomTotalJson[0][companyName]["penetrationTestingLV"];
+            let attackable = roomTotalJson[0][companyName].sections[section]["attackable"];
             let techniqueBeActivationList = roomTotalJson[0][companyName]["sections"][section]["beActivated"];
             let techniqueActivation = roomTotalJson[0][companyName]["sections"][section]["defenseActive"];
             let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["defenseLv"];
@@ -1717,7 +1721,7 @@ module.exports = (io) => {
             console.log("techniqueLevel : ", techniqueLevel);
 
             socket.emit("Get Technique", companyName, techniqueActivation, techniqueLevel);
-            socket.emit("Get Tactic Level", companyName, tacticLevel);
+            socket.emit("Get Tactic Level", companyName, attackable, tacticLevel);
 
             // 여러 공격도 처리될 수 있도록 하기
             for (var i = 0; i < alreadyAttackList.length; i++) {
