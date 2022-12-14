@@ -1117,6 +1117,7 @@ module.exports = (io) => {
 
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             var scenarioLvList = Object.values(roomTotalJson[0]["blackTeam"]["scenarioLevel"]);
+            console.log("[scenarioLvList]"+ scenarioLvList);
             socket.emit('BroadScenarioLv', scenarioLvList);
         });
 
@@ -1155,6 +1156,10 @@ module.exports = (io) => {
 
             io.sockets.in(socket.room+'false').emit('Update Pita', roomTotalJson[0].blackTeam.total_pita );
             socket.emit('ResultUpgradeScenario', true);
+
+            console.log("[업그레이드 scenarioLvList]"+ scenarioLvList);
+            // console.log("[업그레이드 scenarioLvList] 원소 타입"+ typeof(scenarioLvList[0]) + typeof(scenarioLvList[1]));
+
             io.sockets.in(socket.room).emit('BroadScenarioLv', scenarioLvList);
             console.log("업그레이드 성공 ! " + scenarioLvList);
         });
@@ -1193,7 +1198,7 @@ module.exports = (io) => {
             io.sockets.in(socket.room+'false').emit('Update Pita', roomTotalJson[0].blackTeam.total_pita );
             socket.emit('ResultBuyScenario', true);
             console.log("[scenarioLvList]"+ scenarioLvList);
-            console.log("[scenarioLvList] 원소 타입"+ typeof(scenarioLvList[0]) + typeof(scenarioLvList[1]));
+            // console.log("[scenarioLvList] 원소 타입"+ typeof(scenarioLvList[0]) + typeof(scenarioLvList[1]));
             io.sockets.in(socket.room).emit('BroadScenarioLv', scenarioLvList);
             console.log("구입 성공 ! " + scenarioLvList);
         });
@@ -2622,10 +2627,10 @@ module.exports = (io) => {
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
                                 'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
-                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task,Job": false},
+                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task,Job": false},
                                 'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
-                                'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                                'Scheduled Task,Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
                                 'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
                                 'Indirect Command Execution' : {"Brute Force": false},
                                 'Screen Capture' : {"Communication Through Removable Media": false},
@@ -2647,8 +2652,8 @@ module.exports = (io) => {
                                 "System Information Discovery" : {"Clipboard Data": false},
                                 "System Network Configuration Discovery" : {"Data from Local System": false},
                                 "System Network Connections Discovery": {"Data from Local System": false},
-                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown/Reboot": false},
-                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot" : false},
+                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown,Reboot": false},
+                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown,Reboot" : false},
                             },
 
                             // scenario 3
@@ -2661,8 +2666,8 @@ module.exports = (io) => {
                                 "External Remote Services" : {"Account Manipulation": false, "Browser Extensions": false},
                                 "Account Manipulation" :  {"Process Injection": false},
                                 "Browser Extensions" :  {"Process Injection": false},
-                                "Process Injection" : {"Deobfuscate/Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
-                                "Deobfuscate/Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
+                                "Process Injection" : {"Deobfuscate,Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate,Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
                                 "Masquerading" : { "Network Sniffing": false},
                                 "Modify Registry" : {"Query Registry": false},
                                 "Obfuscated Files or Information" : {"System Information Discovery": false, "System Network Configuration Discovery": false, "System Service Discovery": false},
@@ -2685,16 +2690,16 @@ module.exports = (io) => {
                                 "startAttack" : {"Drive-by Compromise" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
-                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
+                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner,User Discovery": false},
                                 "Browser Bookmark Discovery" :  {"Clipboard Data": false},
                                 "File and Directory Discovery":  {"Clipboard Data": false},
                                 "Network Share Discovery":  {"Data from Local System": false},
                                 "Process Discovery":  {"Data from Local System": false}, 
                                 "System Information Discovery":  {"Data from Local System": false},
                                 "System Network Connections Discovery":  {"Data from Local System": false},
-                                "System Owner/User Discovery":  {"Data from Local System": false},
-                                "Clipboard Data":  {"System Shutdown/Reboot": false },
-                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot": false }
+                                "System Owner,User Discovery":  {"Data from Local System": false},
+                                "Clipboard Data":  {"System Shutdown,Reboot": false },
+                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown,Reboot": false }
                             },
 
                             // scenario 5
@@ -2702,17 +2707,17 @@ module.exports = (io) => {
                                 "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
                                 "Drive-by Compromise": {"Windows Management Instrumentation": false},
                                 "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
-                                "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
-                                "Scheduled Task/Job" : {"Deobfuscate/Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
-                                "Deobfuscate/Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner/User Discovery" : false },
+                                "Windows Management Instrumentation" :{"Scheduled Task,Job": false},
+                                "Scheduled Task,Job" : {"Deobfuscate,Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate,Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner,User Discovery" : false },
                                 "Modify Registry" : {"Process Discovery": false},
-                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false, "System Service Discovery": false },
+                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner,User Discovery": false, "System Service Discovery": false },
                                 "Domain Trust Discovery" : {"Proxy": false},
                                 "Process Discovery" : {"Proxy": false},
                                 "Remote System Discovery" : {"Exploitation of Remote Services": false},
                                 "System Network Configuration Discovery": {"Proxy": false},
                                 "System Network Connections Discovery":{"Proxy": false},
-                                "System Owner/User Discovery":{"Proxy": false},
+                                "System Owner,User Discovery":{"Proxy": false},
                                 "System Service Discovery": {"Proxy": false},
                             }
                         ]
@@ -2779,10 +2784,10 @@ module.exports = (io) => {
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
                                 'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
-                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task,Job": false},
+                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task,Job": false},
                                 'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
-                                'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                                'Scheduled Task,Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
                                 'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
                                 'Indirect Command Execution' : {"Brute Force": false},
                                 'Screen Capture' : {"Communication Through Removable Media": false},
@@ -2804,8 +2809,8 @@ module.exports = (io) => {
                                 "System Information Discovery" : {"Clipboard Data": false},
                                 "System Network Configuration Discovery" : {"Data from Local System": false},
                                 "System Network Connections Discovery": {"Data from Local System": false},
-                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown/Reboot": false},
-                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot" : false},
+                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown,Reboot": false},
+                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown,Reboot" : false},
                             },
 
                             // scenario 3
@@ -2818,8 +2823,8 @@ module.exports = (io) => {
                                 "External Remote Services" : {"Account Manipulation": false, "Browser Extensions": false},
                                 "Account Manipulation" :  {"Process Injection": false},
                                 "Browser Extensions" :  {"Process Injection": false},
-                                "Process Injection" : {"Deobfuscate/Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
-                                "Deobfuscate/Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
+                                "Process Injection" : {"Deobfuscate,Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate,Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
                                 "Masquerading" : { "Network Sniffing": false},
                                 "Modify Registry" : {"Query Registry": false},
                                 "Obfuscated Files or Information" : {"System Information Discovery": false, "System Network Configuration Discovery": false, "System Service Discovery": false},
@@ -2842,16 +2847,16 @@ module.exports = (io) => {
                                 "startAttack" : {"Drive-by Compromise" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
-                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
+                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner,User Discovery": false},
                                 "Browser Bookmark Discovery" :  {"Clipboard Data": false},
                                 "File and Directory Discovery":  {"Clipboard Data": false},
                                 "Network Share Discovery":  {"Data from Local System": false},
                                 "Process Discovery":  {"Data from Local System": false}, 
                                 "System Information Discovery":  {"Data from Local System": false},
                                 "System Network Connections Discovery":  {"Data from Local System": false},
-                                "System Owner/User Discovery":  {"Data from Local System": false},
-                                "Clipboard Data":  {"System Shutdown/Reboot": false },
-                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot": false }
+                                "System Owner,User Discovery":  {"Data from Local System": false},
+                                "Clipboard Data":  {"System Shutdown,Reboot": false },
+                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown,Reboot": false }
                             },
 
                             // scenario 5
@@ -2859,17 +2864,17 @@ module.exports = (io) => {
                                 "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
                                 "Drive-by Compromise": {"Windows Management Instrumentation": false},
                                 "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
-                                "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
-                                "Scheduled Task/Job" : {"Deobfuscate/Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
-                                "Deobfuscate/Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner/User Discovery" : false },
+                                "Windows Management Instrumentation" :{"Scheduled Task,Job": false},
+                                "Scheduled Task,Job" : {"Deobfuscate,Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate,Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner,User Discovery" : false },
                                 "Modify Registry" : {"Process Discovery": false},
-                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false, "System Service Discovery": false },
+                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner,User Discovery": false, "System Service Discovery": false },
                                 "Domain Trust Discovery" : {"Proxy": false},
                                 "Process Discovery" : {"Proxy": false},
                                 "Remote System Discovery" : {"Exploitation of Remote Services": false},
                                 "System Network Configuration Discovery": {"Proxy": false},
                                 "System Network Connections Discovery":{"Proxy": false},
-                                "System Owner/User Discovery":{"Proxy": false},
+                                "System Owner,User Discovery":{"Proxy": false},
                                 "System Service Discovery": {"Proxy": false},
                             }
                         ]
@@ -2936,10 +2941,10 @@ module.exports = (io) => {
                                 'Exploit Public-Facing Application' :  {"Command and Scripting Interpreter" : false, "Software Deployment Tools": false},
                                 'Phishing' : {"Command and Scripting Interpreter" : false, "Software Deployment Tools" : false},
                                 'Valid Accounts' : {"Command and Scripting Interpreter": false, "Software Deployment Tools": false},
-                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task/Job": false},
-                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task/Job": false},
+                                'Command and Scripting Interpreter' : {"Account Manipulation": false, "Scheduled Task,Job": false},
+                                'Software Deployment Tools' : {"Account Manipulation": false, "Scheduled Task,Job": false},
                                 'Account Manipulation' : {"Abuse Elevation Control Mechanism": false, "Indirect Command Execution": false},
-                                'Scheduled Task/Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
+                                'Scheduled Task,Job' : {"Screen Capture": false,"Exfiltration Over Alternative Protocol": false,"Exfiltration Over Web Service": false},
                                 'Abuse Elevation Control Mechanism' : {"Brute Force": false, "Account Discovery": false},
                                 'Indirect Command Execution' : {"Brute Force": false},
                                 'Screen Capture' : {"Communication Through Removable Media": false},
@@ -2961,8 +2966,8 @@ module.exports = (io) => {
                                 "System Information Discovery" : {"Clipboard Data": false},
                                 "System Network Configuration Discovery" : {"Data from Local System": false},
                                 "System Network Connections Discovery": {"Data from Local System": false},
-                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown/Reboot": false},
-                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot" : false},
+                                "Clipboard Data" : {"Ingress Tool Transfer": false,  "System Shutdown,Reboot": false},
+                                "Data from Local System" : {"Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown,Reboot" : false},
                             },
 
                             // scenario 3
@@ -2975,8 +2980,8 @@ module.exports = (io) => {
                                 "External Remote Services" : {"Account Manipulation": false, "Browser Extensions": false},
                                 "Account Manipulation" :  {"Process Injection": false},
                                 "Browser Extensions" :  {"Process Injection": false},
-                                "Process Injection" : {"Deobfuscate/Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
-                                "Deobfuscate/Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
+                                "Process Injection" : {"Deobfuscate,Decode Files or Information": false,"Multi-Factor Authentication Interception": false, "Masquerading": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate,Decode Files or Information" : {"Multi-Factor Authentication Interception": false},
                                 "Masquerading" : { "Network Sniffing": false},
                                 "Modify Registry" : {"Query Registry": false},
                                 "Obfuscated Files or Information" : {"System Information Discovery": false, "System Network Configuration Discovery": false, "System Service Discovery": false},
@@ -2999,16 +3004,16 @@ module.exports = (io) => {
                                 "startAttack" : {"Drive-by Compromise" : false},
                                 "Drive-by Compromise" : {"Native API": false},
                                 "Native API" : {"Modify Registry": false},
-                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false},
+                                "Modify Registry" : {"Brute Force": false,"Browser Bookmark Discovery": false, "File and Directory Discovery": false, "Network Share Discovery": false, "Process Discovery": false, "System Information Discovery": false, "System Network Connections Discovery": false, "System Owner,User Discovery": false},
                                 "Browser Bookmark Discovery" :  {"Clipboard Data": false},
                                 "File and Directory Discovery":  {"Clipboard Data": false},
                                 "Network Share Discovery":  {"Data from Local System": false},
                                 "Process Discovery":  {"Data from Local System": false}, 
                                 "System Information Discovery":  {"Data from Local System": false},
                                 "System Network Connections Discovery":  {"Data from Local System": false},
-                                "System Owner/User Discovery":  {"Data from Local System": false},
-                                "Clipboard Data":  {"System Shutdown/Reboot": false },
-                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown/Reboot": false }
+                                "System Owner,User Discovery":  {"Data from Local System": false},
+                                "Clipboard Data":  {"System Shutdown,Reboot": false },
+                                "Data from Local System" :  {"Ingress Tool Transfer": false, "Data Destruction": false,"Data Encrypted for Impact": false, "System Shutdown,Reboot": false }
                             },
 
                             // scenario 5
@@ -3016,17 +3021,17 @@ module.exports = (io) => {
                                 "startAttack" : {"Drive-by Compromise" : false, "Exploit Public-Facing Application" : false},
                                 "Drive-by Compromise": {"Windows Management Instrumentation": false},
                                 "Exploit Public-Facing Application": {"Windows Management Instrumentation": false},
-                                "Windows Management Instrumentation" :{"Scheduled Task/Job": false},
-                                "Scheduled Task/Job" : {"Deobfuscate/Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
-                                "Deobfuscate/Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner/User Discovery" : false },
+                                "Windows Management Instrumentation" :{"Scheduled Task,Job": false},
+                                "Scheduled Task,Job" : {"Deobfuscate,Decode Files or Information": false, "Modify Registry": false, "Obfuscated Files or Information" : false},
+                                "Deobfuscate,Decode Files or Information" : {"Domain Trust Discovery": false, "System Network Configuration Discovery": false,  "System Owner,User Discovery" : false },
                                 "Modify Registry" : {"Process Discovery": false},
-                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner/User Discovery": false, "System Service Discovery": false },
+                                "Obfuscated Files or Information"  : {"Remote System Discovery": false, "System Network Configuration Discovery": false, "System Network Connections Discovery": false, "System Owner,User Discovery": false, "System Service Discovery": false },
                                 "Domain Trust Discovery" : {"Proxy": false},
                                 "Process Discovery" : {"Proxy": false},
                                 "Remote System Discovery" : {"Exploitation of Remote Services": false},
                                 "System Network Configuration Discovery": {"Proxy": false},
                                 "System Network Connections Discovery":{"Proxy": false},
-                                "System Owner/User Discovery":{"Proxy": false},
+                                "System Owner,User Discovery":{"Proxy": false},
                                 "System Service Discovery": {"Proxy": false},
                             }
                         ]

@@ -135,7 +135,7 @@ module.exports = {
             '2' : ["Exploit Public-Facing Application", "Phishing", "Valid Accounts"],
             '3' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
             '4' : ["Account Manipulation"],
-            '5' : ["Scheduled Task/Job"],
+            '5' : ["Scheduled Task,Job"],
             '6' : ["Abuse Elevation Control Mechanism", "Debugger Evasion", "Indirect Command Execution"],
             '7' : ["Brute Force"],
             '8' : ["Account Discovery"],
@@ -163,10 +163,10 @@ module.exports = {
            'Exploit Public-Facing Application' :  ["Command and Scripting Interpreter", "Software Deployment Tools"],
            'Phishing' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
             'Valid Accounts' : ["Command and Scripting Interpreter", "Software Deployment Tools"],
-            'Command and Scripting Interpreter' : ["Account Manipulation", "Scheduled Task/Job"],
-            'Software Deployment Tools' : ["Account Manipulation", "Scheduled Task/Job"],
+            'Command and Scripting Interpreter' : ["Account Manipulation", "Scheduled Task,Job"],
+            'Software Deployment Tools' : ["Account Manipulation", "Scheduled Task,Job"],
             'Account Manipulation' : ["Abuse Elevation Control Mechanism", "Indirect Command Execution"],
-            'Scheduled Task/Job' : ["Screen Capture","Exfiltration Over Alternative Protocol","Exfiltration Over Web Service"],
+            'Scheduled Task,Job' : ["Screen Capture","Exfiltration Over Alternative Protocol","Exfiltration Over Web Service"],
             'Abuse Elevation Control Mechanism' : ["Brute Force", "Account Discovery"],
             'Indirect Command Execution' : ["Brute Force"],
             'Screen Capture' : ["Communication Through Removable Media"],
@@ -196,17 +196,17 @@ module.exports = {
            ],
             'Command and Scripting Interpreter' : [
                 {'tactic' : "Persistence", "tacticNum" : 4, "tech" : "Account Manipulation"},
-                {'tactic' : "Privilege Escalation", "tacticNum" : 5, "tech" : "Scheduled Task/Job"},
+                {'tactic' : "Privilege Escalation", "tacticNum" : 5, "tech" : "Scheduled Task,Job"},
             ],
             'Software Deployment Tools' : [
                 {'tactic' : "Persistence", "tacticNum" : 4, "tech" : "Account Manipulation"},
-                {'tactic' : "Privilege Escalation", "tacticNum" : 5, "tech" : "Scheduled Task/Job"},
+                {'tactic' : "Privilege Escalation", "tacticNum" : 5, "tech" : "Scheduled Task,Job"},
             ],
             'Account Manipulation' : [
                 {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Abuse Elevation Control Mechanism"},
                 {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Indirect Command Execution"},
             ],
-            'Scheduled Task/Job' : [
+            'Scheduled Task,Job' : [
                 {'tactic' : "Collection", "tacticNum" : 10, "tech" : "Screen Capture"},
                 {'tactic' : "Exfiltration", "tacticNum" : 12, "tech" : "Exfiltration Over Alternative Protocol"},
                 {'tactic' : "Exfiltration", "tacticNum" : 12, "tech" : "Exfiltration Over Web Service"},
@@ -248,16 +248,16 @@ module.exports = {
                                     'Software Deployment Tools'],
             
             
-            "Scheduled Task/Job" : ['Command and Scripting Interpreter',
+            "Scheduled Task,Job" : ['Command and Scripting Interpreter',
                                     'Software Deployment Tools'],
 
             "Abuse Elevation Control Mechanism" : ['Account Manipulation'],
             "Indirect Command Execution" : ['Account Manipulation'],
 
-            'Screen Capture' : ['Scheduled Task/Job'],
+            'Screen Capture' : ['Scheduled Task,Job'],
 
-            'Exfiltration Over Alternative Protocol' : ['Scheduled Task/Job'],
-            'Exfiltration Over Web Service' : ['Scheduled Task/Job'],
+            'Exfiltration Over Alternative Protocol' : ['Scheduled Task,Job'],
+            'Exfiltration Over Web Service' : ['Scheduled Task,Job'],
          
             'Account Discovery' :  ['Abuse Elevation Control Mechanism'],
             
@@ -287,7 +287,7 @@ module.exports = {
             '10' : ["Clipboard Data", "Data from Local System"],
             '11' : ["Ingress Tool Transfer"],
             '12' : [],
-            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown,Reboot" ],
         },
 
         'startAttack' : [
@@ -296,7 +296,7 @@ module.exports = {
         
         'mainAttack' : {
             '11' : ["Ingress Tool Transfer"],
-            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown,Reboot" ],
         },
 
         'attackConn' : {
@@ -312,8 +312,8 @@ module.exports = {
             "System Information Discovery" : ["Clipboard Data"],
             "System Network Configuration Discovery" : ["Data from Local System"],
             "System Network Connections Discovery": ["Data from Local System"],
-            "Clipboard Data" : ["Ingress Tool Transfer",  "System Shutdown/Reboot"],
-            "Data from Local System" : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+            "Clipboard Data" : ["Ingress Tool Transfer",  "System Shutdown,Reboot"],
+            "Data from Local System" : ["Data Destruction","Data Encrypted for Impact", "System Shutdown,Reboot" ],
         },
 
         'attackConnDetail':
@@ -371,13 +371,13 @@ module.exports = {
 
             "Clipboard Data" : [
                 {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Ingress Tool Transfer"},
-                {'tactic' : "Impact", "tacticNum" : 13, "tech" : "System Shutdown/Reboot"},
+                {'tactic' : "Impact", "tacticNum" : 13, "tech" : "System Shutdown,Reboot"},
             ],
             
             "Data from Local System" : [
                 {'tactic' : "Impact", "tacticNum" : 13, "tech" : "Data Destruction"},
                 {'tactic' : "Impact", "tacticNum" : 13, "tech" : "Data Encrypted for Impact"},
-                {'tactic' : "Impact", "tacticNum" : 13, "tech" : "System Shutdown/Reboot"},
+                {'tactic' : "Impact", "tacticNum" : 13, "tech" : "System Shutdown,Reboot"},
             ]
         },
 
@@ -399,7 +399,7 @@ module.exports = {
             "Ingress Tool Transfer" : ["Clipboard Data"],
             "Data Destruction" : ["Data from Local System"],
             "Data Encrypted for Impact" : ["Data from Local System"],
-            "System Shutdown/Reboot" : ["Clipboard Data","Data from Local System"]
+            "System Shutdown,Reboot" : ["Clipboard Data","Data from Local System"]
         }
         
     },
@@ -412,7 +412,7 @@ module.exports = {
             '3' : [],
             '4' : ["Account Manipulation", "Browser Extensions"],
             '5' : ["Process Injection"],
-            '6' : ["Deobfuscate/Decode Files or Information", "Masquerading", "Modify Registry", "Obfuscated Files or Information", "Process Injection" ],
+            '6' : ["Deobfuscate,Decode Files or Information", "Masquerading", "Modify Registry", "Obfuscated Files or Information", "Process Injection" ],
             '7' : ["Adversary-in-the-Middle", "Multi-Factor Authentication Interception"],
             '8' : ["File and Directory Discovery", "Network Sniffing", "Process Discovery", "Query Registry", "System Information Discovery", "System Network Configuration Discovery", "System Service Discovery"],
             '9' : ["Internal Spearphishing"],
@@ -439,8 +439,8 @@ module.exports = {
             "External Remote Services" : ["Account Manipulation", "Browser Extensions"],
             "Account Manipulation" :  ["Process Injection"],
             "Browser Extensions" :  ["Process Injection"],
-            "Process Injection" : ["Deobfuscate/Decode Files or Information","Multi-Factor Authentication Interception", "Masquerading", "Modify Registry", "Obfuscated Files or Information" ],
-            "Deobfuscate/Decode Files or Information" : ["Multi-Factor Authentication Interception"],
+            "Process Injection" : ["Deobfuscate,Decode Files or Information","Multi-Factor Authentication Interception", "Masquerading", "Modify Registry", "Obfuscated Files or Information" ],
+            "Deobfuscate,Decode Files or Information" : ["Multi-Factor Authentication Interception"],
             "Masquerading" : [ "Network Sniffing"],
             "Modify Registry" : ["Query Registry"],
             "Obfuscated Files or Information" : ["System Information Discovery", "System Network Configuration Discovery", "System Service Discovery"],
@@ -488,14 +488,14 @@ module.exports = {
             ],
 
             "Process Injection" : [
-                {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Deobfuscate/Decode Files or Information"},
+                {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Deobfuscate,Decode Files or Information"},
                 {'tactic' : "Credential Access" , "tacticNum" : 7, "tech" :  "Multi-Factor Authentication Interception" },
                 {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Masquerading" },
                 {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Modify Registry", },
                 {'tactic' : "Defense Evasion" , "tacticNum" : 6, "tech" :  "Obfuscated Files or Information" },
             ],
 
-            "Deobfuscate/Decode Files or Information" : [
+            "Deobfuscate,Decode Files or Information" : [
                 {'tactic' : "Credential Access" , "tacticNum" : 7, "tech" :  "Multi-Factor Authentication Interception" },
             ],
             "Masquerading" : [
@@ -556,11 +556,11 @@ module.exports = {
             "Account Manipulation" : [ "Exploit Public-Facing Application",   "External Remote Services" ],
             "Browser Extensions" :  [ "Exploit Public-Facing Application",   "External Remote Services" ],
             "Process Injection" : ["Account Manipulation","Browser Extensions" ],
-            "Deobfuscate/Decode Files or Information" : ["Process Injection"],
+            "Deobfuscate,Decode Files or Information" : ["Process Injection"],
             "Masquerading" : ["Process Injection"],
             "Modify Registry" :["Process Injection"],
             "Obfuscated Files or Information" : ["Process Injection"],
-            "Multi-Factor Authentication Interception" : ["Deobfuscate/Decode Files or Information", "Process Injection"],
+            "Multi-Factor Authentication Interception" : ["Deobfuscate,Decode Files or Information", "Process Injection"],
             "File and Directory Discovery" : [ "Multi-Factor Authentication Interception"],
             "Network Sniffing": ["Masquerading"],
             "Process Discovery" : [ "Multi-Factor Authentication Interception"],
@@ -588,12 +588,12 @@ module.exports = {
             '5' : [],
             '6' : ["Modify Registry"],
             '7' : ["Brute Force"],
-            '8' : ["Browser Bookmark Discovery", "File and Directory Discovery", "Network Share Discovery", "Process Discovery", "System Information Discovery", "System Network Connections Discovery", "System Owner/User Discovery"],
+            '8' : ["Browser Bookmark Discovery", "File and Directory Discovery", "Network Share Discovery", "Process Discovery", "System Information Discovery", "System Network Connections Discovery", "System Owner,User Discovery"],
             '9' : [],
             '10' : ["Clipboard Data", "Data from Local System" ],
             '11' : ["Ingress Tool Transfer"],
             '12' : [],
-            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown,Reboot" ],
         },
 
         'startAttack' : [
@@ -603,22 +603,22 @@ module.exports = {
         'mainAttack' : {
             '7' : ["Brute Force"],
             '11' : ["Ingress Tool Transfer"],
-            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+            '13' : ["Data Destruction","Data Encrypted for Impact", "System Shutdown,Reboot" ],
         },
 
         'attackConn' : {
             "Drive-by Compromise" : ["Native API"],
             "Native API" : ["Modify Registry"],
-            "Modify Registry" : ["Brute Force","Browser Bookmark Discovery", "File and Directory Discovery", "Network Share Discovery", "Process Discovery", "System Information Discovery", "System Network Connections Discovery", "System Owner/User Discovery"],
+            "Modify Registry" : ["Brute Force","Browser Bookmark Discovery", "File and Directory Discovery", "Network Share Discovery", "Process Discovery", "System Information Discovery", "System Network Connections Discovery", "System Owner,User Discovery"],
             "Browser Bookmark Discovery" : ["Clipboard Data"], 
             "File and Directory Discovery": ["Clipboard Data"],  
             "Network Share Discovery": ["Data from Local System"], 
             "Process Discovery": ["Data from Local System"],  
             "System Information Discovery": ["Data from Local System"], 
             "System Network Connections Discovery": ["Data from Local System"], 
-            "System Owner/User Discovery": ["Data from Local System"], 
-            "Clipboard Data": [ "System Shutdown/Reboot" ],
-            "Data from Local System" : ["Ingress Tool Transfer", "Data Destruction","Data Encrypted for Impact", "System Shutdown/Reboot" ],
+            "System Owner,User Discovery": ["Data from Local System"], 
+            "Clipboard Data": [ "System Shutdown,Reboot" ],
+            "Data from Local System" : ["Ingress Tool Transfer", "Data Destruction","Data Encrypted for Impact", "System Shutdown,Reboot" ],
         },
 
         'attackConnDetail':
@@ -637,7 +637,7 @@ module.exports = {
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "Process Discovery"},
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Information Discovery"},
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Network Connections Discovery"},
-                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Owner/User Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Owner,User Discovery"},
             ],
 
             "Browser Bookmark Discovery" : [
@@ -658,17 +658,17 @@ module.exports = {
             "System Network Connections Discovery": [
                 {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Data from Local System"},
             ],  
-            "System Owner/User Discovery": [
+            "System Owner,User Discovery": [
                 {'tactic' : "Collection"  , "tacticNum" : 10, "tech" : "Data from Local System"},
             ],  
             "Clipboard Data": [ 
-                {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "System Shutdown/Reboot"},
+                {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "System Shutdown,Reboot"},
             ],
             "Data from Local System" : [
                 {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Ingress Tool Transfer"},
                 {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "Data Destruction"},
                 {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "Data Encrypted for Impact"},
-                {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "System Shutdown/Reboot"},
+                {'tactic' : "Impact"  , "tacticNum" : 13, "tech" : "System Shutdown,Reboot"},
             ],
         },
 
@@ -683,13 +683,13 @@ module.exports = {
             "Process Discovery" : ["Modify Registry"],
             "System Information Discovery" : ["Modify Registry"],
             "System Network Connections Discovery" : ["Modify Registry"],
-            "System Owner/User Discovery" : ["Modify Registry"],
+            "System Owner,User Discovery" : ["Modify Registry"],
             "Clipboard Data" :["Browser Bookmark Discovery", "File and Directory Discovery","System Information Discovery" ],
-            "Data from Local System" : ["Network Share Discovery", "Process Discovery", "System Network Connections Discovery", "System Owner/User Discovery" ],
+            "Data from Local System" : ["Network Share Discovery", "Process Discovery", "System Network Connections Discovery", "System Owner,User Discovery" ],
             "Ingress Tool Transfer" : [  "Data from Local System"],
             "Data Destruction" :  [  "Data from Local System"],
             "Data Encrypted for Impact" : [  "Data from Local System"], 
-            "System Shutdown/Reboot" : [ "Clipboard Data",  "Data from Local System"],
+            "System Shutdown,Reboot" : [ "Clipboard Data",  "Data from Local System"],
         }
         
     },
@@ -700,11 +700,11 @@ module.exports = {
             '1' : [],
             '2' : ["Drive-by Compromise", "Exploit Public-Facing Application"],
             '3' : ["Windows Management Instrumentation"],
-            '4' : ["Scheduled Task/Job"],
+            '4' : ["Scheduled Task,Job"],
             '5' : [],
-            '6' : ["Deobfuscate/Decode Files or Information", "Modify Registry", "Obfuscated Files or Information" ],
+            '6' : ["Deobfuscate,Decode Files or Information", "Modify Registry", "Obfuscated Files or Information" ],
             '7' : [],
-            '8' : ["Domain Trust Discovery", "Process Discovery", "Remote System Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner/User Discovery", "System Service Discovery"  ],
+            '8' : ["Domain Trust Discovery", "Process Discovery", "Remote System Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner,User Discovery", "System Service Discovery"  ],
             '9' : ["Exploitation of Remote Services"],
             '10' : [],
             '11' : ["Proxy"],
@@ -724,17 +724,17 @@ module.exports = {
         'attackConn' : {
             "Drive-by Compromise": ["Windows Management Instrumentation"],
             "Exploit Public-Facing Application": ["Windows Management Instrumentation"],
-            "Windows Management Instrumentation" : ["Scheduled Task/Job"],
-            "Scheduled Task/Job" : ["Deobfuscate/Decode Files or Information", "Modify Registry", "Obfuscated Files or Information" ],
-            "Deobfuscate/Decode Files or Information" : ["Domain Trust Discovery", "System Network Configuration Discovery",  "System Owner/User Discovery"  ],
+            "Windows Management Instrumentation" : ["Scheduled Task,Job"],
+            "Scheduled Task,Job" : ["Deobfuscate,Decode Files or Information", "Modify Registry", "Obfuscated Files or Information" ],
+            "Deobfuscate,Decode Files or Information" : ["Domain Trust Discovery", "System Network Configuration Discovery",  "System Owner,User Discovery"  ],
             "Modify Registry" : ["Process Discovery"],
-            "Obfuscated Files or Information"  : ["Remote System Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner/User Discovery", "System Service Discovery"  ],
+            "Obfuscated Files or Information"  : ["Remote System Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner,User Discovery", "System Service Discovery"  ],
             "Domain Trust Discovery" : ["Proxy"],
             "Process Discovery" : ["Proxy"],
             "Remote System Discovery" : ["Exploitation of Remote Services"],
             "System Network Configuration Discovery": ["Proxy"],
             "System Network Connections Discovery": ["Proxy"],
-            "System Owner/User Discovery": ["Proxy"],
+            "System Owner,User Discovery": ["Proxy"],
             "System Service Discovery": ["Proxy"]
         },
 
@@ -749,19 +749,19 @@ module.exports = {
             ],
 
             "Windows Management Instrumentation" : [
-                {'tactic' : "Persistence", "tacticNum" : 4, "tech" : "Scheduled Task/Job"},
+                {'tactic' : "Persistence", "tacticNum" : 4, "tech" : "Scheduled Task,Job"},
             ],
         
-            "Scheduled Task/Job" : [
-                {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Deobfuscate/Decode Files or Information"},
+            "Scheduled Task,Job" : [
+                {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Deobfuscate,Decode Files or Information"},
                 {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Modify Registry"},
                 {'tactic' : "Defense Evasion", "tacticNum" : 6, "tech" : "Obfuscated Files or Information"},
             ],
             
-            "Deobfuscate/Decode Files or Information" : [
+            "Deobfuscate,Decode Files or Information" : [
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Domain Trust Discovery"},
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Network Configuration Discovery"},
-                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Owner/User Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Owner,User Discovery"},
             ],
             
             "Modify Registry" : [
@@ -772,7 +772,7 @@ module.exports = {
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "Remote System Discovery"},
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Network Configuration Discovery"},
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" :  "System Network Connections Discovery"},
-                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Owner/User Discovery"},
+                {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Owner,User Discovery"},
                 {'tactic' : "Discovery", "tacticNum" : 8, "tech" : "System Service Discovery"},
             ],
             "Domain Trust Discovery" : [
@@ -790,7 +790,7 @@ module.exports = {
             "System Network Connections Discovery": [
                 {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Proxy"},
             ],
-            "System Owner/User Discovery": [
+            "System Owner,User Discovery": [
                 {'tactic' : "Command and Control", "tacticNum" : 11, "tech" : "Proxy"},
             ],
             "System Service Discovery": [
@@ -801,20 +801,20 @@ module.exports = {
         'attackConnParent': // 키 : 자식 공격, 값 : 자식과 연결 부모 공격들
         {
             "Windows Management Instrumentation" : ["Drive-by Compromise", "Exploit Public-Facing Application"],
-            "Scheduled Task/Job" : ["Windows Management Instrumentation"],
-            "Deobfuscate/Decode Files or Information": ["Scheduled Task/Job"],
-            "Modify Registry": ["Scheduled Task/Job"],
-            "Obfuscated Files or Information" : ["Scheduled Task/Job"],
-            "Domain Trust Discovery": ["Deobfuscate/Decode Files or Information"],
+            "Scheduled Task,Job" : ["Windows Management Instrumentation"],
+            "Deobfuscate,Decode Files or Information": ["Scheduled Task,Job"],
+            "Modify Registry": ["Scheduled Task,Job"],
+            "Obfuscated Files or Information" : ["Scheduled Task,Job"],
+            "Domain Trust Discovery": ["Deobfuscate,Decode Files or Information"],
             "Process Discovery" : [ "Modify Registry"] ,
             "Remote System Discovery": [ "Modify Registry"] , 
-            "System Network Configuration Discovery": [ "Deobfuscate/Decode Files or Information", "Obfuscated Files or Information"] ,
+            "System Network Configuration Discovery": [ "Deobfuscate,Decode Files or Information", "Obfuscated Files or Information"] ,
             "System Network Connections Discovery": [ "Obfuscated Files or Information"] ,
-            "System Owner/User Discovery": [ "Deobfuscate/Decode Files or Information", "Obfuscated Files or Information"] , 
+            "System Owner,User Discovery": [ "Deobfuscate,Decode Files or Information", "Obfuscated Files or Information"] , 
             "System Service Discovery": [ "Obfuscated Files or Information"] ,
             "Exploitation of Remote Services": [ "Process Discovery" ],
             "Proxy" : ["Domain Trust Discovery",   "Process Discovery","System Network Configuration Discovery", "System Network Connections Discovery",
-                        "System Owner/User Discovery", "System Service Discovery" ]
+                        "System Owner,User Discovery", "System Service Discovery" ]
         }
         
     },
@@ -827,20 +827,20 @@ module.exports = {
                         "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"],
 
     ATTACK_TECHNIQUE : [
-        ["Active Scanning", "Gather Victim Host Information", "Gather Victim Identity Information", "Gather Victim Network Information", "Gather Victim Org Information", "Phishing for Information", "Search Closed Sources", "Search Open Technical Databases", "	Search Open Websites/Domains", "Search Victim-Owned Websites"],
+        ["Active Scanning", "Gather Victim Host Information", "Gather Victim Identity Information", "Gather Victim Network Information", "Gather Victim Org Information", "Phishing for Information", "Search Closed Sources", "Search Open Technical Databases", "Search Open Websites,Domains", "Search Victim-Owned Websites"],
         ["Acquire Infrastructure", "Compromise Accounts", "Compromise Infrastructure", "Develop Capabilities", "Establish Accounts", "Obtain Capabilities", "Stage Capabilities"],
         ["Drive-by Compromise", "Exploit Public-Facing Application", "External Remote Services", "Hardware Additions", "Phishing", "Replication Through Removable Media", "Supply Chain Compromise", "Trusted Relationship", "Valid Accounts"],
-        ["Command and Scripting Interpreter", "Container Administration Command", "Deploy Container", "Exploitation for Client Execution", "Inter-Process Communication", "Native API", "Scheduled Task/Job", "Shared Modules", "Software Deployment Tools", "System Services", "User Execution", "Windows Management Instrumentation"],
-        ["Account Manipulation", "BITS Jobs", "Boot or Logon Autostart Execution", "Boot or Logon Initialization Scripts", "Browser Extensions", "Compromise Client Software Binary", "Create Account", "Create or Modify System Process", "Event Triggered Execution", "External Remote Services", "Hijack Execution Flow", "Implant Internal Image", "Modify Authentication Process", "Office Application Startup", "Pre-OS Boot", "Scheduled Task/Job", "Server Software Component", "Traffic Signaling", "Valid Accounts"],
-        ["Abuse Elevation Control Mechanism", "Access Token Manipulation", "Boot or Logon Autostart Execution", "Boot or Logon Initialization Scripts", "Create or Modify System Process", "Domain Policy Modification", "Escape to Host", "Event Triggered Execution", "Exploitation for Privilege Escalation", "Hijack Execution Flow", "Process Injection", "Scheduled Task/Job", "Valid Accounts"],
-        ["Abuse Elevation Control Mechanism", "Access Token Manipulation", "BITS Jobs", "Build Image on Host", "Debugger Evasion", "Deobfuscate/Decode Files or Information", "Deploy Container", "Direct Volume Access", "Domain Policy Modification", "Execution Guardrails", "Exploitation for Defense Evasion", "File and Directory Permissions Modification", "Hide Artifacts", "Hijack Execution Flow", "Impair Defenses", "Indicator Removal on Host", "Indirect Command Execution", "Masquerading", "Modify Authentication Process", "Modify Cloud Compute Infrastructure", "Modify Registry", "Modify System Image", "Network Boundary Bridging", "Obfuscated Files or Information", "Plist File Modification", "Pre-OS Boot", "Process Injection", "Reflective Code Loading", "Rogue Domain Controller", "Rootkit", "Subvert Trust Controls", "System Binary Proxy Execution", "System Script Proxy Execution", "Template Injection", "Traffic Signaling", "Trusted Developer Utilities Proxy Execution", "Unused/Unsupported Cloud Regions", "Use Alternate Authentication Material", "Valid Accounts", "Virtualization/Sandbox Evasion", "Weaken Encryption", "XSL Script Processing"],
+        ["Command and Scripting Interpreter", "Container Administration Command", "Deploy Container", "Exploitation for Client Execution", "Inter-Process Communication", "Native API", "Scheduled Task,Job", "Shared Modules", "Software Deployment Tools", "System Services", "User Execution", "Windows Management Instrumentation"],
+        ["Account Manipulation", "BITS Jobs", "Boot or Logon Autostart Execution", "Boot or Logon Initialization Scripts", "Browser Extensions", "Compromise Client Software Binary", "Create Account", "Create or Modify System Process", "Event Triggered Execution", "External Remote Services", "Hijack Execution Flow", "Implant Internal Image", "Modify Authentication Process", "Office Application Startup", "Pre-OS Boot", "Scheduled Task,Job", "Server Software Component", "Traffic Signaling", "Valid Accounts"],
+        ["Abuse Elevation Control Mechanism", "Access Token Manipulation", "Boot or Logon Autostart Execution", "Boot or Logon Initialization Scripts", "Create or Modify System Process", "Domain Policy Modification", "Escape to Host", "Event Triggered Execution", "Exploitation for Privilege Escalation", "Hijack Execution Flow", "Process Injection", "Scheduled Task,Job", "Valid Accounts"],
+        ["Abuse Elevation Control Mechanism", "Access Token Manipulation", "BITS Jobs", "Build Image on Host", "Debugger Evasion", "Deobfuscate,Decode Files or Information", "Deploy Container", "Direct Volume Access", "Domain Policy Modification", "Execution Guardrails", "Exploitation for Defense Evasion", "File and Directory Permissions Modification", "Hide Artifacts", "Hijack Execution Flow", "Impair Defenses", "Indicator Removal on Host", "Indirect Command Execution", "Masquerading", "Modify Authentication Process", "Modify Cloud Compute Infrastructure", "Modify Registry", "Modify System Image", "Network Boundary Bridging", "Obfuscated Files or Information", "Plist File Modification", "Pre-OS Boot", "Process Injection", "Reflective Code Loading", "Rogue Domain Controller", "Rootkit", "Subvert Trust Controls", "System Binary Proxy Execution", "System Script Proxy Execution", "Template Injection", "Traffic Signaling", "Trusted Developer Utilities Proxy Execution", "Unused,Unsupported Cloud Regions", "Use Alternate Authentication Material", "Valid Accounts", "Virtualization,Sandbox Evasion", "Weaken Encryption", "XSL Script Processing"],
         ["Adversary-in-the-Middle", "Brute Force", "Credentials from Password Stores", "Exploitation for Credential Access", "Forced Authentication", "Forge Web Credentials", "Input Capture", "Modify Authentication Process", "Multi-Factor Authentication Interception", "Multi-Factor Authentication Request Generation", "Network Sniffing", "OS Credential Dumping", "Steal Application Access Token", "Steal or Forge Kerberos Tickets", "Steal Web Session Cookie", "Unsecured Credentials"],
-        ["Account Discovery", "Application Window Discovery", "Browser Bookmark Discovery", "Cloud Infrastructure Discovery", "Cloud Service Dashboard", "Cloud Service Discovery", "Cloud Storage Object Discovery", "Container and Resource Discovery", "Debugger Evasion", "Domain Trust Discovery", "File and Directory Discovery", "Group Policy Discovery", "Network Service Discovery", "Network Share Discovery", "Network Sniffing", "Password Policy Discovery", "Peripheral Device Discovery", "Permission Groups Discovery", "Process Discovery", "Process Discovery", "Query Registry", "Remote System Discovery", "Software Discovery", "System Information Discovery", "System Location Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner/User Discovery", "System Service Discovery", "System Time Discovery", "Virtualization/Sandbox Evasion"],
+        ["Account Discovery", "Application Window Discovery", "Browser Bookmark Discovery", "Cloud Infrastructure Discovery", "Cloud Service Dashboard", "Cloud Service Discovery", "Cloud Storage Object Discovery", "Container and Resource Discovery", "Debugger Evasion", "Domain Trust Discovery", "File and Directory Discovery", "Group Policy Discovery", "Network Service Discovery", "Network Share Discovery", "Network Sniffing", "Password Policy Discovery", "Peripheral Device Discovery", "Permission Groups Discovery", "Process Discovery", "Process Discovery", "Query Registry", "Remote System Discovery", "Software Discovery", "System Information Discovery", "System Location Discovery", "System Network Configuration Discovery", "System Network Connections Discovery", "System Owner,User Discovery", "System Service Discovery", "System Time Discovery", "Virtualization,Sandbox Evasion"],
         ["Exploitation of Remote Services", "Internal Spearphishing", "Lateral Tool Transfer", "Remote Service Session Hijacking", "Remote Services", "Replication Through Removable Media", "Software Deployment Tools", "Taint Shared Content", "Use Alternate Authentication Material"],
         ["Adversary-in-the-Middle", "Archive Collected Data", "Audio Capture", "Automated Collection", "Browser Session Hijacking", "Clipboard Data", "Data from Cloud Storage Object", "Data from Configuration Repository", "Data from Information Repositories", "Data from Local System", "Data from Network Shared Drive", "Data from Removable Media", "Data Staged", "Email Collection", "Input Capture", "Screen Capture", "Video Capture"],
         ["Application Layer Protocol", "Communication Through Removable Media", "Data Encoding", "Data Obfuscation", "Dynamic Resolution", "Encrypted Channel", "Fallback Channels", "Ingress Tool Transfer", "Multi-Stage Channels", "Non-Application Layer Protocol", "Non-Standard Port", "Protocol Tunneling", "Proxy", "Remote Access Software", "Traffic Signaling", "Web Service"],
         ["Automated Exfiltration", "Data Transfer Size Limits", "Exfiltration Over Alternative Protocol", "Exfiltration Over C2 Channel", "Exfiltration Over Other Network Medium", "Exfiltration Over Physical Medium", "Exfiltration Over Web Service", "Scheduled Transfer", "Transfer Data to Cloud Account"],
-        ["Account Access Removal", "Data Destruction", "Data Encrypted for Impact", "Data Manipulation", "Defacement", "Disk Wipe", "Endpoint Denial of Service", "Firmware Corruption", "Inhibit System Recovery", "Network Denial of Service", "Resource Hijacking", "Service Stop", "System Shutdown/Reboot"]
+        ["Account Access Removal", "Data Destruction", "Data Encrypted for Impact", "Data Manipulation", "Defacement", "Disk Wipe", "Endpoint Denial of Service", "Firmware Corruption", "Inhibit System Recovery", "Network Denial of Service", "Resource Hijacking", "Service Stop", "System Shutdown,Reboot"]
     ]
   
 }
