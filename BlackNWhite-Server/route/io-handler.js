@@ -1,11 +1,8 @@
 const config = require('../configure');
 
 /* local server */
-const REDIS_PORT = 6380;
-const Redis = require("ioredis"); 
-const redisClient = new Redis(REDIS_PORT);
-const { RedisSessionStore } = require("../sessionStore");
-const sessionStore = new RedisSessionStore(redisClient);
+// const { RedisSessionStore } = require("../sessionStore");
+// const sessionStore = new RedisSessionStore(redisClient);
 
 /* aws server */
 // const REDIS_PORT = 6379;
@@ -45,7 +42,8 @@ String.prototype.replaceAt = function(index, replacement) {
 }
 
 module.exports = (io, redisClient) => {
-    
+    const { RedisSessionStore } = require("../sessionStore");
+    const sessionStore = new RedisSessionStore(redisClient);
 
     io.use(async (socket, next) => {
         const sessionID = socket.handshake.auth.sessionID;

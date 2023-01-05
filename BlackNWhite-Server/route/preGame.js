@@ -40,6 +40,9 @@ module.exports = async(io, socket, redisClient) => {
     const { redisListStore } = require("../redisListStore");
     const listStore = new redisListStore(redisClient);
 
+    console.log("liststore : ", listStore);
+    console.log("redisClient : ", redisClient);
+
     const { RedisRoomStore } = require("../roomStore");
     const redis_room = new RedisRoomStore(redisClient);
 
