@@ -1,31 +1,4 @@
-const config = require('./configure');
-
-/* local server */
-const REDIS_PORT = 6380;
-const Redis = require("ioredis"); 
-const redisClient = new Redis(REDIS_PORT);
-
-/* aws server */
-// const REDIS_PORT = 6379;
-// const REDIS_URL = "redis-test.i187of.ng.0001.use1.cache.amazonaws.com"
-// const Redis = require("ioredis"); 
-// const redisClient = new Redis(REDIS_PORT, REDIS_URL);
-
-const { RedisSessionStore } = require("./sessionStore");
-const sessionStore = new RedisSessionStore(redisClient);
-
-const { redisHashTableStore } = require("./redisHashTableStore");
-const hashtableStore = new redisHashTableStore(redisClient);
-
-const { RedisJsonStore } = require("./redisJsonStore");
-const jsonStore = new RedisJsonStore(redisClient);
-
-const { redisListStore } = require("./redisListStore");
-const listStore = new redisListStore(redisClient);
-
-const { RedisRoomStore } = require("./roomStore");
-const redis_room = new RedisRoomStore(redisClient);
-
+const config = require('../configure');
 
 const crypto = require("crypto");
 const randomId = () => crypto.randomBytes(8).toString("hex");
@@ -53,7 +26,30 @@ String.prototype.replaceAt = function(index, replacement) {
     return this.substring(0, index) + replacement + this.substring(index + 1);
 }
 
-module.exports = async(io, socket) => {
+module.exports = async(io, socket, redisClient) => {
+    const { RedisSessionStore } = require("./sessionStore");
+    const sessionStore = new RedisSessionStore(redisClient);
+
+    const { redisHashTableStore } = require("./redisHashTableStore");
+    const hashtableStore = new redisHashTableStore(redisClient);
+
+    const { RedisJsonStore } = require("./redisJsonStore");
+    const jsonStore = new RedisJsonStore(redisClient);
+
+    const { redisListStore } = require("./redisListStore");
+    const listStore = new redisListStore(redisClient);
+
+    const { RedisRoomStore } = require("./roomStore");
+    const redis_room = new RedisRoomStore(redisClient);
+
+    
+    let companyNameList = ["companyA", "companyB", "companyC", "companyD", "companyE"];
+    let taticNamesList = ["Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"];
+    let areaNameList = ["DMZ", "Internal", "Security"]
+
+    let timerId;
+    let pitaTimerId;
+
         // [MainGame] 게임 시작시 해당 룸의 사용자 정보 넘김
         socket.on('InitGame',  async() =>{
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));

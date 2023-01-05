@@ -11,21 +11,6 @@ const redisClient = new Redis(REDIS_PORT);
 // const Redis = require("ioredis"); 
 // const redisClient = new Redis(REDIS_PORT, REDIS_URL);
 
-const { RedisSessionStore } = require("../sessionStore");
-const sessionStore = new RedisSessionStore(redisClient);
-
-const { redisHashTableStore } = require("../redisHashTableStore");
-const hashtableStore = new redisHashTableStore(redisClient);
-
-const { RedisJsonStore } = require("../redisJsonStore");
-const jsonStore = new RedisJsonStore(redisClient);
-
-const { redisListStore } = require("../redisListStore");
-const listStore = new redisListStore(redisClient);
-
-const { RedisRoomStore } = require("../roomStore");
-const redis_room = new RedisRoomStore(redisClient);
-
 
 const crypto = require("crypto");
 const randomId = () => crypto.randomBytes(8).toString("hex");
@@ -57,14 +42,8 @@ String.prototype.replaceAt = function(index, replacement) {
     return this.substring(0, index) + replacement + this.substring(index + 1);
 }
 
-module.exports = (io) => {
+module.exports = (io, redisClient) => {
     
-    let companyNameList = ["companyA", "companyB", "companyC", "companyD", "companyE"];
-    let taticNamesList = ["Reconnaissance", "Resource Development", "Initial Access", "Execution", "Persistence", "Privilege Escalation", "Defense Evasion", "Credential Access", "Discovery", "Lateral Movement", "Collection", "Command and Control", "Exfiltration", "Impact"];
-    let areaNameList = ["DMZ", "Internal", "Security"]
-
-    let timerId;
-    let pitaTimerId;
 
     io.use(async (socket, next) => {
         const sessionID = socket.handshake.auth.sessionID;
@@ -93,8 +72,8 @@ module.exports = (io) => {
     });
 
     const onConnection = async(socket) => {
-        preGameHandlers(io, socket);
-        gameHandlers(io, socket);
+        preGameHandlers(io, socket, redisClient);
+        gameHandlers(io, socket, redisClient);
     }  
 
     io.on('connection', onConnection);    
