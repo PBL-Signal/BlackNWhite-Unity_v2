@@ -19,6 +19,20 @@ const io = socketio(server,{
     transport: ["websocket"]
 });
 
+// local server
+// const REDIS_PORT = 6380
+// const REDIS_URL = "localhost"
+
+// const app = express();
+// const server = http.createServer(app);
+// const io = socketio(server,{
+//     cors: {
+//         origin: ['http://localhost:5693'],
+//         methods: ["GET", "POST"]
+//     },
+
+//     transport: ["websocket"]
+// });
 
 io.adapter(socketredis({host: REDIS_URL, port: REDIS_PORT}));
 
@@ -27,7 +41,7 @@ const crypto = require("crypto");
 const randomId = () => crypto.randomBytes(8).toString("hex");
 
 setupWorker(io);
-require('./io-handler')(io);
+require('./route/io-handler')(io);
 
 app.use(cors());
 app.use(bodyPaser.json());
