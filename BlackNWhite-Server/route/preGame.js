@@ -764,6 +764,27 @@ module.exports = async(io, socket, redisClient) => {
     
     });
 
+    socket.on('disconnect', async function() {
+        console.log('A Player disconnected!!! - socket.sessionID : ', socket.sessionID);
+        clearInterval(timerId)
+        clearInterval(pitaTimerId);
+
+        
+        if (socket.room){
+            await leaveRoom(socket, socket.room);
+        }
+        
+        lobbyLogger.info('mainHome:logout', {
+            server : server_ip,
+            userIP : '192.0.0.1',
+            sessionID : socket.sessionID,
+            userID : socket.userID,
+            nickname : socket.nickname,
+            data : {status : 1} 
+        });
+
+        await sessionStore.deleteSession(socket.sessionID);
+    });
     
     // [room] 방 키 5자리 랜덤 
     function randomN(){
