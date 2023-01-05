@@ -10,8 +10,6 @@ const Section = new Schema({
     attackProgress : { type : Array, required : true },
     attackSenarioProgress : { type : Array, required : true },
     defenseProgress : { type : Array, required : true },
-    beActivated : { type : Array, required : true },   // 0 : 비활성화, 1 : 활성화, 2: 비활성화 중 공격됨
-    defenseActive : { type : Array, required : true },
     defenseLv : { type : Array, required : true },
     defenseCnt : { type : Array, required : true },
     attackConn   : { type : {}, required : true },

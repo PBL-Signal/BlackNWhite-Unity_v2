@@ -54,6 +54,8 @@ module.exports = async(io, socket, redisClient) => {
             let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             let abandonStatusList = [];
 
+            console.log("roomTotalJson : ", roomTotalJson);
+
             for(let company of companyNameList){
                 abandonStatusList.push(roomTotalJson[0][company]["abandonStatus"]);
             }
