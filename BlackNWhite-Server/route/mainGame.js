@@ -3,19 +3,19 @@ const config = require('../configure');
 const crypto = require("crypto");
 const randomId = () => crypto.randomBytes(8).toString("hex");
 
-const BlackTeam = require("./schemas/roomTotal/BlackTeam");
-const WhiteTeam = require("./schemas/roomTotal/WhiteTeam");
-const BlackUsers = require("./schemas/roomTotal/BlackUsers");
-const UserCompanyStatus = require("./schemas/roomTotal/UserCompanyStatus");
-const WhiteUsers = require("./schemas/roomTotal/WhiteUsers");
-const Company = require("./schemas/roomTotal/Company");
-const Section = require("./schemas/roomTotal/Section");
-const Progress = require("./schemas/roomTotal/Progress");
-const RoomInfoTotal = require("./schemas/roomTotal/RoomInfoTotal");
-const User = require("./schemas/roomTotal/User");
-const RoomInfo = require("./schemas/roomTotal/RoomInfo");
+const BlackTeam = require("../schemas/roomTotal/BlackTeam");
+const WhiteTeam = require("../schemas/roomTotal/WhiteTeam");
+const BlackUsers = require("../schemas/roomTotal/BlackUsers");
+const UserCompanyStatus = require("../schemas/roomTotal/UserCompanyStatus");
+const WhiteUsers = require("../schemas/roomTotal/WhiteUsers");
+const Company = require("../schemas/roomTotal/Company");
+const Section = require("../schemas/roomTotal/Section");
+const Progress = require("../schemas/roomTotal/Progress");
+const RoomInfoTotal = require("../schemas/roomTotal/RoomInfoTotal");
+const User = require("../schemas/roomTotal/User");
+const RoomInfo = require("../schemas/roomTotal/RoomInfo");
 
-const {lobbyLogger, gameLogger, chattingLogger} = require('./logConfig'); 
+const {lobbyLogger, gameLogger, chattingLogger} = require('../logConfig'); 
 var server_ip = "128.0.0.1";
 
 String.prototype.replaceAt = function(index, replacement) {
