@@ -4,6 +4,8 @@ const config = require('../configure');
 const REDIS_PORT = 6380;
 const Redis = require("ioredis"); 
 const redisClient = new Redis(REDIS_PORT);
+const { RedisSessionStore } = require("../sessionStore");
+const sessionStore = new RedisSessionStore(redisClient);
 
 /* aws server */
 // const REDIS_PORT = 6379;
