@@ -763,9 +763,6 @@ module.exports = async(io, socket, redisClient) => {
 
     socket.on('disconnect', async function() {
         console.log('A Player disconnected!!! - socket.sessionID : ', socket.sessionID);
-        clearInterval(timerId)
-        clearInterval(pitaTimerId);
-
         
         if (socket.room){
             await leaveRoom(socket, socket.room);

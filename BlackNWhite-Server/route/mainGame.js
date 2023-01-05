@@ -953,6 +953,11 @@ module.exports = async(io, socket, redisClient) => {
                 AttackCoolTime(socket, (lvCoolTime*1000), corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName); // (socket, corpName, sectionIdx, attackIdx, tacticIdx, attackLv, tacticName, attackName)
             }
         });
+    
+    socket.on('disconnect', async function() {
+        clearInterval(timerId)
+        clearInterval(pitaTimerId);
+    });
         
        
         
@@ -1257,7 +1262,7 @@ module.exports = async(io, socket, redisClient) => {
             winTeam = false;
         }
         io.sockets.in(socket.room).emit('Timeout_Gameover', winTeam, blackScore, whiteScore);
-    }   
+    }
 
     
   // <<TODO>>게임 종료시 게임 정보와 룸 정보를 mongoDB에 저장 후 redis에서 삭제 

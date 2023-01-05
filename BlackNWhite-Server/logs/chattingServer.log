@@ -1,0 +1,2 @@
+error: Jan-05-2023 21:10:54: game:chatting |	128.0.0.1 - 192.0.0.1 |	SESSION: e3bea960c5669b41|	USERID: 7aa8ea60bbfaac48 |	NICKNAME: test |	DATA: {"roomID":"f95e21fd05e69844","room":"06810","team":false,"chatting":"test"}
+error: Jan-05-2023 21:10:57: game:chatting |	128.0.0.1 - 192.0.0.1 |	SESSION: e3bea960c5669b41|	USERID: 7aa8ea60bbfaac48 |	NICKNAME: test |	DATA: {"roomID":"f95e21fd05e69844","room":"06810","team":false,"chatting":"eeeee"}
