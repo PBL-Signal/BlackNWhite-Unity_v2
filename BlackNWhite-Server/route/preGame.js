@@ -40,9 +40,6 @@ module.exports = async(io, socket, redisClient) => {
     const { redisListStore } = require("../redisListStore");
     const listStore = new redisListStore(redisClient);
 
-    console.log("liststore : ", listStore);
-    console.log("redisClient : ", redisClient);
-
     const { RedisRoomStore } = require("../roomStore");
     const redis_room = new RedisRoomStore(redisClient);
 
@@ -785,7 +782,7 @@ module.exports = async(io, socket, redisClient) => {
 
         await sessionStore.deleteSession(socket.sessionID);
     });
-    
+
     // [room] 방 키 5자리 랜덤 
     function randomN(){
         var randomNum = {};

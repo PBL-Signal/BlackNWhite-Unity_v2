@@ -328,6 +328,7 @@ module.exports = async(io, socket, redisClient) => {
                 selectScenario : data.scenario,
             };
             var attackHint = []; 
+            var scenarioNum = data.scenario + 1;
 
             // lv2: 각 단계 공격 개수
             for(let i = 0; i <= 13; i++){
