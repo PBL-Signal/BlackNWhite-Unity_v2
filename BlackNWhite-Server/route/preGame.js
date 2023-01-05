@@ -715,6 +715,7 @@ module.exports = async(io, socket, redisClient) => {
       
         // 게임 관련 Json 생성 (new)
         var roomTotalJson = InitGame(socket.room, blackUsersInfo, whiteUsersInfo);
+        jsonStore.storejson(roomTotalJson, socket.room);
 
         // monitoringLog 생성
         var monitoringLog = [];
