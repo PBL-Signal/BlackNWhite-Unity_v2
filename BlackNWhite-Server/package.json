@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon cluster.js 8080"
+    "start": "sudo node cluster.js 8080"
   },
   "author": "",
   "license": "ISC",
