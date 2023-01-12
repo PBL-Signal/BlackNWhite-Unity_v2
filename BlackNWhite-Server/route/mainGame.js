@@ -979,7 +979,6 @@ module.exports = async(io, socket, redisClient) => {
             let prob = config["ATTACK_" + (tacticIdx + 1)]["success"][attackLv] * 0.01;
             let percent = Math.random();
             console.log("prob : ", prob, ", percent : ", percent); 
-            prob = 1; // test
 
             // 공격 성공 (by.성공률)
             if (prob >= percent) {
