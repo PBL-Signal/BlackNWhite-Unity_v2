@@ -481,13 +481,13 @@ module.exports = async(io, socket, redisClient) => {
         if (socket.team == true) {
             cardLv = roomTotalJson[0][companyName]["penetrationTestingLV"][attackIndex];
             if (cardLv < 5) {
-                pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["DEFENSE_" + (attackIndex + 1)]['pita'][cardLv];
+                pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["DEFENSE_UPGRADE"][cardLv];
                 roomTotalJson[0]['whiteTeam']['total_pita'] = pitaNum;
             }
         } else {
             cardLv = roomTotalJson[0][companyName]["attackLV"][attackIndex];
             if (cardLv < 5) {
-                pitaNum = roomTotalJson[0]['blackTeam']['total_pita'] - config["ATTACK_" + (attackIndex + 1)]['pita'][cardLv];
+                pitaNum = roomTotalJson[0]['blackTeam']['total_pita'] - config["ATTACK_UPGRADE"][cardLv];
                 roomTotalJson[0]['blackTeam']['total_pita'] = pitaNum;
             }
         }

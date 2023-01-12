@@ -1547,12 +1547,12 @@ module.exports = async(io, socket, redisClient) => {
             server_start  : new Date(),
             server_end  :  new Date(),
             blackTeam  : new BlackTeam({ 
-                total_pita : 500,
+                total_pita : config.BLACK_INITIAL_FUND,
                 users : blackUsers,
-                scenarioLevel : [-1,-1,-1, -1, -1], 
+                scenarioLevel : [-1, -1, -1, -1, -1], 
             }),
             whiteTeam  : new WhiteTeam({ 
-                total_pita : 500,
+                total_pita : config.WHITE_INITIAL_FUND,
                 users : whiteUsers
             }),
             companyA    : initCompanyArray[0],
