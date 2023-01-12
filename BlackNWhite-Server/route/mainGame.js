@@ -1236,7 +1236,7 @@ module.exports = async(io, socket, redisClient) => {
         } else { // 공격 실패 (성공률로 인해)
             console.log("Failed due to success rate!!")
             io.sockets.emit('Failed to success rate');
-            automaticDefense(socket, corpName, sectionIdx, tacticIndex, techniqueIndex);
+            automaticDefense(socket, companyName, section, tacticIndex, techniqueIndex);
             return;
         }
 
