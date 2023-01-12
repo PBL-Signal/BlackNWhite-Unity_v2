@@ -1187,44 +1187,59 @@ module.exports = async(io, socket, redisClient) => {
             return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
         })[0];
 
-        let cardLv;
-        let pitaNum = 0;
-        if (socket.team == true) {
-            cardLv = roomTotalJson[0][companyName]["penetrationTestingLV"][tacticIndex];
-            if (cardLv < 5) {
-                pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["DEFENSE_" + (tacticIndex + 1)]['pita'][cardLv];
-                roomTotalJson[0]['whiteTeam']['total_pita'] = pitaNum;
+        let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel] * 0.01;
+        let percent = Math.random();
+
+        console.log("prob : ", prob, ", percent : ", percent); 
+
+        // 대응 성공
+        if (prob >= percent) {
+            let cardLv;
+            let pitaNum = 0;
+            if (socket.team == true) {
+                cardLv = roomTotalJson[0][companyName]["penetrationTestingLV"][tacticIndex];
+                if (cardLv < 5) {
+                    pitaNum = roomTotalJson[0]['whiteTeam']['total_pita'] - config["DEFENSE_" + (tacticIndex + 1)]['pita'][cardLv];
+                    roomTotalJson[0]['whiteTeam']['total_pita'] = pitaNum;
+                }
             }
-        }
 
-        if (pitaNum >= 0 && cardLv < 5) {
-            socket.to(socket.room + socket.team).emit('Update Pita', pitaNum);
-            socket.emit('Update Pita', pitaNum);
+            if (pitaNum >= 0 && cardLv < 5) {
+                socket.to(socket.room + socket.team).emit('Update Pita', pitaNum);
+                socket.emit('Update Pita', pitaNum);
 
-            let techniqueBeActivationList = roomTotalJson[0][companyName]["beActivated"];
-            techniqueBeActivationList.length = 0;
-            
-            let techniqueActivation = roomTotalJson[0][companyName]["defenseActive"];
-            let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["defenseLv"];
+                let techniqueBeActivationList = roomTotalJson[0][companyName]["beActivated"];
+                techniqueBeActivationList.length = 0;
+                
+                let techniqueActivation = roomTotalJson[0][companyName]["defenseActive"];
+                let techniqueLevel = roomTotalJson[0][companyName]["sections"][section]["defenseLv"];
 
-            // white team -> 공격을 선택할 수 있도록 함
-            DefenseCooltime(socket, attackInfo.state, companyName, section, tacticIndex, techniqueIndex, cardLv);
-            socket.emit('Start Defense', companyName, section, tacticIndex, techniqueIndex, config["DEFENSE_1"]["time"][techniqueLevel[tacticIndex][techniqueIndex]]);
+                // white team -> 공격을 선택할 수 있도록 함
+                DefenseCooltime(socket, attackInfo.state, companyName, section, tacticIndex, techniqueIndex, cardLv);
+                socket.emit('Start Defense', companyName, section, tacticIndex, techniqueIndex, config["DEFENSE_1"]["time"][techniqueLevel[tacticIndex][techniqueIndex]]);
+
+                await jsonStore.updatejson(roomTotalJson[0], socket.room);
+                roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+
+            } else {
+                if (pitaNum < 0){
+                    console.log("업그레이드 실패!! >> pita 부족");
+                    io.sockets.emit("Short of Money");
+                } else if (cardLv >= 5){
+                    console.log("업그레이드 실패!! >> 만랩 달성");
+                    io.sockets.emit("Already Max Level");
+                }
+            }
 
             await jsonStore.updatejson(roomTotalJson[0], socket.room);
-            roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
 
-        } else {
-            if (pitaNum < 0){
-                console.log("업그레이드 실패!! >> pita 부족");
-                io.sockets.emit("Short of Money");
-            } else if (cardLv >= 5){
-                console.log("업그레이드 실패!! >> 만랩 달성");
-                io.sockets.emit("Already Max Level");
-            }
+        } else { // 공격 실패 (성공률로 인해)
+            console.log("Failed due to success rate!!")
+            io.sockets.emit('Failed to success rate');
+            automaticDefense(socket, corpName, sectionIdx, tacticIndex, techniqueIndex);
+            return;
         }
-
-        await jsonStore.updatejson(roomTotalJson[0], socket.room);
+        
         roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
     }
 
