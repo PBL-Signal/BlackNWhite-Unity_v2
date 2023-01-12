@@ -791,7 +791,7 @@ module.exports = async(io, socket, redisClient) => {
                             var newLog = {
                                 area: areaNameList[idx],
                                 tactic: logElement.tactic,
-                                attackName: logElement.attackName + "has been carried out."
+                                attackName: logElement.attackName + " has been carried out."
                             }
                             break;
                     }
@@ -799,6 +799,18 @@ module.exports = async(io, socket, redisClient) => {
                 });                
             });
             io.sockets.in(socket.room+'true').emit('Monitoring_Log', logArr, corpName);
+            
+            // issue count 갱신
+            const roomTotalJsonNew = JSON.parse(await jsonStore.getjson(socket.room));
+            var corpName = corp;
+            var sectionsArr = roomTotalJsonNew[0][corpName].sections;
+            var cntArr = [];
+            sectionsArr.forEach( async(element, idx) => {
+                var sectionData = element.suspicionCount;
+                cntArr[idx] = sectionData;
+            });
+            socket.emit('Issue_Count', cntArr, corpName);
+
             // [GameLog] 로그 추가
             let today = new Date();   
             let hours = today.getHours(); // 시
@@ -1127,16 +1139,6 @@ module.exports = async(io, socket, redisClient) => {
                                 defenseLvArr += 1;
                             }
     
-                            // [GameLog] 로그 추가
-                            let today = new Date();
-                            let hours = today.getHours(); // 시
-                            let minutes = today.getMinutes();  // 분
-                            let seconds = today.getSeconds();  // 초
-                            let now = hours+":"+minutes+":"+seconds;
-                            var gameLog = {time: now, nickname: "", targetCompany: corpName, targetSection: areaNameList[sectionIdx], detail: config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex]+" response has been completed."};
-                            var logArr = [];
-                            logArr.push(gameLog);
-                            io.sockets.in(socket.room+'true').emit('addLog', logArr);
                             io.sockets.emit('Defense Success');
                             
                         } else {   // 방어 실패
@@ -1145,6 +1147,17 @@ module.exports = async(io, socket, redisClient) => {
                             return;
                         }
                     }
+
+                    // [GameLog] 로그 추가
+                    let today = new Date();
+                    let hours = today.getHours(); // 시
+                    let minutes = today.getMinutes();  // 분
+                    let seconds = today.getSeconds();  // 초
+                    let now = hours+":"+minutes+":"+seconds;
+                    var gameLog = {time: now, nickname: "", targetCompany: corpName, targetSection: areaNameList[sectionIdx], detail: config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex]+" response has been completed."};
+                    var logArr = [];
+                    logArr.push(gameLog);
+                    io.sockets.in(socket.room+'true').emit('addLog', logArr);
             
                     roomTotalJson[0][corpName].sections[sectionIdx].attackProgress = sectionAttackProgressArr;
                     roomTotalJson[0][corpName].sections[sectionIdx].defenseProgress[senarioIdx] = filterDefenseProgress;
