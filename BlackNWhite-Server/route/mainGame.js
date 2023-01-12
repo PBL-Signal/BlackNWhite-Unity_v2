@@ -978,7 +978,7 @@ module.exports = async(io, socket, redisClient) => {
         var attackTime = setTimeout(async function(){
             let prob = config["ATTACK_" + (tacticIdx + 1)]["success"][attackLv] * 0.01;
             let percent = Math.random();
-            console.log("prob : ", prob, ", percent : ", percent); 
+            console.log("attack - prob : ", prob, ", percent : ", percent); 
 
             // 공격 성공 (by.성공률)
             if (prob >= percent) {
@@ -1117,7 +1117,7 @@ module.exports = async(io, socket, redisClient) => {
                 let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel] * 0.01;
                 let percent = Math.random();
 
-                console.log("prob : ", prob, ", percent : ", percent); 
+                console.log("white - prob : ", prob, ", percent : ", percent); 
 
                 // 대응 성공
                 if (prob >= percent) {
@@ -1166,7 +1166,7 @@ module.exports = async(io, socket, redisClient) => {
 
                 } else { // 공격 실패 (성공률로 인해)
                     console.log("Failed due to success rate!!")
-                    io.sockets.emit('Failed to success rate');
+                    // io.sockets.emit('Failed to success rate');
                     automaticDefense(socket, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLevel);
                     return;
                 }
@@ -1234,7 +1234,7 @@ module.exports = async(io, socket, redisClient) => {
 
         } else { // 공격 실패 (성공률로 인해)
             console.log("Failed due to success rate!!")
-            io.sockets.emit('Failed to success rate');
+            // io.sockets.emit('Failed to success rate');
             automaticDefense(socket, companyName, section, tacticIndex, techniqueIndex);
             return;
         }
