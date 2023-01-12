@@ -1114,9 +1114,10 @@ module.exports = async(io, socket, redisClient) => {
             })[0];
 
             if (typeof attackInfo != "undefined") {
-                let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel - 1] * 0.01;
+                let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel] * 0.01;
                 let percent = Math.random();
 
+                console.log("white defenseLevel : ", defenseLevel);
                 console.log("white - prob : ", prob, ", percent : ", percent); 
 
                 // 대응 성공
@@ -1186,7 +1187,7 @@ module.exports = async(io, socket, redisClient) => {
             return progress.tactic == config.ATTACK_CATEGORY[tacticIndex] && progress.attackName == config.ATTACK_TECHNIQUE[tacticIndex][techniqueIndex];
         })[0];
 
-        let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel - 1] * 0.01;
+        let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel] * 0.01;
         let percent = Math.random();
 
         console.log("prob : ", prob, ", percent : ", percent); 
