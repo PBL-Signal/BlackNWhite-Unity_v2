@@ -86,7 +86,7 @@ module.exports = {
     
     // 수입원
     BLACK_INCOME : { pita : 2000, time : 60 },
-    WHITE_INCOME : { pita : 1500, time : 60 },
+    WHITE_INCOME : { pita : 750, time : 60 },
     
     // 방 생성 인원 기본 값
     DEFAULT_ROOM : { maxPlayer : 8 },
