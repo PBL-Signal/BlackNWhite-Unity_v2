@@ -1118,7 +1118,7 @@ module.exports = async(io, socket, redisClient) => {
             })[0];
 
             if (typeof attackInfo != "undefined") {
-                if (attackLv - 1 < 1) {
+                if (defenseLevel - 1 < 1) {
                     return;
                 }
 
