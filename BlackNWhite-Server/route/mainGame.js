@@ -836,7 +836,8 @@ module.exports = async(io, socket, redisClient) => {
                     console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
 
                     if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
-                        var newInfo = { tactic: attackElement.tactic, attackName: attackElement.attackName, state: false }; 
+                        var newInfo = { tactic: attackElement.tactic, attackName: attackElement.attackName, state: false };
+                        console.log("newInfo : ", newInfo);
                         sectionDefenseProgressArr[tacticIndex].push(newInfo);
                         console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
                         // 0은 나중에 시나리오 인덱스로 변경
