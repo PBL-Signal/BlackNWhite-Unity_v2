@@ -41,9 +41,9 @@ module.exports = {
     DEFENSE_13 : { pita : [10, 20, 30, 50, 80], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Exfiltration"},
     DEFENSE_14 : { pita : [10, 20, 30, 50, 80], time : [9, 7, 6, 5, 4], success : [40, 50, 60, 70, 80], name : "Impact"},
     
-    DEFENSE_UPGRADE : [0, 50, 100, 150, 250, 400],
+    DEFENSE_UPGRADE : [50, 100, 150, 250, 400],
     DEFENSE_TECHNIQUE_UPGRADE : [0, 2, 4, 6, 8, 10],
-    ATTACK_UPGRADE : [0, 50, 100, 150, 250, 400],
+    ATTACK_UPGRADE : [50, 100, 150, 250, 400],
 
     // 관제 시간
     MONITORING_1 : { pita : [40, 80, 120, 200, 320], time : [9, 7, 6, 5, 4], name : "Reconnaissance"},
