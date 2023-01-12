@@ -492,7 +492,7 @@ module.exports = async(io, socket, redisClient) => {
             }
         }
 
-        if (pitaNum >= 0 && cardLv < 5) {
+        if (pitaNum > 0 && cardLv < 5) {
             socket.to(socket.room + socket.team).emit('Update Pita', pitaNum);
             socket.emit('Update Pita', pitaNum);
 
@@ -1204,7 +1204,7 @@ module.exports = async(io, socket, redisClient) => {
                 }
             }
 
-            if (pitaNum >= 0 && cardLv < 5) {
+            if (pitaNum > 0 && cardLv < 5) {
                 socket.to(socket.room + socket.team).emit('Update Pita', pitaNum);
                 socket.emit('Update Pita', pitaNum);
 
