@@ -1114,7 +1114,7 @@ module.exports = async(io, socket, redisClient) => {
             })[0];
 
             if (typeof attackInfo != "undefined") {
-                let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel] * 0.01;
+                let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel - 1] * 0.01;
                 let percent = Math.random();
 
                 console.log("white - prob : ", prob, ", percent : ", percent); 
