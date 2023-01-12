@@ -976,10 +976,6 @@ module.exports = async(io, socket, redisClient) => {
     // Attack 쿨타임
     async function AttackCoolTime(socket, lvCoolTime, corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName){
         var attackTime = setTimeout(async function(){
-            if (attackLv <= 1) {
-                return;
-            }
-
             let prob = config["ATTACK_" + (tacticIdx + 1)]["success"][attackLv - 1] * 0.01;
             let percent = Math.random();
             console.log("attack - prob : ", prob, ", percent : ", percent); 
@@ -1118,10 +1114,6 @@ module.exports = async(io, socket, redisClient) => {
             })[0];
 
             if (typeof attackInfo != "undefined") {
-                if (defenseLevel <= 1) {
-                    return;
-                }
-
                 let prob = config["DEFENSE_" + (tacticIndex + 1)]["success"][defenseLevel] * 0.01;
                 let percent = Math.random();
 
