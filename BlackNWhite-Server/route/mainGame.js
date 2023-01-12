@@ -1168,7 +1168,7 @@ module.exports = async(io, socket, redisClient) => {
                 } else { // 공격 실패 (성공률로 인해)
                     console.log("Failed due to success rate!!")
                     io.sockets.emit('Failed to success rate');
-                    automaticDefense(socket, corpName, sectionIdx, tacticIndex, techniqueIndex);
+                    automaticDefense(socket, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLevel);
                     return;
                 }
             }
@@ -1179,7 +1179,7 @@ module.exports = async(io, socket, redisClient) => {
     }    
 
     // 자동 대응 수행
-    async function automaticDefense(socket, companyName, section, tacticIndex, techniqueIndex) {
+    async function automaticDefense(socket, companyName, section, tacticIndex, techniqueIndex, defenseLevel) {
         let roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
         var sectionAttackProgressArr = roomTotalJson[0][companyName].sections[section].attackProgress;
 
@@ -1239,7 +1239,7 @@ module.exports = async(io, socket, redisClient) => {
             automaticDefense(socket, corpName, sectionIdx, tacticIndex, techniqueIndex);
             return;
         }
-        
+
         roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
     }
 
