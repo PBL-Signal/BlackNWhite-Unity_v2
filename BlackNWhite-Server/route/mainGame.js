@@ -976,7 +976,7 @@ module.exports = async(io, socket, redisClient) => {
     // Attack 쿨타임
     async function AttackCoolTime(socket, lvCoolTime, corpName, sectionIdx, tacticIdx, attackLv, tacticName, attackName){
         var attackTime = setTimeout(async function(){
-            if (attackLv < 1) {
+            if (attackLv <= 1) {
                 return;
             }
 
@@ -1118,7 +1118,7 @@ module.exports = async(io, socket, redisClient) => {
             })[0];
 
             if (typeof attackInfo != "undefined") {
-                if (defenseLevel < 1) {
+                if (defenseLevel <= 1) {
                     return;
                 }
 
