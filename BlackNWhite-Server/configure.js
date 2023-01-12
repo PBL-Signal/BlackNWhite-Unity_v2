@@ -85,7 +85,7 @@ module.exports = {
     EXPLORE_INFO : { pita : 10, time : 10 },
     
     // 수입원
-    BLACK_INCOME : { pita : 2000, time : 60 },
+    BLACK_INCOME : { pita : 1000, time : 60 },
     WHITE_INCOME : { pita : 750, time : 60 },
     
     // 방 생성 인원 기본 값
