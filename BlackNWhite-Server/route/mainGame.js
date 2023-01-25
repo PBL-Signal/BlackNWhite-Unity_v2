@@ -676,7 +676,7 @@ module.exports = async(io, socket, redisClient) => {
         io.sockets.in(socket.room+'true').emit('Now_Level', corpName, area_level.toString());
     });
 
-    // [Security Monitoring] 영역 클릭 시 -> 유지보수 버튼 클릭 시로 수정 필요
+    // [Security Monitoring] 유지보수 버튼 클릭
     socket.on('Section_Name', async(data) => {
         const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
         var white_total_pita = roomTotalJson[0].whiteTeam.total_pita;
@@ -687,36 +687,33 @@ module.exports = async(io, socket, redisClient) => {
         if(white_total_pita - config.MAINTENANCE_SECTION_INFO.pita[roomTotalJson[0][corpName].sections[sectionIdx].level] <= 0) {
             socket.emit("Short_of_Money");
         } else {
-            // 최대 레벨 확인
             if(roomTotalJson[0][corpName].sections[sectionIdx].level >= config.MAX_LEVEL) { socket.emit("Out of Level"); } 
             else 
             {
-                // json 변경 - pita 감소
-                var newTotalPita = white_total_pita - config.MAINTENANCE_SECTION_INFO.pita[roomTotalJson[0][corpName].sections[sectionIdx].level]; //pita 감소
+                var newTotalPita = white_total_pita - config.MAINTENANCE_SECTION_INFO.pita[roomTotalJson[0][corpName].sections[sectionIdx].level];
                 roomTotalJson[0].whiteTeam.total_pita = newTotalPita;
-                roomTotalJson[0][corpName].sections[sectionIdx].level += 1; // 레벨 증가
+                roomTotalJson[0][corpName].sections[sectionIdx].level += 1;
                 var attackProgressLen = roomTotalJson[0][corpName].sections[sectionIdx].attackProgress.length;
                 newLevel = roomTotalJson[0][corpName].sections[sectionIdx].level;
 
-                // 레벨에 맞게 의심 개수 갱신
                 newSusCnt = 0
                 switch (newLevel) {
-                    case 1: // 1~5개
+                    case 1: 
                         for (var i=0; i<attackProgressLen; i++){
                             newSusCnt = newSusCnt + (Math.floor(Math.random() * 5) + 1);
                         }
                         break;
-                    case 2: // 1~3개
+                    case 2: 
                         for (var i=0; i<attackProgressLen; i++){
                             newSusCnt = newSusCnt + Math.floor(Math.random() * 3) + 1;
                         }                            
                         break;
-                    case 3: // 0~3개
+                    case 3: 
                         for (var i=0; i<attackProgressLen; i++){
                             newSusCnt = newSusCnt + Math.floor(Math.random() * 4);
                         }                             
                         break;
-                    case 4: // 0~2개
+                    case 4: 
                         for (var i=0; i<attackProgressLen; i++){
                             newSusCnt = newSusCnt + Math.floor(Math.random() * 3);
                         } 
@@ -753,7 +750,6 @@ module.exports = async(io, socket, redisClient) => {
 
     // [Security Monitoring] MonitoringLog 분석 결과 전송 및 자동 대응
     socket.on('Get_Monitoring_Log', async(corp) => {
-        // 피타 확인 및 차감
         const roomTotalJson_pita = JSON.parse(await jsonStore.getjson(socket.room));
         var white_total_pita = roomTotalJson_pita[0].whiteTeam.total_pita;
         var corpName = corp;
@@ -767,8 +763,7 @@ module.exports = async(io, socket, redisClient) => {
         if(white_total_pita - totalCharge <= 0) {
             socket.emit("Short of Money");
         } else {
-            var newTotalPita = white_total_pita - totalCharge; //pita 차감
-            // 분석 결과 전송
+            var newTotalPita = white_total_pita - totalCharge;
             const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
             var corpName = corp;
             var sectionsArr = roomTotalJson[0][corpName].sections;
@@ -800,7 +795,6 @@ module.exports = async(io, socket, redisClient) => {
             });
             io.sockets.in(socket.room+'true').emit('Monitoring_Log', logArr, corpName);
             
-            // issue count 갱신
             const roomTotalJsonNew = JSON.parse(await jsonStore.getjson(socket.room));
             var corpName = corp;
             var sectionsArr = roomTotalJsonNew[0][corpName].sections;
@@ -821,41 +815,47 @@ module.exports = async(io, socket, redisClient) => {
             var logArr = [];
             logArr.push(gameLog);
             io.sockets.in(socket.room+'true').emit('addLog', logArr);
-
-            // 자동대응
-            var sectionDefenseActivationArr = roomTotalJson[0][corpName]["defenseActive"];
-            sectionsArr.forEach( async(element, sectionIdx) => {
-                var sectionDefenseProgressArr = element.defenseProgress;
-                var defenseLv = element.defenseLv;
-                var sectionAttackData = element.attackProgress;
-                sectionAttackData.forEach( async(attackElement) => {
-                    console.log(attackElement.tactic, attackElement.attackName);
-                    
-                    var tacticIndex = config.ATTACK_CATEGORY.indexOf(attackElement.tactic);
-                    var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackElement.attackName);
-                    console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
-
-                    if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
-                        var newInfo = { tactic: attackElement.tactic, attackName: attackElement.attackName, state: false };
-                        console.log("newInfo : ", newInfo);
-                        sectionDefenseProgressArr[tacticIndex].push(newInfo);
-                        console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
-                        // 0은 나중에 시나리오 인덱스로 변경
-                        DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
-                        socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
-                    } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
-                        sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
-                        let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
-                        let tacticLevel = roomTotalJson[0][corpName]["penetrationTestingLV"];
-                        socket.emit("Get Technique", corpName, sectionDefenseActivationArr, tacticLevel);
-                        console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
-                    }
-
-                    await jsonStore.updatejson(roomTotalJson[0], socket.room);
-                });
-            });
-
         }
+    });
+
+    // [Security Monitoring] Defense 버튼 클릭
+    socket.on('Click_Defense_Button', async(corp) => {
+        const roomTotalJson = JSON.parse(await jsonStore.getjson(socket.room));
+        var corpName = corp;
+        var sectionsArr = roomTotalJson[0][corpName].sections;
+
+        // 자동대응
+        var sectionDefenseActivationArr = roomTotalJson[0][corpName]["defenseActive"];
+        sectionsArr.forEach( async(element, sectionIdx) => {
+            var sectionDefenseProgressArr = element.defenseProgress;
+            var defenseLv = element.defenseLv;
+            var sectionAttackData = element.attackProgress;
+            sectionAttackData.forEach( async(attackElement) => {
+                console.log(attackElement.tactic, attackElement.attackName);
+                
+                var tacticIndex = config.ATTACK_CATEGORY.indexOf(attackElement.tactic);
+                var techniqueIndex = config.ATTACK_TECHNIQUE[tacticIndex].indexOf(attackElement.attackName);
+                console.log(attackElement.tactic, tacticIndex, attackElement.attackName, techniqueIndex, sectionDefenseActivationArr[tacticIndex][techniqueIndex]);
+
+                if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 1){
+                    var newInfo = { tactic: attackElement.tactic, attackName: attackElement.attackName, state: false };
+                    console.log("newInfo : ", newInfo);
+                    sectionDefenseProgressArr[tacticIndex].push(newInfo);
+                    console.log("sectionDefenseProgressArr - Deactivation: ", sectionDefenseProgressArr);
+                    // 0은 나중에 시나리오 인덱스로 변경
+                    DefenseCooltime(socket, newInfo.state, corpName, sectionIdx, tacticIndex, techniqueIndex, defenseLv[tacticIndex][techniqueIndex]);
+                    socket.emit('Start Defense', corpName, sectionIdx, tacticIndex, techniqueIndex, config["DEFENSE_" + (tacticIndex + 1)]["time"][defenseLv[tacticIndex][techniqueIndex]]);
+                } else if (sectionDefenseActivationArr[tacticIndex][techniqueIndex] == 0) {
+                    sectionDefenseActivationArr[tacticIndex][techniqueIndex] = 2;
+                    let techniqueLevel = roomTotalJson[0][corpName]["sections"][sectionIdx]["defenseLv"];
+                    let tacticLevel = roomTotalJson[0][corpName]["penetrationTestingLV"];
+                    socket.emit("Get Technique", corpName, sectionDefenseActivationArr, tacticLevel);
+                    console.log("sectionDefenseActivationArr - Deactivation : ", sectionDefenseActivationArr);
+                }
+
+                await jsonStore.updatejson(roomTotalJson[0], socket.room);
+            });
+        });
     });
     
     // [Result] 최종 결과 보내기
